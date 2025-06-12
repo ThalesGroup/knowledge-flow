@@ -332,7 +332,7 @@ Here is a typical launch.json file you need in knowledge-flow/.vscode folder:
 A _nightly_ docker image is available for this project. Get it with this command:
 
 ```
-docker pull ghcr.io/thalesgroup/knowledge-flow-app:nightly
+docker pull ghcr.io/thalesgroup/knowledge-flow:nightly
 ```
 
 This image needs two files to be executed. Copy the two following files and edit and set the parameters you need:
