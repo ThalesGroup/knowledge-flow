@@ -3,27 +3,32 @@
 # -----------------------------------------------------------------------------
 FROM mirror.gcr.io/python:3.12.8-slim AS builder
 
-# Set the poetry env
-ENV POETRY_VIRTUALENVS_CREATE=true
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-ENV POETRY_CACHE_DIR=/tmp/poetry_cache
+ARG UV_VERSION=0.7.12
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -Ls https://astral.sh/uv/${UV_VERSION}/install.sh | bash
 
 # Copy project files
 COPY .. /app
 
+# Add uv into the PATH
+ENV PATH=/root/.local/bin:$PATH
+
 # Move to workdir
 WORKDIR /app
 
-# Install poetry and python dependancies
-RUN pip install poetry==1.7.1 --root-user-action=ignore && \
-    poetry install
+# Create python virtual env and install deps
+RUN uv venv && \
+    uv pip install -r uv.lock
 
 # -----------------------------------------------------------------------------
 # RUNTIME
 # -----------------------------------------------------------------------------
 FROM mirror.gcr.io/python:3.12.8-slim AS runtime
 
-ARG USER_NAME=knowledge-flow-user
+ARG USER_NAME=python-user
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
@@ -41,9 +46,12 @@ COPY --from=builder --chown=${USER_ID}:${GROUP_ID} /app /app
 WORKDIR /app
 
 # Activate the virtualenv
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH=/app/.venv/bin:$PATH
+ENV PYTHONPATH=/app
 
 # Expose Fast API default port
 EXPOSE 8111
 
-ENTRYPOINT ["python", "/app/knowledge_flow_app/main.py"]
+# Define default entrypoint and command
+ENTRYPOINT ["python"]
+CMD ["/app/knowledge_flow_app/main.py"]
