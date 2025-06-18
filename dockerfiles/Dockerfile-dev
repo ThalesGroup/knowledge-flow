@@ -3,9 +3,10 @@
 # -----------------------------------------------------------------------------
 FROM mirror.gcr.io/python:3.12.8-slim
 
-ARG USER_NAME=knowledge-flow-user
+ARG USER_NAME=python-user
 ARG USER_ID=1000
 ARG GROUP_ID=1000
+ARG UV_VERSION=0.7.12
 
 # Install required system dependencies
 RUN apt-get update && \
@@ -46,7 +47,7 @@ RUN chown -R ${USER_ID}:${GROUP_ID} /app
 # Switch to the created user
 USER ${USER_NAME}
 
-# Expose Fast API default port
+# Expose Fast API port
 EXPOSE 8111
 
 # Run the application

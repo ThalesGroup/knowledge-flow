@@ -327,6 +327,30 @@ Here is a typical launch.json file you need in knowledge-flow/.vscode folder:
 
 ---
 
+## Docker
+
+A _nightly_ docker image is available for this project. Get it with this command:
+
+```
+docker pull ghcr.io/thalesgroup/knowledge-flow:nightly
+```
+
+This image needs two files to be executed. Copy the two following files and edit and set the parameters you need:
+- config/.env
+- config/configuration.yaml
+
+Then run the docker container with the previous files mounted as below:
+
+```
+docker run -d --name knowledge-flow \
+  --volume <YOUR_.ENV_FILE>:/app/config/.env \
+  --volume <YOUR_CONFIGURATION.YAML_FILE>:/app/config/configuration.yaml \
+  --publish 8111:8111 \
+  ghcr.io/thalesgroup/knowledge-flow:nightly
+```
+
+---
+
 ## Docker compose
 
 This docker-compose.yml sets up the core services required to run Knowledge Flow OSS locally. It provides a consistent and automated way to start the development environment, including authentication (Keycloak), search (OpenSearch), and storage (MinIO) components. All these components are configured and connected. This simplifies onboarding, reduces setup errors, and ensures all developers work with the same infrastructure by running a few command lines.
