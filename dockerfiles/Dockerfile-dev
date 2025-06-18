@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Backend development image
+# Backend development image (hot-reload enabled)
 # -----------------------------------------------------------------------------
 FROM mirror.gcr.io/python:3.12.8-slim
 
@@ -8,41 +8,49 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 ARG UV_VERSION=0.7.12
 
-# Install dependencies
+# Install required system dependencies
 RUN apt-get update && \
-    apt-get install -y curl
+    apt-get install -y git curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY .. /app
+# Install uv globally
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /usr/local/bin/uv && \
+    chmod +x /usr/local/bin/uv
 
-# Setup user
+# Setup user and permissions
 RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
     useradd -u ${USER_ID} -g ${GROUP_ID} -m ${USER_NAME} && \
-    mkdir /opt/python && \
-    chown -R ${USER_ID}:${GROUP_ID} /app /opt/python
+    mkdir -p /opt/python && \
+    chown -R ${USER_ID}:${GROUP_ID} /opt/python
 
-# Change user
-USER ${USER_NAME}
+# Set environment variables for uv and Python
+ENV UV_PROJECT_ENVIRONMENT=/opt/python/venv
+ENV PATH="/opt/python/venv/bin:$PATH"
+ENV OPENAI_API_KEY=<MUST_BE_DEFINED>
 
-# Install uv
-RUN curl -Ls https://astral.sh/uv/${UV_VERSION}/install.sh | bash
-
-# Set the python virtual env into docker image
-ENV VIRTUAL_ENV=/opt/python/venv
-ENV PATH=/home/${USER_NAME}/.local/bin:${VIRTUAL_ENV}/bin:$PATH
-ENV PYTHONPATH=/app
-ENV ENV_CONFIG=/app/config/.env
-
-# Move to workdir
+# Set working directory
 WORKDIR /app
 
-# Create python virtual env and install deps
-RUN uv venv ${VIRTUAL_ENV} && \
-    uv pip install -r uv.lock
+# Copy only dependency files first to leverage Docker layer caching
+COPY pyproject.toml uv.lock* /app/
+
+# Install dependencies with uv
+RUN uv sync
+
+# Copy the rest of the project files
+COPY . /app
+
+# Adjust ownership of copied files
+RUN chown -R ${USER_ID}:${GROUP_ID} /app
+
+# Switch to the created user
+USER ${USER_NAME}
 
 # Expose Fast API port
 EXPOSE 8111
 
-# Define default entrypoint and command
-ENTRYPOINT ["python"]
-CMD ["/app/knowledge_flow_app/main.py"]
+# Run the application
+ENV PYTHONPATH=/app
+ENTRYPOINT ["python", "knowledge_flow_app/main.py"]
+CMD ["--server.reload", "--server.reloadDir=/app"]

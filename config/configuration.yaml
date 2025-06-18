@@ -2,6 +2,8 @@
 security:
   enabled: false
   keycloak_url: "http://fred-keycloak:8080/realms/fred"
+  authorized_origins:
+  - "http://localhost:5173"
 
 # -----------------------------------------------------------------------------
 # INPUT PROCESSORS
@@ -148,3 +150,7 @@ embedding:
   # pointed to by the ENV_FILE variable in your Makefile.
   #
   type: "openai"  # can be "openai" or "azureopenai" or "azureapim" or "ollama"
+
+chat_profile_storage:
+  type: local
+chat_profile_max_tokens: 8000

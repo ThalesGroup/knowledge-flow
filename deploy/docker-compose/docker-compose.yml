@@ -1,211 +1,24 @@
 services:
-
-# -----------------------------------------------------------------------------
-# Required components for knowledge-flow : Keycloak, Minio, OpenSearch
-# -----------------------------------------------------------------------------
-
-  keycloak:
-    container_name: knowledge-flow-keycloak
-    image: mirror.gcr.io/keycloak/keycloak:25.0
-    environment:
-      KC_HTTP_ENABLE: true
-      KC_HTTP_PORT: 8080
-      KC_HOSTNAME_STRICT: false
-      KC_HOSTNAME_STRICT_HTTPS: false
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: Azerty123_
-    command:
-      - start-dev
-      - --import-realm
-    volumes:
-      - ./keycloak/app-realm.json:/opt/keycloak/data/import/app-realm.json
-    networks:
-      - knowledge-flow-network
-    ports:
-      - 0.0.0.0:8080:8080/tcp
-    healthcheck:
-      test: /opt/keycloak/bin/kcadm.sh get realms/app --fields id --server http://localhost:8080 --realm master --user $$KEYCLOAK_ADMIN --password $$KEYCLOAK_ADMIN_PASSWORD
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-      start_interval: 10s
-
-  opensearch-pre-install-job:
-    container_name: knowledge-flow-opensearch-pre-install-job
-    image: mirror.gcr.io/alpine:3.21.3
-    environment:
-      no_proxy: "*"
-    entrypoint:
-      - /bin/sh
-      - -c
-    command:
-      - |
-        apk update
-        apk add --no-cache bash openssl
-        /opt/opensearch-pre-install-job/create_self_certs.sh /usr/share/opensearch/config/certs
-        chown -R 1000:1000 /usr/share/opensearch/config/certs
-    volumes:
-      - vol-opensearch-certs:/usr/share/opensearch/config/certs/
-      - ./opensearch-pre-install-job/:/opt/opensearch-pre-install-job/
-    networks:
-      - knowledge-flow-network
-    depends_on:
-      keycloak:
-        condition: service_healthy
-
-  opensearch:
-    container_name: knowledge-flow-opensearch
-    image: mirror.gcr.io/opensearchproject/opensearch:2.18.0
-    command:
-      - -Ediscovery.type=single-node
-    environment:
-      no_proxy: "*"
-      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
-    volumes:
-      - vol-opensearch-certs:/usr/share/opensearch/config/certs/
-      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
-      - ./opensearch/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
-      - ./opensearch/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
-      - ./opensearch/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./opensearch/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-    networks:
-      - knowledge-flow-network
-    ports:
-      -  0.0.0.0:9200:9200/tcp
-    depends_on:
-      opensearch-pre-install-job:
-        condition: service_completed_successfully
-    healthcheck:
-      test: curl --insecure https://localhost:9200/_cluster/health
-      interval: 60s
-      timeout: 10s
-      retries: 20
-      start_period: 60s
-      start_interval: 10s
-
-  opensearch-post-install-job:
-    container_name: knowledge-flow-opensearch-post-install-job
-    image: mirror.gcr.io/opensearchproject/opensearch:2.18.0
-    environment:
-      no_proxy: "*"
-    entrypoint:
-      - /bin/bash
-      - -c
-    command:
-      - >-
-        bash /opt/opensearch-post-install-job/create_users_and_roles.sh knowledge-flow-opensearch &&
-        bash /opt/opensearch-post-install-job/wait_for_os_init.sh knowledge-flow-opensearch &&
-        bash /opt/opensearch-post-install-job/create_indice.sh knowledge-flow-opensearch metadata-index &&
-        bash /opt/opensearch-post-install-job/create_indice.sh knowledge-flow-opensearch vector-index &&
-        bash /opt/opensearch-post-install-job/create_indice.sh knowledge-flow-opensearch active-sessions-index &&
-        bash /opt/opensearch-post-install-job/create_indice.sh knowledge-flow-opensearch chat-interactions-index
-    volumes:
-      - vol-opensearch-certs:/usr/share/opensearch/config/certs/
-      - ./opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
-      - ./opensearch/internal_users.yml:/usr/share/opensearch/config/opensearch-security/internal_users.yml
-      - ./opensearch/roles_mapping.yml:/usr/share/opensearch/config/opensearch-security/roles_mapping.yml
-      - ./opensearch/roles.yml:/usr/share/opensearch/config/opensearch-security/roles.yml
-      - ./opensearch/config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
-      - ./opensearch-post-install-job/:/opt/opensearch-post-install-job/
-    networks:
-      - knowledge-flow-network
-    depends_on:
-      opensearch:
-        condition: service_healthy
-
-  opensearch-dashboards:
-    container_name: knowledge-flow-opensearch-dashboards
-    image: mirror.gcr.io/opensearchproject/opensearch-dashboards:2.18.0
-    environment:
-      no_proxy: "*"
-    volumes:
-      - vol-opensearch-certs:/usr/share/opensearch/config/certs/
-      - ./opensearch-dashboards/opensearch-dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
-    networks:
-      - knowledge-flow-network
-    ports:
-      - 0.0.0.0:5601:5601/TCP
-    depends_on:
-      opensearch-post-install-job:
-        condition: service_completed_successfully
-    healthcheck:
-      test: curl --fail http://localhost:5601
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-      start_interval: 1s
-
-  minio:
-    container_name: knowledge-flow-minio
-    image: mirror.gcr.io/minio/minio:RELEASE.2025-02-07T23-21-09Z
+  knowledge-flow-backend:
+    image: registry.thalesdigital.io/tsn/projects/knowledge_flow_app/knowledge-flow-backend:0.1
+    container_name: knowledge-flow-backend
+    build:
+      context: ../../
+      dockerfile: dockerfiles/Dockerfile-dev
     environment:
       NO_PROXY: "*"
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: Azerty123_
-      MINIO_IDENTITY_OPENID_CONFIG_URL: "http://knowledge-flow-keycloak:8080/realms/app/.well-known/openid-configuration"
-      MINIO_IDENTITY_OPENID_CLIENT_ID: "minio-console"
-      MINIO_IDENTITY_OPENID_CLIENT_SECRET: "Azerty123_"
-      MINIO_IDENTITY_OPENID_CLAIM_NAME: "policy"
-      MINIO_IDENTITY_OPENID_SCOPES: "openid"
-      MINIO_IDENTITY_OPENID_REDIRECT_URI: "http://localhost:9001/oauth_callback"
     command:
-      - server
-      - /data
-      - --console-address=:9001
-    networks:
-      - knowledge-flow-network
-    ports:
-      - 0.0.0.0:9000:9000/tcp
-      - 0.0.0.0:9001:9001/tcp
-    healthcheck:
-      test: curl --fail http://localhost:9000/minio/health/live
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-      start_interval: 1s
-    depends_on:
-      keycloak:
-        condition: service_healthy
-
-  minio-post-install-job:
-    container_name: knowledge-flow-minio-post-install-job
-    image: mirror.gcr.io/minio/minio:RELEASE.2025-02-07T23-21-09Z
-    environment:
-      NO_PROXY: "*"
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: Azerty123_
-    entrypoint:
-      - /bin/bash
-      - -c
-    command:
-      - |
-        mc alias set knowledge-flow-minio http://knowledge-flow-minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD
-        
-        # Create bucket
-        mc mb knowledge-flow-minio/app-bucket
-
-        # Create Read Only user
-        mc admin user add knowledge-flow-minio app_ro Azerty123_
-        mc admin policy create knowledge-flow-minio knowledge-flow-minio-ro-policy /opt/minio/ro-policy.json
-        mc admin policy attach knowledge-flow-minio knowledge-flow-minio-ro-policy --user app_ro
-
-        # Create Read Write user
-        mc admin user add knowledge-flow-minio app_rw Azerty123_
-        mc admin policy create knowledge-flow-minio knowledge-flow-minio-rw-policy /opt/minio/rw-policy.json
-        mc admin policy attach knowledge-flow-minio knowledge-flow-minio-rw-policy --user app_rw
+      - --config-path 
+      - /app/config/configuration.yaml
     volumes:
-      - ./minio-post-install-job/:/opt/minio/
+      # Mount the whole project (RW mode)
+      - ../../:/app:rw
     networks:
-      - knowledge-flow-network
-    depends_on:
-      minio:
-        condition: service_healthy
-
-volumes:
-  vol-opensearch-certs:
+      - app-network
+    ports:
+      - "0.0.0.0:8111:8111/tcp"
 
 networks:
-  knowledge-flow-network:
+  app-network:
+    external: true
+    name: fred-shared-network
