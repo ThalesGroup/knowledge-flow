@@ -35,9 +35,9 @@ def test_extract_file_metadata(processor):
     assert len(metadata["sample_columns"]) > 0
 
 def test_convert_file_to_table(processor):
-    test_file = Path("knowledge_flow_app/input_processors/pps_tabular_processor/tests/assets/sample_pps.xlsm")
     with tempfile.TemporaryDirectory() as tmpdir:
-        df = processor.convert_file_to_table(test_file)
+        output_dir = Path(tmpdir)
+        df = processor.convert_file_to_table(test_file, output_dir=output_dir)
         assert not df.empty
         assert "Champ" in df.columns
         assert "Valeur extraite" in df.columns
