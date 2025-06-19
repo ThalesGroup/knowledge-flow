@@ -2,7 +2,7 @@
 
 ## Installation of dependencies
 
-Follow this [README](https://github.com/fred-agent/deployment-factory/tree/main/charts) to properly install all knowledge-flow dependencies.
+Follow this [README](https://github.com/ThalesGroup/fred-deployment-factory/tree/main/charts) to properly install all knowledge-flow dependencies.
 
 ## Installation of Knowledge-flow
 
