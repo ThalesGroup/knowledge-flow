@@ -20,8 +20,3 @@ runs:
         uv venv
         uv sync --all-extras
         echo "$UV_PROJECT_ENVIRONMENT/bin" >> $GITHUB_PATH
-
-    - name: Install dev dependencies
-      shell: bash
-      run: |
-        tox --version
