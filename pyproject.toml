@@ -64,3 +64,6 @@ packages = [
 
 [tool.setuptools.packages.find]
 include = ["knowledge_flow_app*"]
+
+[tool.ruff]
+line-length = 120
