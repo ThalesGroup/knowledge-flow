@@ -27,10 +27,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase repository name
+        run: echo "LOWER_CASE_REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+  
       - name: Build and push nightly image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: dockerfiles/Dockerfile-prod
           push: true
-          tags: ghcr.io/${{ github.repository.toLowerCase() }}:nightly
+          tags: ghcr.io/${{ LOWER_CASE_REPO }}:nightly
