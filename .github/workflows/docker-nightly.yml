@@ -33,4 +33,4 @@ jobs:
           context: .
           file: dockerfiles/Dockerfile-prod
           push: true
-          tags: ghcr.io/${{ github.repository }}:nightly
+          tags: ghcr.io/${{ github.repository.toLowerCase() }}:nightly
