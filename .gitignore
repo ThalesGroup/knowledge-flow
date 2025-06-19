@@ -191,3 +191,7 @@ pyrightconfig.json
 
 *.code-workspace
 /media/
+
+# Helm dependency files
+*.lock
+*.tgz
