@@ -206,7 +206,7 @@ LOCAL_STORAGE_PATH=~/.fred/knowledge-flow/content-store
 LOCAL_STORAGE_PATH=~/.fred/knowledge-flow/metadata-store.json
 
 # OpenAI Settings
-OPENAI_API_KEY="your-openai-api-key"
+OPENAI_API_KEY=""  # Set your OpenAI API Key here
 OPENAI_MODEL_NAME="text-embedding-ada-002"
 ```
 
