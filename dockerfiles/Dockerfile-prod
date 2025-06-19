@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Create python virtual env and install deps
 RUN uv venv && \
-    uv pip install -r uv.lock
+    uv sync
 
 # -----------------------------------------------------------------------------
 # RUNTIME
