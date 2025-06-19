@@ -57,10 +57,6 @@ class InMemoryLangchainVectorStore(BaseVectoreStore):
                 break
 
     def similarity_search_with_score(self, query: str, k: int = 5) -> List[Tuple[Document, float]]:
-        return self.vectorstore.similarity_search_with_score(query, k=k)
-        
-
-    def similarity_search_with_score(self, query: str, k: int = 5) -> List[Tuple[Document, float]]:
         results = self.vectorstore.similarity_search_with_score(query, k=k)
         enriched = []
 

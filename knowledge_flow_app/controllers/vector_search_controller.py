@@ -17,6 +17,8 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from typing import List, Optional
 from langchain.schema.document import Document
+from pydantic import BaseModel, Field
+from typing import Optional
 
 from knowledge_flow_app.services.vector_search_service import VectorSearchService
 
@@ -25,10 +27,6 @@ router = APIRouter()
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 10
-
-from pydantic import BaseModel, Field
-from typing import Optional
-
 
 class DocumentSource(BaseModel):
     content: str

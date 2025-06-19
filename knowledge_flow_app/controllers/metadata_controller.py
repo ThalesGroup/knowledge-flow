@@ -16,6 +16,7 @@ import logging
 from typing import Any, Dict, List
 from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
+from threading import Lock
 
 from knowledge_flow_app.common.structures import Status
 from knowledge_flow_app.services.metadata_service import MetadataService
@@ -23,7 +24,6 @@ from knowledge_flow_app.stores.content.content_storage_factory import get_conten
 
 logger = logging.getLogger(__name__)
 # --- Flexible Response Models ---
-from threading import Lock
 
 lock = Lock()
 
