@@ -48,7 +48,11 @@ dev = [
   "pytest==8.3.5",
   "pytest-asyncio==0.26.0",
   "black==23.1.0",
-  "isort==5.10.1"
+  "isort==5.10.1",
+  "tox==4.27.0",
+  "pre-commit==4.2.0",
+  "bandit==1.8.5",
+  "ruff==0.12.0"
 ]
 
 [build-system]
