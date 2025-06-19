@@ -93,7 +93,7 @@ helm-push: ## Push Helm chart to GitLab package registry
 run: dev ## Run the app from source
 	PYTHONPATH=. \
 	ENV_FILE="$(ENV_FILE)" LOG_LEVEL="$(LOG_LEVEL)" \
-	$(PYTHON) ${PY_PACKAGE}/main.py --config-path ./config/configuration.yaml
+	$(PYTHON) ${PY_PACKAGE}/main.py --config-path ./config/configuration.yaml --server-address 0.0.0.0
 
 .PHONY: docker-run
 
@@ -104,7 +104,7 @@ docker-run: ## Run the app in Docker
 		-v ~/.aws/:/home/fred-user/.aws/ \
 		-v $(realpath knowledge_flow_app/config/configuration.yaml):/app/configuration.yaml \
 		-e LOG_LEVEL="$(LOG_LEVEL)" \
-		$(IMG) --config-path /app/configuration.yaml
+		$(IMG) --config-path /app/configuration.yaml --server-address 0.0.0.0
 
 ##@ Tests
 

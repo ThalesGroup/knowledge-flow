@@ -89,7 +89,10 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
             "images": [image_base64]
         }
         url = f"{ollama_url}/api/generate"
-        response = requests.post(url, json=payload)
+        try:
+            response = requests.post(url, json=payload, timeout=120)  # TODO: Timeout to set as a parameter
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Timeout reached {url} : {e}")
         
         # Collect all the streamed parts into a single string
         description = ""

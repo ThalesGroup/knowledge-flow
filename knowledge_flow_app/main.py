@@ -112,7 +112,7 @@ def parse_cli_opts():
 
     parser.add_argument("--config-path", dest="server_configuration_path", default="./config/configuration.yaml", help="Path to configuration YAML file")
     parser.add_argument("--base-url", dest="server_base_url_path", default="/knowledge/v1", help="Base path for all API endpoints")
-    parser.add_argument("--server-address", dest="server_address", default="0.0.0.0", help="Server binding address")
+    parser.add_argument("--server-address", dest="server_address", default="127.0.0.1", help="Server binding address")
     parser.add_argument("--server-port", dest="server_port", type=int, default=8111, help="Server port")
     parser.add_argument("--log-level", dest="server_log_level", default="info", help="Logging level")
     parser.add_argument("--server.reload", dest="server_reload", action="store_true", help="Enable auto-reload (for dev only)")
