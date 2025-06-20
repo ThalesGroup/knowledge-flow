@@ -35,16 +35,14 @@ from knowledge_flow_app.common.structures import Configuration
 from knowledge_flow_app.common.utils import parse_server_configuration
 from knowledge_flow_app.controllers.chat_profile_controller import ChatProfileController
 from knowledge_flow_app.controllers.content_controller import ContentController
-from knowledge_flow_app.controllers.ingestion_controller import \
-    IngestionController
-from knowledge_flow_app.controllers.metadata_controller import \
-    MetadataController
-from knowledge_flow_app.controllers.vector_search_controller import \
-    VectorSearchController
+from knowledge_flow_app.controllers.ingestion_controller import IngestionController
+from knowledge_flow_app.controllers.metadata_controller import MetadataController
+from knowledge_flow_app.controllers.vector_search_controller import VectorSearchController
 
 
 logger = logging.getLogger(__name__)
 app: FastAPI = None  # Global app instance for optional reuse
+
 
 def configure_logging():
     """Configure logging dynamically based on LOG_LEVEL environment variable."""
@@ -59,9 +57,11 @@ def configure_logging():
         handlers=[RichHandler(rich_tracebacks=False, show_time=False, show_path=False)],
     )
     logging.getLogger().info(f"Logging configured at {log_level} level.")
-    
+
+
 # --- Après tous les imports
 logger = logging.getLogger(__name__)
+
 
 # --- Dans create_app
 def create_app(config_path: str = "./config/configuration.yaml", base_url: str = "/knowledge/v1") -> FastAPI:
@@ -110,26 +110,42 @@ def parse_cli_opts():
     """
     parser = argparse.ArgumentParser(description="Start the knowledge_flow_app microservice")
 
-    parser.add_argument("--config-path", dest="server_configuration_path", default="./config/configuration.yaml", help="Path to configuration YAML file")
-    parser.add_argument("--base-url", dest="server_base_url_path", default="/knowledge/v1", help="Base path for all API endpoints")
+    parser.add_argument(
+        "--config-path",
+        dest="server_configuration_path",
+        default="./config/configuration.yaml",
+        help="Path to configuration YAML file",
+    )
+    parser.add_argument(
+        "--base-url", dest="server_base_url_path", default="/knowledge/v1", help="Base path for all API endpoints"
+    )
     parser.add_argument("--server-address", dest="server_address", default="127.0.0.1", help="Server binding address")
     parser.add_argument("--server-port", dest="server_port", type=int, default=8111, help="Server port")
     parser.add_argument("--log-level", dest="server_log_level", default="info", help="Logging level")
-    parser.add_argument("--server.reload", dest="server_reload", action="store_true", help="Enable auto-reload (for dev only)")
-    parser.add_argument("--server.reloadDir", dest="server_reload_dir", type=str, help="watch for changes in these directories when auto-reload is enabled (for dev only)", default=".")
+    parser.add_argument(
+        "--server.reload", dest="server_reload", action="store_true", help="Enable auto-reload (for dev only)"
+    )
+    parser.add_argument(
+        "--server.reloadDir",
+        dest="server_reload_dir",
+        type=str,
+        help="watch for changes in these directories when auto-reload is enabled (for dev only)",
+        default=".",
+    )
 
     return parser.parse_args()
+
 
 args = parse_cli_opts()
 app = create_app(args.server_configuration_path, args.server_base_url_path)
 # MCP server to Knowledge Flow FastAPI app
 mcp = FastApiMCP(
-    app,  
+    app,
     name="Knowledge Flow MCP",  # Name for the MCP server
     description="MCP server for Knowledge Flow",  # Description
     include_tags=["Vector Search"],
     describe_all_responses=True,  # Include all possible response schemas
-    describe_full_response_schema=True  # Include full JSON schema in descriptions
+    describe_full_response_schema=True,  # Include full JSON schema in descriptions
 )
 
 # Mount the MCP server to Knowledge Flow FastAPI app
@@ -142,5 +158,5 @@ if __name__ == "__main__":
         port=args.server_port,
         log_level=args.server_log_level,
         reload=args.server_reload,
-        reload_dirs=args.server_reload_dir
+        reload_dirs=args.server_reload_dir,
     )

@@ -127,14 +127,10 @@ class TestMetadataController:
         """
 
         opensearch_metadata_store.save_metadata(document1)
-        response = client.delete(
-            f"/knowledge/v1/document/{document1.get('document_uid')}"
-        )
+        response = client.delete(f"/knowledge/v1/document/{document1.get('document_uid')}")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_delete_metadata_not_found(
-        self, client: TestClient, opensearch_metadata_store
-    ) -> None:
+    def test_delete_metadata_not_found(self, client: TestClient, opensearch_metadata_store) -> None:
         """
         Test that attempting to delete metadata for a non-existent document returns a
         500 Internal Server Error.
@@ -248,9 +244,7 @@ class TestMetadataController:
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert "Failed to fetch document metadata" in response.json()["detail"]
 
-    def test_get_document_metadata(
-        self, client: TestClient, opensearch_metadata_store, document1
-    ):
+    def test_get_document_metadata(self, client: TestClient, opensearch_metadata_store, document1):
         """
         Test the retrieval of document metadata via the API endpoint.
         This test saves a sample document's metadata to the OpenSearch metadata store,
@@ -277,9 +271,7 @@ class TestMetadataController:
         assert data["metadata"]["author"] == "Jane Doe"
         assert data["metadata"]["document_name"] == "document.docx"
 
-    def test_update_document_retrievable(
-        self, client: TestClient, opensearch_metadata_store, document1
-    ):
+    def test_update_document_retrievable(self, client: TestClient, opensearch_metadata_store, document1):
         """
         Test that updating a document's 'retrievable' metadata via the API works as expected.
         This test saves a document to the metadata store, updates its 'retrievable' field to
@@ -326,7 +318,5 @@ class TestMetadataController:
             422 (Unprocessable Entity),
         """
 
-        response = client.put(
-            "/knowledge/v1/document/doesnotexist", json={"retrievable": True}
-        )
+        response = client.put("/knowledge/v1/document/doesnotexist", json={"retrievable": True})
         assert response.status_code in (500, 422)

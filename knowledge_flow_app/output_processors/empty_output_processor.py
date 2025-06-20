@@ -19,6 +19,7 @@ from knowledge_flow_app.output_processors.base_output_processor import BaseOutpu
 
 logger = logging.getLogger(__name__)
 
+
 class EmptyOutputProcessor(BaseOutputProcessor):
     """
     A no-op output processor that does nothing.

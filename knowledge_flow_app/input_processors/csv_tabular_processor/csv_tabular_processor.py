@@ -20,6 +20,7 @@ import pandas
 
 from knowledge_flow_app.input_processors.base_input_processor import BaseTabularProcessor
 
+
 class CsvTabularProcessor(BaseTabularProcessor):
     """
     An example tabular processor for CSV files.

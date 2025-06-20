@@ -17,6 +17,7 @@
 from pathlib import Path
 import os
 
+
 class ContentStoreLocalSettings:
     def __init__(self):
         env_value = os.getenv("LOCAL_CONTENT_STORAGE_PATH")

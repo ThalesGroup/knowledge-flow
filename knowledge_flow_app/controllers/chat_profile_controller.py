@@ -9,13 +9,14 @@ from knowledge_flow_app.application_context import ApplicationContext
 class UpdateChatProfileRequest(BaseModel):
     title: str
     description: str
+
+
 class ChatProfileController:
     def __init__(self, router: APIRouter):
         self.service = ChatProfileService()
         self._register_routes(router)
 
     def _register_routes(self, router: APIRouter):
-        
         @router.get("/chatProfiles/maxTokens")
         async def get_max_tokens():
             context = ApplicationContext.get_instance()
@@ -36,9 +37,7 @@ class ChatProfileController:
 
         @router.post("/chatProfiles")
         async def create_profile(
-            title: str = Form(...),
-            description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
+            title: str = Form(...), description: str = Form(...), files: list[UploadFile] = File(default=[])
         ):
             try:
                 with tempfile.TemporaryDirectory() as tmp_dir:
@@ -59,10 +58,9 @@ class ChatProfileController:
             chatProfile_id: str,
             title: str = Form(...),
             description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
+            files: list[UploadFile] = File(default=[]),
         ):
             return await self.service.update_profile(chatProfile_id, title, description, files)
-
 
         @router.delete("/chatProfiles/{chatProfile_id}")
         async def delete_profile(chatProfile_id: str):

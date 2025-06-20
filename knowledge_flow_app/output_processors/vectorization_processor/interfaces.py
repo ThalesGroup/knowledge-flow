@@ -36,7 +36,7 @@ High-Level Schema:
              │
              ▼
 ┌─────────────────────────────────────┐
-│        VectorStoreInterface         │  (ex: TracedOpenSearchVectorStore) 
+│        VectorStoreInterface         │  (ex: TracedOpenSearchVectorStore)
 └─────────────────────────────────────┘
              │
              ▼
@@ -53,6 +53,7 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 from langchain.schema.document import Document
 
+
 class BaseDocumentLoader(ABC):
     """
     Interface for loading documents from a given source and returning them as LangChain Documents.
@@ -61,15 +62,15 @@ class BaseDocumentLoader(ABC):
 
     Design Motivation:
     -------------------
-    Although in the current system documents are always processed from local files, 
+    Although in the current system documents are always processed from local files,
     we define this interface to maintain clear separation of concerns:
-    
+
     - The "loading" step (reading raw content + associating metadata) is isolated.
     - Future flexibility: easily swap in other sources (e.g., S3, Minio, remote API, database).
     - Testability: mock the loading phase during unit testing without involving actual file I/O.
     - Uniformity: keeps the vectorization pipeline modular and easy to extend.
 
-    Every concrete implementation must return a LangChain `Document` 
+    Every concrete implementation must return a LangChain `Document`
     containing the loaded text and its associated metadata.
 
     Typical implementations:
@@ -93,10 +94,12 @@ class BaseTextSplitter(ABC):
     This interface is designed to be implemented by various concrete classes that handle
     different splitting strategies (e.g., by character, by sentence, etc.).
     """
+
     @abstractmethod
     def split(self, document: Document) -> List[Document]:
         """Split a document into smaller chunks."""
         pass
+
 
 # 3. Embedding Model Interface
 class BaseEmbeddingModel(ABC):
@@ -105,6 +108,7 @@ class BaseEmbeddingModel(ABC):
     This interface is designed to be implemented by various concrete classes that handle
     different embedding strategies (e.g., OpenAI, Azure, HuggingFace, etc.).
     """
+
     @abstractmethod
     def embed_documents(self, documents: List[Document]) -> List[dict]:
         """
@@ -112,6 +116,7 @@ class BaseEmbeddingModel(ABC):
         Returns a list of { 'embedding': List[float], 'document': Document }
         """
         pass
+
 
 # 4. Vector Store Interface
 class BaseVectoreStore(ABC):
@@ -123,6 +128,7 @@ class BaseVectoreStore(ABC):
     This interface is designed to be implemented by various concrete classes that handle
     different vector storage strategies (e.g., OpenSearch, in memory, etc.).
     """
+
     @abstractmethod
     def add_documents(self, documents: List[Document]) -> None:
         """Store the documents in a vector database."""
@@ -139,5 +145,5 @@ class BaseVectoreStore(ABC):
 
         Returns:
             List[Tuple[Document, float]]: A list of tuples containing the document and its similarity score.
-        """ 
+        """
         pass

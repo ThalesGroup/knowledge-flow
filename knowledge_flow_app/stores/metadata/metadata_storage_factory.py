@@ -22,6 +22,7 @@ from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataS
 from knowledge_flow_app.stores.metadata.local_metadata_store import LocalMetadataStore
 from knowledge_flow_app.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
 
+
 def get_metadata_store() -> BaseMetadataStore:
     """
     Factory function to create a metadata store instance based on the configuration.
@@ -44,7 +45,7 @@ def get_metadata_store() -> BaseMetadataStore:
             secure=settings.opensearch_secure,
             verify_certs=settings.opensearch_verify_certs,
             vector_index_name=settings.opensearch_vector_index,
-            metadata_index_name=settings.opensearch_metadata_index
+            metadata_index_name=settings.opensearch_metadata_index,
         )
-    else:   
+    else:
         raise ValueError(f"Unsupported metadata storage backend: {config.type}")

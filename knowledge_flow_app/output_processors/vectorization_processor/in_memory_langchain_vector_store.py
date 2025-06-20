@@ -24,6 +24,8 @@ from knowledge_flow_app.common.utils import get_embedding_model_name
 from knowledge_flow_app.output_processors.vectorization_processor.interfaces import BaseVectoreStore
 
 logger = logging.getLogger(__name__)
+
+
 class InMemoryLangchainVectorStore(BaseVectoreStore):
     """
     In-Memory langchain Vector Store.
@@ -31,6 +33,7 @@ class InMemoryLangchainVectorStore(BaseVectoreStore):
     A simple and minimalistic in-memory vector store.
     It uses the langchain_community FAISS class.
     """
+
     def __init__(self, embedding_model: Embeddings):
         """
         Args:
@@ -70,4 +73,3 @@ class InMemoryLangchainVectorStore(BaseVectoreStore):
             enriched.append((doc, score))
 
         return enriched
-

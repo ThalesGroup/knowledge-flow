@@ -34,7 +34,7 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
     def check_file_validity(self, file_path: Path) -> bool:
         """Checks if the PDF is readable and contains at least one page."""
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 reader = pypdf.PdfReader(f)
                 if len(reader.pages) == 0:
                     logger.warning(f"The PDF file {file_path} is empty.")
@@ -46,26 +46,26 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
             logger.error(f"Unexpected error while validating {file_path}: {e}")
         return False
 
-
     def extract_file_metadata(self, file_path: Path) -> dict:
         """Extracts metadata from the PDF file."""
         metadata = {"document_name": file_path.name}
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 reader = pypdf.PdfReader(f)
                 info = reader.metadata or {}
 
-                metadata.update({
-                    "title": info.title.strip() if info.title else "Unknown",
-                    "author": info.author.strip() if info.author else "Unknown",
-                    "subject": info.subject.strip() if info.subject else "Unknown",
-                    "num_pages": len(reader.pages),
-                })
+                metadata.update(
+                    {
+                        "title": info.title.strip() if info.title else "Unknown",
+                        "author": info.author.strip() if info.author else "Unknown",
+                        "subject": info.subject.strip() if info.subject else "Unknown",
+                        "num_pages": len(reader.pages),
+                    }
+                )
         except Exception as e:
             logger.error(f"Error extracting metadata from PDF: {e}")
             metadata["error"] = str(e)
         return metadata
-
 
     # Describe the pictures using the Ollama VLM
     def _describe_picture(self, image_base64: str, ollama_url: str, model: str) -> str:
@@ -86,26 +86,24 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
                 Do not include any code or markdown formatting.
                 Do not include any image URLs or references.
             """,
-            "images": [image_base64]
+            "images": [image_base64],
         }
         url = f"{ollama_url}/api/generate"
         try:
             response = requests.post(url, json=payload, timeout=120)  # TODO: Timeout to set as a parameter
         except requests.exceptions.RequestException as e:
             logging.error(f"Timeout reached {url} : {e}")
-        
+
         # Collect all the streamed parts into a single string
         description = ""
         for line in response.iter_lines():
             if line:
-                data = json.loads(line.decode('utf-8'))
+                data = json.loads(line.decode("utf-8"))
                 description += data.get("response", "")
 
         return description
 
-
     def convert_file_to_markdown(self, input_doc_path: Path, output_dir: Path) -> dict:
-
         output_markdown_path = output_dir / "output.md"
         ollama_settings = OllamaSettings()
 
@@ -118,7 +116,7 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
                 "status": "error",
                 "message": "Ollama settings are not properly configured.",
             }
-        
+
         try:
             # Initialize the DocumentConverter with PDF format options
             pipeline_options = PdfPipelineOptions()
@@ -128,11 +126,7 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
             # pipeline_options.do_picture_description = True
 
             converter = DocumentConverter(
-                format_options = {
-                    InputFormat.PDF: PdfFormatOption(
-                        pipeline_options=pipeline_options
-                    )
-                }
+                format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)}
             )
 
             # Convert the PDF document to a Document object
@@ -142,15 +136,15 @@ class PdfMarkdownProcessor(BaseMarkdownProcessor):
             # Extract the pictures descriptions from the document
             pictures_desc = []
             for pic in doc.pictures:
-                base64 = pic.image.uri.path.split(',')[1]  # Extract base64 part from the data URI
-                description = self._describe_picture(image_base64=base64, ollama_url=ollama_settings.api_url, model=ollama_settings.vision_model_name)
+                base64 = pic.image.uri.path.split(",")[1]  # Extract base64 part from the data URI
+                description = self._describe_picture(
+                    image_base64=base64, ollama_url=ollama_settings.api_url, model=ollama_settings.vision_model_name
+                )
                 pictures_desc.append(description)
 
             # Generate the markdown file with placeholders for images
             doc.save_as_markdown(
-                output_markdown_path,
-                image_mode=ImageRefMode.PLACEHOLDER,
-                image_placeholder="%%ANNOTATION%%"
+                output_markdown_path, image_mode=ImageRefMode.PLACEHOLDER, image_placeholder="%%ANNOTATION%%"
             )
 
             # Replace placeholders with picture descriptions in the markdown file

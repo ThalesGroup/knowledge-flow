@@ -138,9 +138,11 @@ def test_process_success_pdf(tmp_path, sample_pdf, monkeypatch):
 
     def mock_describe(*args, **kwargs):
         return "This is a test image description"
-        
-    monkeypatch.setattr("knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture", mock_describe)
 
+    monkeypatch.setattr(
+        "knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture",
+        mock_describe,
+    )
 
     target_path = tmp_path / sample_pdf.name
     target_path.write_bytes(sample_pdf.read_bytes())

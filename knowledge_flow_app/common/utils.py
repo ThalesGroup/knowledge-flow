@@ -19,7 +19,9 @@ import yaml
 from typing import Dict
 
 from knowledge_flow_app.common.structures import Configuration
+
 logger = logging.getLogger(__name__)
+
 
 def parse_server_configuration(configuration_path: str) -> Configuration:
     """

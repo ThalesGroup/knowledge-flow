@@ -1,6 +1,6 @@
-
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
 
 class ChatProfileMinioSettings(BaseSettings):
     minio_endpoint: str = Field(..., validation_alias="MINIO_ENDPOINT")
@@ -9,6 +9,4 @@ class ChatProfileMinioSettings(BaseSettings):
     minio_chat_profile_bucket_name: str = Field(..., validation_alias="MINIO_CHAT_PROFILE_BUCKET_NAME")
     minio_secure: bool = Field(False, validation_alias="MINIO_SECURE")
 
-    model_config = {
-        "extra": "ignore"
-    }
+    model_config = {"extra": "ignore"}

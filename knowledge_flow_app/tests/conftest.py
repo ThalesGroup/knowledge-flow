@@ -33,6 +33,7 @@ from knowledge_flow_app.stores.content.content_storage_factory import get_conten
 from langchain_community.embeddings import FakeEmbeddings
 from minio.error import S3Error
 
+
 @pytest.fixture(scope="session", name="client")
 def client_fixture():
     """
@@ -59,7 +60,7 @@ def app_context(request):
     for the application, allowing test cases to override storage types via pytest markers.
     The configuration includes security settings, storage backends (content, metadata, vector),
     embedding configuration, and input processors for various file types.
-    
+
     Args:
         request: The pytest request object, used to access test markers for overriding
                  storage types.
@@ -72,24 +73,23 @@ def app_context(request):
         - vector_storage_type(type="..."): Override the vector storage backend. (opensearch, in_memory)
     """
 
-
     # 🧼 Force reset the singleton before initializing
     ApplicationContext._instance = None
-    
+
     # Default config
     content_storage_type = "local"
     metadata_storage_type = "local"
     vector_storage_type = "in_memory"
-    
+
     # Allow test to override via marker
     marker_metadata_storage_type = request.node.get_closest_marker("metadata_storage_type")
     if marker_metadata_storage_type and "type" in marker_metadata_storage_type.kwargs:
         metadata_storage_type = marker_metadata_storage_type.kwargs["type"]
-    
+
     marker_content_storage_type = request.node.get_closest_marker("content_storage_type")
     if marker_content_storage_type and "type" in marker_content_storage_type.kwargs:
         content_storage_type = marker_content_storage_type.kwargs["type"]
-        
+
     marker_vector_storage_type = request.node.get_closest_marker("vector_storage_type")
     if marker_vector_storage_type and "type" in marker_vector_storage_type.kwargs:
         vector_storage_type = marker_vector_storage_type.kwargs["type"]
@@ -122,6 +122,7 @@ def app_context(request):
 
     ApplicationContext(config)
 
+
 @pytest.fixture(scope="function")
 def opensearch_metadata_store():
     """
@@ -130,15 +131,14 @@ def opensearch_metadata_store():
     and yields the store instance for use in tests. After the test completes, it attempts to
     delete both the metadata and vector indices to clean up. If the indices do not exist,
     the NotFoundError is caught and ignored.
-    
+
     Yields:
         OpenSearchMetadataStore: An initialized metadata store connected to OpenSearch.
     """
-    
-    
+
     opensearch_metadata_store: OpenSearchMetadataStore = get_metadata_store()
     opensearch_metadata_store.client.indices.create(index=opensearch_metadata_store.vector_index_name, ignore=400)
-    
+
     yield opensearch_metadata_store
 
     try:
@@ -155,19 +155,18 @@ def fake_embedder(monkeypatch):
     This function replaces the original __init__ method of the Embedder class in
     'knowledge_flow_app.output_processors.vectorization_processor.embedder' with a fake implementation
     that initializes the model attribute with a FakeEmbeddings instance of size 1352.
-    
+
     Args:
         monkeypatch: pytest's monkeypatch fixture used to modify or replace attributes for testing.
     """
-    
-    
+
     def fake_embedder_init(self, config=None):
         self.model = FakeEmbeddings(size=1352)
 
     monkeypatch.setattr(
-        "knowledge_flow_app.output_processors.vectorization_processor.embedder.Embedder.__init__",
-        fake_embedder_init
+        "knowledge_flow_app.output_processors.vectorization_processor.embedder.Embedder.__init__", fake_embedder_init
     )
+
 
 @pytest.fixture(scope="function")
 def minio_content_store():
@@ -184,7 +183,7 @@ def minio_content_store():
     """
 
     minio_content_store: MinioContentStore = get_content_store()
-    
+
     yield minio_content_store
 
     try:

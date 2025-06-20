@@ -14,6 +14,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class BaseMetadataStore(ABC):
     @abstractmethod
     def get_all_metadata(self, filters: dict) -> list:

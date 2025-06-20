@@ -38,11 +38,15 @@ from knowledge_flow_app.common.structures import VectorizationResponse
 @pytest.fixture
 def prepared_pdf_dir(tmp_path, monkeypatch):
     """Prepare a temporary PDF file and run input processing on it."""
+
     def mock_describe(*args, **kwargs):
         return "This is a test image description"
-        
-    monkeypatch.setattr("knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture", mock_describe)
-    
+
+    monkeypatch.setattr(
+        "knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture",
+        mock_describe,
+    )
+
     source_file = Path("knowledge_flow_app/tests/assets/sample.pdf")
     target_file = tmp_path / source_file.name
     shutil.copy(source_file, target_file)
@@ -76,7 +80,7 @@ class DummyProcessor:
 
 def test_process_real_pdf_success(prepared_pdf_dir):
     """Test output processing on a real processed PDF."""
-    
+
     service = OutputProcessorService()
     result = service.process(prepared_pdf_dir, "sample.pdf", {"meta": "pdf", "document_uid": "uid-123"})
     assert isinstance(result, VectorizationResponse)

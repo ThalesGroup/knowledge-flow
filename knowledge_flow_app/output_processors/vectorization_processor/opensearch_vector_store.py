@@ -24,6 +24,7 @@ from knowledge_flow_app.output_processors.vectorization_processor.interfaces imp
 
 logger = logging.getLogger(__name__)
 
+
 class OpenSearchVectorStoreAdapter(BaseVectoreStore):
     """
     Opensearch Vector Store.
@@ -36,9 +37,7 @@ class OpenSearchVectorStoreAdapter(BaseVectoreStore):
     It accepts documents + embeddings and stores them into the configured OpenSearch vector index.
     """
 
-    def __init__(self, 
-                 embedding_model: BaseEmbeddingModel,
-                 settings: OpenSearchSettings):
+    def __init__(self, embedding_model: BaseEmbeddingModel, settings: OpenSearchSettings):
         self.settings = settings
         self.opensearch_vector_search = OpenSearchVectorSearch(
             opensearch_url=self.settings.opensearch_host,
@@ -53,7 +52,7 @@ class OpenSearchVectorStoreAdapter(BaseVectoreStore):
         """
         Add raw documents to OpenSearch.
         Embeddings will be computed internally by LangChain using the configured embedding model.
-    
+
         Args:
             documents (List[Document]): List of documents to embed and store.
         """

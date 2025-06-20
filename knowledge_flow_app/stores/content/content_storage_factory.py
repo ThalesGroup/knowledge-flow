@@ -23,7 +23,6 @@ from knowledge_flow_app.stores.content.local_content_store import LocalStorageBa
 from knowledge_flow_app.stores.content.minio_content_store import MinioContentStore
 
 
-        
 def get_content_store() -> BaseContentStore:
     """
     Factory function to get the appropriate storage backend based on configuration.
@@ -41,7 +40,7 @@ def get_content_store() -> BaseContentStore:
             access_key=settings.minio_access_key,
             secret_key=settings.minio_secret_key,
             bucket_name=settings.minio_bucket_name,
-            secure=settings.minio_secure
+            secure=settings.minio_secure,
         )
     elif backend_type == "local":
         settings = ContentStoreLocalSettings()

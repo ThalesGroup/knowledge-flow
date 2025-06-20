@@ -22,6 +22,7 @@ from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdow
 
 logger = logging.getLogger(__name__)
 
+
 class PptxMarkdownProcessor(BaseMarkdownProcessor):
     def check_file_validity(self, file_path: Path) -> bool:
         """Checks if the PPTX file is valid and can be opened."""

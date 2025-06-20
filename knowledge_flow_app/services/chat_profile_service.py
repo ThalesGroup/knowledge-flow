@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 MAX_TOKENS_PER_PROFILE = 40000
 
+
 def count_tokens_from_markdown(md_path: Path) -> int:
     embedder = ApplicationContext.get_instance().get_embedder()
 
@@ -29,6 +30,7 @@ def count_tokens_from_markdown(md_path: Path) -> int:
 
     text = md_path.read_text(encoding="utf-8")
     return len(encoding.encode(text))
+
 
 class ChatProfileService:
     def __init__(self):
@@ -60,7 +62,7 @@ class ChatProfileService:
                     creator=profile_data["creator"],
                     user_id=profile_data["user_id"],
                     tokens=profile_data["tokens"],
-                    documents=documents
+                    documents=documents,
                 )
 
                 all_profiles.append(profile)
@@ -87,18 +89,13 @@ class ChatProfileService:
                         processing_dir = tmp_path / f"{file.stem}_processing"
                         processing_dir.mkdir(parents=True, exist_ok=True)
 
-                        input_metadata = {
-                            "source_file": file.name,
-                            "document_uid": file.stem
-                        }
+                        input_metadata = {"source_file": file.name, "document_uid": file.stem}
 
                         temp_input_file = processing_dir / file.name
                         shutil.copy(file, temp_input_file)
 
                         self.processor.process(
-                            output_dir=processing_dir,
-                            input_file=file.name,
-                            input_file_metadata=input_metadata
+                            output_dir=processing_dir, input_file=file.name, input_file_metadata=input_metadata
                         )
 
                         output_md = next((processing_dir / "output").glob("*.md"), None)
@@ -115,13 +112,15 @@ class ChatProfileService:
                         if total_tokens > MAX_TOKENS_PER_PROFILE:
                             raise ValueError(f"Profile exceeds the {MAX_TOKENS_PER_PROFILE} token limit.")
 
-                        documents.append(ChatProfileDocument(
-                            id=file.stem,
-                            document_name=file.name,
-                            document_type=file.suffix[1:],
-                            size=file.stat().st_size,
-                            tokens=token_count
-                        ))
+                        documents.append(
+                            ChatProfileDocument(
+                                id=file.stem,
+                                document_name=file.name,
+                                document_type=file.suffix[1:],
+                                size=file.stat().st_size,
+                                tokens=token_count,
+                            )
+                        )
 
                     except Exception as e:
                         logger.error(f"Failed to process file '{file.name}': {e}", exc_info=True)
@@ -136,7 +135,7 @@ class ChatProfileService:
                 "creator": "system",
                 "documents": [doc.model_dump() for doc in documents],
                 "tokens": total_tokens,
-                "user_id": "local"
+                "user_id": "local",
             }
 
             (profile_dir / "profile.json").write_text(
@@ -150,7 +149,7 @@ class ChatProfileService:
     async def delete_profile(self, profile_id: str):
         self.store.delete_profile(profile_id)
         return {"success": True}
-    
+
     async def get_profile_with_markdown(self, profile_id: str) -> dict:
         """
         Load profile metadata and associated markdown content.
@@ -168,14 +167,16 @@ class ChatProfileService:
                 "id": profile_data["id"],
                 "title": profile_data.get("title", ""),
                 "description": profile_data.get("description", ""),
-                "markdown": markdown.strip()
+                "markdown": markdown.strip(),
             }
 
         except Exception as e:
             logger.error(f"Error loading profile with markdown: {e}")
             raise
 
-    async def update_profile(self, profile_id: str, title: str, description: str, files: list[UploadFile]) -> ChatProfile:
+    async def update_profile(
+        self, profile_id: str, title: str, description: str, files: list[UploadFile]
+    ) -> ChatProfile:
         try:
             # Load and update base metadata
             metadata = self.store.get_profile_description(profile_id)
@@ -208,10 +209,7 @@ class ChatProfileService:
                         self.processor.process(
                             output_dir=processing_dir,
                             input_file=file_path.name,
-                            input_file_metadata={
-                                "source_file": file_path.name,
-                                "document_uid": file_path.stem
-                            }
+                            input_file_metadata={"source_file": file_path.name, "document_uid": file_path.stem},
                         )
 
                         md_output = next((processing_dir / "output").glob("*.md"), None)
@@ -230,7 +228,7 @@ class ChatProfileService:
                             document_name=file_path.name,
                             document_type=file_path.suffix[1:],
                             size=file_path.stat().st_size,
-                            tokens=token_count
+                            tokens=token_count,
                         )
 
                         existing_documents[doc.id] = doc.model_dump()
@@ -259,7 +257,9 @@ class ChatProfileService:
                     shutil.copy(md_file, files_dir / f"{doc_id}.md")
 
                 # Write profile.json
-                (profile_dir / "profile.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
+                (profile_dir / "profile.json").write_text(
+                    json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
 
                 # Save using store
                 self.store.save_profile(profile_id, profile_dir)

@@ -46,7 +46,7 @@ def sample_pdf_file():
 #         assert processor.check_file_validity(sample_pdf_file)
 
 #         metadata = processor.process_metadata(sample_pdf_file)
-        
+
 #         assert metadata["document_name"] == "sample.pdf"
 #         # assert metadata["title"] == "Test Title"
 #         # assert metadata["author"] == "Test Author"
@@ -55,10 +55,11 @@ def sample_pdf_file():
 #         assert "document_uid" in metadata
 
 #         result = processor.convert_file_to_markdown(sample_pdf_file, output_dir)
-        
+
 #         assert result["status"] == "fallback_to_text"
 #         assert Path(result["md_file"]).exists()
 #         assert Path(result["md_file"]).read_text(encoding="utf-8").strip() != ""
+
 
 @patch("requests.post")
 def test_pdf_processor_end_to_end(mock_post, processor, sample_pdf_file):
@@ -80,7 +81,7 @@ def test_pdf_processor_end_to_end(mock_post, processor, sample_pdf_file):
         assert "document_uid" in metadata
 
         result = processor.convert_file_to_markdown(sample_pdf_file, output_dir)
-        
+
         assert result["status"] == "fallback_to_text"
         assert Path(result["md_file"]).exists()
         assert Path(result["md_file"]).read_text(encoding="utf-8").strip() != ""

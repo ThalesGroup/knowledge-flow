@@ -17,6 +17,7 @@
 from pathlib import Path
 import os
 
+
 class LocalVectorStoreSettings:
     """
     Local vector store settings class.
@@ -24,6 +25,7 @@ class LocalVectorStoreSettings:
     The defauls is "~/.fred/knowledge/vectore-store".
     The path can be overridden by setting the "LOCAL_VECTOR_STORAGE_PATH" environment variable.
     """
+
     def __init__(self):
         env_value = os.getenv("LOCAL_VECTOR_STORAGE_PATH")
         if env_value:
