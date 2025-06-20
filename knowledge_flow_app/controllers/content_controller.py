@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -77,7 +77,7 @@ class ContentController:
                 raise HTTPException(status_code=400, detail=str(e))
             except FileNotFoundError as e:
                 raise HTTPException(status_code=404, detail=str(e))
-            except Exception as e:
+            except Exception:
                 logger.exception("Unexpected error in get_document_preview")
                 raise HTTPException(status_code=500, detail="Internal server error")
             
@@ -103,6 +103,6 @@ class ContentController:
                 raise HTTPException(status_code=400, detail=str(e))
             except FileNotFoundError as e:
                 raise HTTPException(status_code=404, detail=str(e))
-            except Exception as e:
+            except Exception:
                 logger.exception("Unexpected error in download_document")
                 raise HTTPException(status_code=500, detail="Internal server error")

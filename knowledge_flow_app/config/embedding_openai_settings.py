@@ -16,7 +16,6 @@ import logging
 from typing import Optional
 from pydantic_settings import BaseSettings
 from pydantic import Field
-import os
 logger = logging.getLogger(__name__)
 
 class EmbeddingOpenAISettings(BaseSettings):

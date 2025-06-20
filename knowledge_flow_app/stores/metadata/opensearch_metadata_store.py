@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-from pathlib import Path
 from opensearchpy import OpenSearch, RequestsHttpConnection, OpenSearchException
 
 from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataStore

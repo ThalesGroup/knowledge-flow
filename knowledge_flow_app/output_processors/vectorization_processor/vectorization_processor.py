@@ -19,8 +19,6 @@ from langchain.schema.document import Document
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import Status, VectorizationResponse
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
-from knowledge_flow_app.output_processors.vectorization_processor.interfaces import BaseDocumentLoader, BaseEmbeddingModel, BaseTextSplitter, BaseVectoreStore
-from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataStore
 from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
 
 logger = logging.getLogger(__name__)

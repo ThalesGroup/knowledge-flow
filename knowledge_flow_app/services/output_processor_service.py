@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import pathlib
-from fastapi import UploadFile
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import VectorizationResponse
-from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdownProcessor, BaseTabularProcessor
 
 class OutputProcessorService:
     """

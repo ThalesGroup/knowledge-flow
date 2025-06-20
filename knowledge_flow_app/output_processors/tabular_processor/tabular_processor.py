@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import logging
-from fastapi import HTTPException
-from langchain.schema.document import Document
 
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
 

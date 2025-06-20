@@ -18,7 +18,6 @@ class ChatProfileController:
         
         @router.get("/chatProfiles/maxTokens")
         async def get_max_tokens():
-            from knowledge_flow_app.application_context import ApplicationContext
             context = ApplicationContext.get_instance()
             return {"max_tokens": context.get_chat_profile_max_tokens()}
 

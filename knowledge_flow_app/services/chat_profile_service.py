@@ -1,6 +1,5 @@
 from datetime import datetime
 import shutil
-from typing import List
 from uuid import uuid4
 from pathlib import Path
 import tempfile

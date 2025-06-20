@@ -18,7 +18,6 @@ from pathlib import Path
 import pytest
 
 from knowledge_flow_app.input_processors.docx_markdown_processor.docx_markdown_processor import DocxMarkdownProcessor
-from knowledge_flow_app.services.input_processor_service import InputProcessorService
 
 @pytest.fixture
 def processor():

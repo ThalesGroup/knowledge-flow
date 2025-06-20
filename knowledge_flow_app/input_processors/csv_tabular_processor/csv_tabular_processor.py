@@ -15,8 +15,6 @@
 # knowledge_flow_app/processors/processor_example_tabular/example_tabular_processor.py
 
 from pathlib import Path
-from typing import List, Dict
-import csv
 
 import pandas
 

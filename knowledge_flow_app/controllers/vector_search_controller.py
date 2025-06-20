@@ -13,12 +13,11 @@
 # limitations under the License.
 
 from datetime import datetime, timezone
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List, Optional
 from langchain.schema.document import Document
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import Field
 
 from knowledge_flow_app.services.vector_search_service import VectorSearchService
 

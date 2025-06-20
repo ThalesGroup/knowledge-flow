@@ -15,7 +15,6 @@
 # knowledge_flow_app/processors/pptx/pptx_processor.py
 
 import logging
-import shutil
 from pathlib import Path
 
 from pptx import Presentation
