@@ -67,3 +67,6 @@ include = ["knowledge_flow_app*"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.pytest.ini_options]
+cache_dir = "/tmp/.pytest"
