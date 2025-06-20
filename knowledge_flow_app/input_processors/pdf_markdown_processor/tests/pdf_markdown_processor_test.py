@@ -18,6 +18,8 @@ import os
 from dotenv import load_dotenv
 import pytest
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+import json
 import tempfile
 from knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor import PdfMarkdownProcessor
 
@@ -36,7 +38,36 @@ def sample_pdf_file():
     return Path(__file__).parent / "assets" / "sample.pdf"
 
 
-def test_pdf_processor_end_to_end(processor, sample_pdf_file):
+# def test_pdf_processor_end_to_end(processor, sample_pdf_file):
+#     with tempfile.TemporaryDirectory(prefix="knowledge_flow_test_") as tmpdirname:
+#         output_dir = Path(tmpdirname)
+#         output_dir.mkdir(exist_ok=True, parents=True)
+
+#         assert processor.check_file_validity(sample_pdf_file)
+
+#         metadata = processor.process_metadata(sample_pdf_file)
+        
+#         assert metadata["document_name"] == "sample.pdf"
+#         # assert metadata["title"] == "Test Title"
+#         # assert metadata["author"] == "Test Author"
+#         # assert metadata["subject"] == "Test Subject"
+#         assert metadata["num_pages"] == 2
+#         assert "document_uid" in metadata
+
+#         result = processor.convert_file_to_markdown(sample_pdf_file, output_dir)
+        
+#         assert result["status"] == "fallback_to_text"
+#         assert Path(result["md_file"]).exists()
+#         assert Path(result["md_file"]).read_text(encoding="utf-8").strip() != ""
+
+@patch("requests.post")
+def test_pdf_processor_end_to_end(mock_post, processor, sample_pdf_file):
+    mock_response = MagicMock()
+    mock_response.iter_lines.return_value = [
+        json.dumps({"response": "There is an image showing a diagram."}).encode("utf-8")
+    ]
+    mock_post.return_value = mock_response
+
     with tempfile.TemporaryDirectory(prefix="knowledge_flow_test_") as tmpdirname:
         output_dir = Path(tmpdirname)
         output_dir.mkdir(exist_ok=True, parents=True)
@@ -44,11 +75,7 @@ def test_pdf_processor_end_to_end(processor, sample_pdf_file):
         assert processor.check_file_validity(sample_pdf_file)
 
         metadata = processor.process_metadata(sample_pdf_file)
-        
         assert metadata["document_name"] == "sample.pdf"
-        # assert metadata["title"] == "Test Title"
-        # assert metadata["author"] == "Test Author"
-        # assert metadata["subject"] == "Test Subject"
         assert metadata["num_pages"] == 2
         assert "document_uid" in metadata
 
