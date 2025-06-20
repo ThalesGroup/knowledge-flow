@@ -18,17 +18,17 @@ jobs:
       - name: Run linter, formatter, secrets detection and sast 
         run: pre-commit run --all-files
 
-  # unit-tests:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Setup env
-  #       uses: ./.github/actions/setup-env
+      - name: Setup env
+        uses: ./.github/actions/setup-env
 
-  #     - name: Run tests with coverage
-  #       run: tox -e test
+      - name: Run tests with coverage
+        run: tox -e test
 
   # build:
   #   runs-on: ubuntu-latest
