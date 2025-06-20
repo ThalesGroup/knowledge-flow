@@ -67,7 +67,7 @@ class TestMetadataController:
         """
 
         return {
-            "document_uid": "03a8ceb96fc018aa77353c2add5d4ac3d79a734d6cfd2857be6698158040c519",
+            "document_uid": "doc-01",
             "title": "Example Document",
             "author": "Jane Doe",
             "created": "2024-06-01T12:00:00Z",

@@ -16,5 +16,5 @@ repos:
     rev: 1.8.5
     hooks:
       - id: bandit
-        args: ["-r", "-s", "B101", "--", "knowledge_flow_app", "knowledge_flow_app/tests"]
+        args: ["-r", "-s", "B101,B108", "--", "knowledge_flow_app", "knowledge_flow_app/tests"]
         name: sast

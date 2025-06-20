@@ -36,7 +36,7 @@ class TestMetadataController:
                 - document_dir (Path): Path to the document's root directory 
         """
         
-        document_uid = "a77dbd5200c74a5cb58dd5b36ecbd4c6"
+        document_uid = "doc-01"
         target_input_dir = tmp_path / document_uid / "input"
         target_output_dir = tmp_path / document_uid / "output"
         target_input_dir.mkdir(parents=True, exist_ok=True)
@@ -100,7 +100,7 @@ class TestMetadataController:
         """
 
         return {
-            "document_uid": "a77dbd5200c74a5cb58dd5b36ecbd4c6",
+            "document_uid": "doc-01",
             "title": "Example Document",
             "author": "Jane Doe",
             "created": "2024-06-01T12:00:00Z",

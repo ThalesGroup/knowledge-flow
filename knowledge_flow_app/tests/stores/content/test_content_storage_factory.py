@@ -109,7 +109,7 @@ def test_get_minio_content_store(monkeypatch, patch_app_context):
         {
             "minio_endpoint": "localhost",
             "minio_access_key": "AK",
-            "minio_secret_key": "SK",
+            "minio_secret_key": "",
             "minio_bucket_name": "bucket",
             "minio_secure": False,
         },

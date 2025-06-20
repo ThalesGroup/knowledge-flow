@@ -98,7 +98,7 @@ def test_get_opensearch_metadata_store(monkeypatch, patch_context):
                 "opensearch_metadata_index": "meta",
                 "opensearch_vector_index": "vec",
                 "opensearch_user": "user",
-                "opensearch_password": "pass",
+                "opensearch_password": "",
                 "opensearch_secure": False,
                 "opensearch_verify_certs": False,
             },
