@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import shutil
 from typing import List
 from uuid import uuid4
@@ -106,15 +106,16 @@ class ChatProfileService:
                         if not output_md:
                             raise FileNotFoundError(f"No .md output found for {file.name}")
 
+                        token_count = count_tokens_from_markdown(output_md)
+                        if total_tokens + token_count > MAX_TOKENS_PER_PROFILE:
+                            raise HTTPException(status_code=400, detail="Token limit exceeded")
+
+                        # Only now that we're safe, move the file and record the doc
                         new_md_name = f"{file.stem}.md"
                         dest_path = files_subdir / new_md_name
                         shutil.move(str(output_md), dest_path)
 
-                        token_count = count_tokens_from_markdown(dest_path)
                         total_tokens += token_count
-
-                        if total_tokens > MAX_TOKENS_PER_PROFILE:
-                            raise ValueError(f"Profile exceeds the {MAX_TOKENS_PER_PROFILE} token limit.")
 
                         documents.append(ChatProfileDocument(
                             id=file.stem,
@@ -124,10 +125,13 @@ class ChatProfileService:
                             tokens=token_count
                         ))
 
+                    except HTTPException:
+                        raise
                     except Exception as e:
                         logger.error(f"Failed to process file '{file.name}': {e}", exc_info=True)
+                        raise HTTPException(status_code=500, detail=f"Failed to process file '{file.name}'")
 
-            now = datetime.utcnow().isoformat()
+            now = datetime.now(datetime.timezone.utc).isoformat()
             metadata = {
                 "id": profile_id,
                 "title": title,
@@ -147,6 +151,7 @@ class ChatProfileService:
             self.store.save_profile(profile_id, profile_dir)
 
         return ChatProfile(**metadata)
+
 
     async def delete_profile(self, profile_id: str):
         self.store.delete_profile(profile_id)
@@ -181,7 +186,7 @@ class ChatProfileService:
             metadata = self.store.get_profile_description(profile_id)
             metadata["title"] = title
             metadata["description"] = description
-            metadata["updated_at"] = datetime.utcnow().isoformat()
+            metadata["updated_at"] = datetime.now(timezone.utc).isoformat()
 
             existing_documents = {doc["id"]: doc for doc in metadata.get("documents", [])}
             total_tokens = sum(doc.get("tokens", 0) for doc in existing_documents.values())
@@ -278,7 +283,7 @@ class ChatProfileService:
             # Remove the document from metadata
             updated_documents = [doc for doc in metadata.get("documents", []) if doc["id"] != document_id]
             metadata["documents"] = updated_documents
-            metadata["updated_at"] = datetime.utcnow().isoformat()
+            metadata["updated_at"] = datetime.now(timezone.utc).isoformat()
 
             # Recalculate tokens
             total_tokens = 0
