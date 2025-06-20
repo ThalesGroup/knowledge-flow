@@ -178,14 +178,11 @@ class ChatProfileService:
 
     async def update_profile(self, profile_id: str, title: str, description: str, files: list[UploadFile]) -> ChatProfile:
         try:
-            # Load and update base metadata
             metadata = self.store.get_profile_description(profile_id)
             metadata["title"] = title
             metadata["description"] = description
             metadata["updated_at"] = datetime.utcnow().isoformat()
-            print(files)
 
-            # Merge existing documents
             existing_documents = {doc["id"]: doc for doc in metadata.get("documents", [])}
             total_tokens = sum(doc.get("tokens", 0) for doc in existing_documents.values())
 
@@ -199,46 +196,41 @@ class ChatProfileService:
                     with open(file_path, "wb") as f:
                         f.write(await upload.read())
 
-                    try:
-                        # Process file
-                        processing_dir = tmp_path / f"{file_path.stem}_processing"
-                        processing_dir.mkdir(parents=True, exist_ok=True)
+                    # Process file
+                    processing_dir = tmp_path / f"{file_path.stem}_processing"
+                    processing_dir.mkdir(parents=True, exist_ok=True)
 
-                        shutil.copy(file_path, processing_dir / file_path.name)
+                    shutil.copy(file_path, processing_dir / file_path.name)
 
-                        self.processor.process(
-                            output_dir=processing_dir,
-                            input_file=file_path.name,
-                            input_file_metadata={
-                                "source_file": file_path.name,
-                                "document_uid": file_path.stem
-                            }
-                        )
+                    self.processor.process(
+                        output_dir=processing_dir,
+                        input_file=file_path.name,
+                        input_file_metadata={
+                            "source_file": file_path.name,
+                            "document_uid": file_path.stem
+                        }
+                    )
 
-                        md_output = next((processing_dir / "output").glob("*.md"), None)
-                        if not md_output:
-                            raise FileNotFoundError(f"No markdown generated for {file_path.name}")
+                    md_output = next((processing_dir / "output").glob("*.md"), None)
+                    if not md_output:
+                        raise FileNotFoundError(f"No markdown generated for {file_path.name}")
 
-                        token_count = count_tokens_from_markdown(md_output)
-                        total_tokens += token_count
+                    token_count = count_tokens_from_markdown(md_output)
+                    if total_tokens + token_count > MAX_TOKENS_PER_PROFILE:
+                        raise HTTPException(status_code=400, detail="Token limit exceeded")
 
-                        if total_tokens > MAX_TOKENS_PER_PROFILE:
-                            raise ValueError("Token limit exceeded")
+                    total_tokens += token_count
 
-                        # Build doc object
-                        doc = ChatProfileDocument(
-                            id=file_path.stem,
-                            document_name=file_path.name,
-                            document_type=file_path.suffix[1:],
-                            size=file_path.stat().st_size,
-                            tokens=token_count
-                        )
+                    doc = ChatProfileDocument(
+                        id=file_path.stem,
+                        document_name=file_path.name,
+                        document_type=file_path.suffix[1:],
+                        size=file_path.stat().st_size,
+                        tokens=token_count
+                    )
 
-                        existing_documents[doc.id] = doc.model_dump()
-                        processed_documents.append((doc.id, md_output))
-
-                    except Exception as e:
-                        logger.error(f"Failed to process {upload.filename}: {e}", exc_info=True)
+                    existing_documents[doc.id] = doc.model_dump()
+                    processed_documents.append((doc.id, md_output))
 
                 # Final metadata
                 metadata["tokens"] = total_tokens
@@ -266,6 +258,13 @@ class ChatProfileService:
                 self.store.save_profile(profile_id, profile_dir)
 
             return ChatProfile(**metadata)
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to update profile {profile_id}: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Failed to update profile")
+
 
         except Exception as e:
             logger.error(f"Failed to update profile {profile_id}: {e}", exc_info=True)
