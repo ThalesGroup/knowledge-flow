@@ -19,6 +19,8 @@ from datetime import datetime
 from pathlib import Path
 import pandas
 
+from knowledge_flow_app.common.utils import utc_now_iso
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +46,7 @@ class BaseInputProcessor(ABC):
     def _add_common_metadata(self, file_path: Path, front_metadata: dict) -> dict:
         common_metadata = {
             "document_name": file_path.name,
-            "date_added_to_kb": datetime.now().isoformat(),
+            "date_added_to_kb": utc_now_iso(),
             "retrievable": True,
         }
         common_metadata["document_uid"] = self._generate_file_unique_id(common_metadata, front_metadata)

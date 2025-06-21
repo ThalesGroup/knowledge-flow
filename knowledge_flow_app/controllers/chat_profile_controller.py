@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
+from knowledge_flow_app.common.business_exception import BusinessException, ChatProfileError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, ProfileDeletionError, ProfileNotFound, TokenLimitExceeded
+from knowledge_flow_app.common.utils import log_exception
 from knowledge_flow_app.services.chat_profile_service import ChatProfileService
 import tempfile
 from pathlib import Path
-from knowledge_flow_app.application_context import ApplicationContext
 
 
 class UpdateChatProfileRequest(BaseModel):
@@ -52,8 +53,15 @@ class ChatProfileController:
 
                     profile = await self.service.create_profile(title, description, tmp_path)
                     return profile
+            except TokenLimitExceeded:
+                raise HTTPException(status_code=400, detail="Token limit exceeded")
+            except DocumentProcessingError as e:
+                raise HTTPException(status_code=500, detail=f"Could not process file: {e.filename}")
+            except BusinessException as e:
+                raise HTTPException(status_code=400, detail=str(e))
             except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+                log_exception(e, "Unexpected error during profile creation")
+                raise HTTPException(status_code=500, detail="Internal Server Error")
 
         @router.put("/chatProfiles/{chatProfile_id}")
         async def update_profile(
@@ -62,18 +70,42 @@ class ChatProfileController:
             description: str = Form(...),
             files: list[UploadFile] = File(default=[])
         ):
-            return await self.service.update_profile(chatProfile_id, title, description, files)
-
+            try:
+                return await self.service.update_profile(chatProfile_id, title, description, files)
+            except ProfileNotFound as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except TokenLimitExceeded as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except DocumentProcessingError as e:
+                raise HTTPException(status_code=500, detail=f"Failed to process one or more documents: {e}")
+            except Exception as e:
+                log_exception(e, f"Unexpected error while updating profile {chatProfile_id}")
+                raise HTTPException(status_code=500, detail="Unexpected server error during profile update.")
 
         @router.delete("/chatProfiles/{chatProfile_id}")
         async def delete_profile(chatProfile_id: str):
-            return await self.service.delete_profile(chatProfile_id)
-
-        @router.post("/chatProfiles/{chatProfile_id}/documents")
-        async def upload_documents(chatProfile_id: str, files: list[UploadFile] = File(...)):
-            # à implémenter plus tard
-            return {"message": "not yet implemented"}
+            try:
+                return await self.service.delete_profile(chatProfile_id)
+            except ProfileNotFound as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except ProfileDeletionError as e:
+                raise HTTPException(status_code=500, detail=str(e))
+            except ChatProfileError as e:
+                raise HTTPException(status_code=400, detail=str(e))
+            except Exception as e:
+                log_exception(e, f"Unexpected error while deleting chat profile {chatProfile_id}")
+                raise HTTPException(status_code=500, detail="Internal server error")
 
         @router.delete("/chatProfiles/{chatProfile_id}/documents/{document_id}")
         async def delete_document(chatProfile_id: str, document_id: str):
-            return await self.service.delete_document(chatProfile_id, document_id)
+            try:
+                return await self.service.delete_document(chatProfile_id, document_id)
+            except ProfileNotFound as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except DocumentNotFound as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except DocumentDeletionError as e:
+                raise HTTPException(status_code=500, detail=str(e))
+            except Exception as e:
+                log_exception(e, f"Unexpected error deleting document '{document_id}' from profile '{chatProfile_id}'")
+                raise HTTPException(status_code=500, detail="Internal server error")
