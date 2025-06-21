@@ -154,6 +154,23 @@ clean-test: ## Clean test cache
 	@echo "************ CLEANING TESTS ************"
 	rm -rf .tox .coverage htmlcov $(TARGET)/.tested
 
+##@ Review 
+
+.PHONY: review-pull-request
+review-pull-request: dev ## Run AI-based PR review locally
+	@echo "🤖 Reviewing Python changes using AI..."
+	$(PYTHON) developer_tools/ai_review_pull_request.py --mode committed
+
+.PHONY: review-uncommitted
+review-uncommitted: dev ## Run AI-based PR review locally
+	@echo "🤖 Reviewing Python changes using AI..."
+	$(PYTHON) developer_tools/ai_review_pull_request.py --mode uncommitted
+
+.PHONY: review-all
+review-all: dev ## Run AI-based PR review locally
+	@echo "🤖 Reviewing Python changes using AI..."
+	$(PYTHON) developer_tools/ai_review_pull_request.py --mode all
+
 ##@ Help
 
 .PHONY: help

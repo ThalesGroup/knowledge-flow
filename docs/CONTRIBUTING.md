@@ -78,7 +78,7 @@ A CI pipeline will automatically run all tests when you open or update a pull re
 
 ## 🧾 License
 
-All contributions must be compatible with the project’s open source license (see `LICENSE` file in the repo).
+All contributions must be compatible with the project’s open source license (see `[LICENSE](docs/CONTRIBUTING.md).
 
 ---
 
@@ -93,7 +93,7 @@ All contributions must be compatible with the project’s open source license (s
 
 ## 🧪 Testing
 
-Testing is mandatory for any non-trivial change. Both unit and integration tests are run using `pytest`.
+Testing is mandatory for any non-trivial change. Both unit and integration tests are run using `pytest`. Use the Makefile always to launch test suites.
 
 ### Recommended workflow:
 
