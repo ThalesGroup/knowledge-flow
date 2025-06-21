@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import warnings
 import pytest
 from knowledge_flow_app.application_context import ApplicationContext
-from knowledge_flow_app.common.structures import Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig
+from knowledge_flow_app.common.structures import ChatProfileStorageConfig, Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig
+
+os.environ["OPENAI_API_KEY"] = "sk-test-key"
 
 @pytest.fixture(scope="function", autouse=True)
 def app_context():
@@ -40,6 +44,9 @@ def app_context():
         ),
         embedding=EmbeddingConfig(
             type="openai"
+        ),
+        chat_profile_storage=ChatProfileStorageConfig(
+            type="local"
         ),
         input_processors=[
             ProcessorConfig(

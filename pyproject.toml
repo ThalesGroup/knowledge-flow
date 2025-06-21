@@ -45,10 +45,11 @@ dependencies = [
 dev = [
   "pytest-cov==6.1.1",
   "reportlab==4.3.1",
-  "pytest==8.3.5",
   "pytest-asyncio==0.26.0",
   "black==23.1.0",
-  "isort==5.10.1"
+  "isort==5.10.1",
+  "pytest>=8.3.5,<9.0.0",
+  "pytest-cov>=6.1.1,<7.0.0"
 ]
 
 [build-system]
@@ -60,3 +61,7 @@ packages = [
 
 [tool.setuptools.packages.find]
 include = ["knowledge_flow_app*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"

@@ -20,7 +20,7 @@ from pathlib import Path
 from docx import Document
 import pypandoc
 
-from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdownProcessor
+from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor
 
 logger = logging.getLogger(__name__)
 

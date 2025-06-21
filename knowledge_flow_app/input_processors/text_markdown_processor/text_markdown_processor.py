@@ -16,7 +16,7 @@
 
 from pathlib import Path
 
-from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdownProcessor
+from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor
 
 class TextMarkdownProcessor(BaseMarkdownProcessor):
     def check_file_validity(self, file_path: Path) -> bool:

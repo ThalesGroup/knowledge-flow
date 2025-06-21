@@ -143,6 +143,69 @@ async def create_profile(
 
 ---
 
+## 🧠 Input Processors: OpenAI or Ollama Setup
+
+If your markdown processor uses OpenAI or Ollama for image description:
+
+- ✅ Inherit from `PdfMarkdownProcessor`, `DocxMarkdownProcessor`, etc.
+- ✅ Create your own subclass like `OpenAIPdfMarkdownProcessor`
+- ✅ Inject the correct image describer in the constructor
+- ✅ Register the class in your config `input_processors`
+
+### Example
+
+```python
+# OpenAIPdfMarkdownProcessor
+
+class OpenAIPdfMarkdownProcessor(PdfMarkdownProcessor):
+    def __init__(self):
+        super().__init__(image_describer=OpenAIImageDescriber())
+```
+
+### Example config.yaml
+
+```yaml
+input_processors:
+  - prefix: ".pdf"
+    class_path: knowledge_flow_app.input_processors.pdf_markdown_processor.openai_pdf_processor.OpenAIPdfMarkdownProcessor
+```
+
+> 🚨 Don't use dynamic logic in the factory. Always create a dedicated class with a known path.
+
+---
+
+## 🧪 Testing Your Code
+
+We use a consistent test layout and Makefile helpers.
+
+### Run all tests:
+
+```bash
+make test
+```
+
+### Run a specific test file:
+
+```bash
+make test-one TEAT=knowledge_flow_app/path/to/my_test_file.py
+```
+
+### List all available tests:
+
+```bash
+make list-tests
+```
+
+### Example output:
+
+```
+knowledge_flow_app/input_processors/pdf_markdown_processor/tests/pdf_markdown_processor_test.py::test_pdf_processor_end_to_end
+```
+
+> ℹ️ Use this to locate and run your test interactively.
+
+---
+
 ## ❌ Forbidden Practices
 
 | ❌ Do Not                         | ✅ Do Instead                                   |
@@ -174,10 +237,15 @@ async def create_profile(
 - [ ] Keep business logic out of routes
 - [ ] Avoid duplicated logic (timestamps, paths, token count...)
 
+✅ Input processors:
+- [ ] Create dedicated subclasses for OpenAI or Ollama
+- [ ] Don’t hardcode describers in the factory
+- [ ] Register class paths explicitly in config
+
 ---
 
 ## 🆘 Got questions?
 
-Start by reading an existing clean module like `ChatProfileService`. Then ask a senior if you're unsure. **No copy-paste without understanding.**
+Start by reading an existing clean module like `ChatProfileService` or `PdfMarkdownProcessor`. Then ask a senior if you're unsure. **No copy-paste without understanding.**
 
 Let’s build a clean, robust backend together 💪

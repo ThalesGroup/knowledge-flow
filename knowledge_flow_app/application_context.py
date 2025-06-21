@@ -25,7 +25,7 @@ from knowledge_flow_app.config.opensearch_settings import OpenSearchSettings
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
 from langchain_openai import OpenAIEmbeddings, AzureOpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
-from knowledge_flow_app.input_processors.base_input_processor import (
+from knowledge_flow_app.input_processors.common.base_input_processor import (
     BaseInputProcessor,
     BaseMarkdownProcessor,
     BaseTabularProcessor,
