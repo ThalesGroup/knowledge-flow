@@ -17,7 +17,7 @@ import pathlib
 from fastapi import UploadFile
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import VectorizationResponse
-from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdownProcessor, BaseTabularProcessor
+from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor, BaseTabularProcessor
 
 class OutputProcessorService:
     """

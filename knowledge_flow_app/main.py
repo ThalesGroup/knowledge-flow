@@ -60,10 +60,9 @@ def configure_logging():
     )
     logging.getLogger().info(f"Logging configured at {log_level} level.")
     
-# --- Après tous les imports
+# --- After all the imports
 logger = logging.getLogger(__name__)
 
-# --- Dans create_app
 def create_app(config_path: str = "./config/configuration.yaml", base_url: str = "/knowledge/v1") -> FastAPI:
     logger.info(f"🛠️ create_app() called with base_url={base_url}")
     configuration: Configuration = parse_server_configuration(config_path)

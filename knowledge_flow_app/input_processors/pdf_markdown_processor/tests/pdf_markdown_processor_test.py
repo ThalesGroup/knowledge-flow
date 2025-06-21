@@ -18,16 +18,20 @@ import os
 from dotenv import load_dotenv
 import pytest
 from pathlib import Path
+from knowledge_flow_app.input_processors.common.base_image_describer import BaseImageDescriber
 from knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor import PdfMarkdownProcessor
 
 
 dotenv_path = os.getenv("ENV_FILE", "./config/.env")
 load_dotenv(dotenv_path)
 
-
+class MockImageDescriber(BaseImageDescriber):
+    def describe(self, image_base64: str) -> str:
+        return "There is an image showing a mocked description."
+    
 @pytest.fixture
 def processor():
-    return PdfMarkdownProcessor()
+    return PdfMarkdownProcessor(image_describer=MockImageDescriber())
 
 
 @pytest.fixture
@@ -44,14 +48,14 @@ def test_pdf_processor_end_to_end(processor, sample_pdf_file):
     metadata = processor.process_metadata(sample_pdf_file)
     
     assert metadata["document_name"] == "sample.pdf"
-    # assert metadata["title"] == "Test Title"
-    # assert metadata["author"] == "Test Author"
-    # assert metadata["subject"] == "Test Subject"
     assert metadata["num_pages"] == 2
     assert "document_uid" in metadata
 
     result = processor.convert_file_to_markdown(sample_pdf_file, output_dir)
     
     assert result["status"] == "fallback_to_text"
-    assert Path(result["md_file"]).exists()
-    assert Path(result["md_file"]).read_text(encoding="utf-8").strip() != ""
+    md_file = Path(result["md_file"])
+    assert md_file.exists()
+    md_content = md_file.read_text(encoding="utf-8").strip()
+    assert md_content != ""
+    assert "There is an image showing a mocked description." in md_content

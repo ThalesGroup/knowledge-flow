@@ -42,7 +42,7 @@ dev: $(TARGET)/.compiled ## Install from compiled lock
 	@echo "✅ Dependencies installed using uv."
 
 $(TARGET)/.compiled: pyproject.toml $(TARGET)/.uv-installed
-	$(UV) sync
+	$(UV) sync --extra dev
 	touch $@
 
 .PHONY: update
@@ -108,19 +108,26 @@ docker-run: ## Run the app in Docker
 
 ##@ Tests
 
+.PHONY: list-tests
+list-tests: dev ## List all available test names using pytest
+	@echo "************ AVAILABLE TESTS ************"
+	$(PYTHON) -m pytest --collect-only -q | grep -v "<Module"
+
 .PHONY: test test-app test-processors
 
-test: dev test-processors test-app ## Run all tests
+.PHONY: test-one
+test-one: dev ## Run a specific test by setting TEST=...
+	@if [ -z "$(TEST)" ]; then \
+		echo "❌ Please provide a test path using: make test-one TEST=path::to::test"; \
+		exit 1; \
+	fi
+	$(PYTHON) -m pytest -v $(subst ::,::,$(TEST))
 
-test-app:
+test: dev ## Run all tests
 	@echo "************ TESTING APP ************"
-	$(PYTHON) -m pytest --cov=. --cov-report=html knowledge_flow_app/tests
+	$(PYTHON) -m pytest --cov=. --cov-config=.coveragerc --cov-report=html knowledge_flow_app
 	@echo "✅ Coverage report: htmlcov/index.html"
 	@xdg-open htmlcov/index.html || echo "📎 Open manually htmlcov/index.html"
-
-test-processors:
-	@echo "************ TESTING PROCESSORS ************"
-	$(PYTHON) -m pytest --cov=. --cov-report=html knowledge_flow_app/input_processors/
 
 ##@ Clean
 

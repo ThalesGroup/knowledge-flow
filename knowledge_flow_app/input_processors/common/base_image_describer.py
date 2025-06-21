@@ -12,16 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-import os
+# knowledge_flow_app/image_description/base_image_describer.py
 
-class ChatProfileLocalSettings:
-    def __init__(self):
-        # Default local path unless overridden by env var
-        env_value = os.getenv("LOCAL_CHAT_PROFILE_STORAGE_PATH")
-        if env_value:
-            self.root_path = Path(env_value).expanduser()
-        else:
-            self.root_path = Path.home() / ".fred" / "chat-profiles"
+from abc import ABC, abstractmethod
 
-        self.root_path.mkdir(parents=True, exist_ok=True)
+class BaseImageDescriber(ABC):
+    @abstractmethod
+    def describe(self, image_base64: str) -> str:
+        """Given a base64 image, return a textual description."""
+        pass

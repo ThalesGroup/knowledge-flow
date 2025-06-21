@@ -19,7 +19,7 @@ import shutil
 from pathlib import Path
 
 from pptx import Presentation
-from knowledge_flow_app.input_processors.base_input_processor import BaseMarkdownProcessor
+from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor
 
 logger = logging.getLogger(__name__)
 

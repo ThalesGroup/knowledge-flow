@@ -16,7 +16,7 @@
 import logging
 from pathlib import Path
 import pandas as pd
-from knowledge_flow_app.input_processors.base_input_processor import BaseTabularProcessor
+from knowledge_flow_app.input_processors.common.base_input_processor import BaseTabularProcessor
 from pathlib import Path
 import pandas as pd
 
