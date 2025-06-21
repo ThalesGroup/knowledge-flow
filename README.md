@@ -4,7 +4,7 @@ A modular **FastAPI microservice** for extracting and structuring knowledge from
 This component is designed to be easily extended with various vector stores or completely different 
 output processing logics once you have extracted information and knowledge from your input documents. 
 
-> 📌 Developers: see also: [Contributing Guidelines](CONTRIBUTING.md) • [Code Guidelines](CODING_GUIDELINES.md)
+> 📌 Developers: see also: [Contributing Guidelines](docs/CONTRIBUTING.md) • [Code Guidelines](docs/CODING_GUIDELINES.md)
 
 ## ✨ Features
 
