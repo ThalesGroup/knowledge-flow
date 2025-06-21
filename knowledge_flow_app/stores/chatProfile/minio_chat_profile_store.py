@@ -7,6 +7,8 @@ from typing import BinaryIO, List
 from minio import Minio
 from minio.error import S3Error
 
+from knowledge_flow_app.common.business_exception import ProfileDeletionError
+
 from .base_chat_profile_store import BaseChatProfileStore
 
 logger = logging.getLogger(__name__)
@@ -54,7 +56,7 @@ class MinioChatProfileStore(BaseChatProfileStore):
                 logger.info(f"Deleted '{obj.object_name}' from bucket '{self.bucket_name}'.")
         except S3Error as e:
             logger.error(f"Failed to delete profile {profile_id}: {e}")
-            raise ValueError(f"Failed to delete chat profile from MinIO: {e}")
+            raise ProfileDeletionError(f"Could not delete profile {profile_id}: {e}")
 
     def get_profile_description(self, profile_id: str) -> dict:
         """
