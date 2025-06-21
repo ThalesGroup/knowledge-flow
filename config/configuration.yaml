@@ -13,7 +13,7 @@ security:
 
 input_processors:
   - prefix: ".pdf"
-    class_path: knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor
+    class_path: knowledge_flow_app.input_processors.pdf_markdown_processor.ollama_pdf_mardown_processor.OllamaPdfMarkdownProcessor
   - prefix: ".docx"
     class_path: knowledge_flow_app.input_processors.docx_markdown_processor.docx_markdown_processor.DocxMarkdownProcessor
   - prefix: ".pptx"
