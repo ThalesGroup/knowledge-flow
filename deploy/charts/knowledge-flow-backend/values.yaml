@@ -52,7 +52,7 @@ service:
   data:    
     - name: "http"
       port: 8080
-      targetPort: 8080
+      targetPort: 8111
       protocol: TCP
     - name: "https"
       port: 8443
