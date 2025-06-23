@@ -19,6 +19,14 @@ docker save knowledge-flow-backend:0.1-dev | gzip > /tmp/image.tar.gz
 sudo k3s ctr images import /tmp/image.tar.gz
 ```
 
+## Prepare hosts file
+
+```
+IP_K3S=$(hostname -I | awk '{print $1}')
+
+echo $IP_K3S knowledge-flow-backend.test | sudo tee -a /etc/hosts
+```
+
 ## Install Knowledge-Flow
 
 Overload the file `knowlegde-flow-backend/values.yaml`, specifically the three following variables, we recommend a separated customvalues.yaml file
