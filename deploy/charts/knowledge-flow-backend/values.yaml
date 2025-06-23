@@ -59,6 +59,20 @@ service:
       targetPort: 8443
       protocol: TCP
 
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: knowledge-flow-backend.test
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+
 
 volumes:
   enabled: true
@@ -101,7 +115,7 @@ ConfigMap:
       # Enable or disable the security layer
       security:
         enabled: false
-        keycloak_url: "http://keycloak:80/realms/fred"
+        keycloak_url: "http://keycloak.test/realms/app"
 
       # -----------------------------------------------------------------------------
       # INPUT PROCESSORS
@@ -346,12 +360,12 @@ ConfigMap:
 
 
         # KEYCLOAK
-        KEYCLOAK_SERVER_URL="http://keycloak:80"
+        KEYCLOAK_SERVER_URL="http://keycloak.test:80"
         KEYCLOAK_REALM_NAME="app"
         KEYCLOAK_CLIENT_ID="app"
 
         # OPENSEARCH
-        OPENSEARCH_HOST="https://opensearch:9200"
+        OPENSEARCH_HOST="https://opensearch.test:9200"
         OPENSEARCH_USER="admin"
         OPENSEARCH_PASSWORD="Azerty123_"
         OPENSEARCH_SECURE="false"
