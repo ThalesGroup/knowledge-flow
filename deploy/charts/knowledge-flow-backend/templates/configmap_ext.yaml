@@ -1,0 +1,23 @@
+{{- if .Values.ConfigMap_ext.enabled }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.applicationName }}-ext-configmap"
+  namespace: {{ .Release.Namespace }}
+  {{- if .Values.ConfigMap_ext.annotations }}
+  annotations:
+{{ toYaml .Values.ConfigMap_ext.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    name : {{ .Release.Name }}
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: "{{ .Values.applicationName }}"
+    heritage: "{{ .Release.Service }}"
+    {{- if .Values.extraLabels }}
+{{ toYaml .Values.extraLabels.data | indent 4 }}
+    {{- end }}
+data:
+{{ toYaml .Values.ConfigMap_ext.data | indent 2 }}
+{{- end }}
