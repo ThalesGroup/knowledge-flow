@@ -80,7 +80,7 @@ metadata_storage:
   # - OPENSEARCH_PORT
   # - OPENSEARCH_USERNAME
   # - OPENSEARCH_PASSWORD
-  # - OPENSEARCH_INDEX
+  # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
   # If you are using local storage, make sure to set the following environment variable:
   # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/metadata-store.json'
   type: "local"
@@ -93,7 +93,6 @@ vector_storage:
   # - OPENSEARCH_PASSWORD="Azerty123_"
   # - OPENSEARCH_SECURE="false"
   # - OPENSEARCH_VERIFY_CERTS="false"
-  # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
   # - OPENSEARCH_VECTOR_INDEX = "fred-dev-embeddings"
   #type: "opensearch"
   # If you are using local storage, make sure to set the following environment variable:
