@@ -1,8 +1,8 @@
 # Knowledge Flow Backend
 
 A modular **FastAPI microservice** for extracting and structuring knowledge from ingested documents.
-This component is designed to be easily extended with various vector stores or completely different 
-output processing logics once you have extracted information and knowledge from your input documents. 
+This component is designed to be easily extended with various vector stores or completely different
+output processing logics once you have extracted information and knowledge from your input documents.
 
 > 📌 Developers: see also: [Contributing Guidelines](docs/CONTRIBUTING.md) • [Code Guidelines](docs/CODING_GUIDELINES.md)
 
@@ -38,16 +38,16 @@ The backend distinguishes **two types of processors**:
 
 **Purpose**: Extract structured content and metadata from uploaded files.
 
-- **Markdown Input Processors**  
-  Handle unstructured textual documents like PDFs, DOCX, PPTX, and TXT.  
+- **Markdown Input Processors**
+  Handle unstructured textual documents like PDFs, DOCX, PPTX, and TXT.
   Output: clean, unified Markdown for downstream processing.
 
   Example use cases:
   - Preparing content for LLM analysis
   - Enabling semantic search or RAG pipelines
 
-- **Tabular Input Processors**  
-  Handle structured tabular data such as CSV or Excel files.  
+- **Tabular Input Processors**
+  Handle structured tabular data such as CSV or Excel files.
   Output: normalized rows and fields.
 
   Example use cases:
@@ -60,10 +60,10 @@ The backend distinguishes **two types of processors**:
 
 **Purpose**: Post-process extracted knowledge (from Input Processors) and prepare it for storage, search, or advanced querying.
 
-- **Vectorization Output Processors**  
+- **Vectorization Output Processors**
   Transform text chunks into vector embeddings and store them into vector databases (e.g., OpenSearch, In Memory Langchain) Store.
 
-- **Tabular Output Processors**  
+- **Tabular Output Processors**
   Process extracted tabular data for storage or analytics.
 
 📌 *Output processors can be customized to plug into different backends (OpenSearch, Pinecone, SQL databases, etc.).*
@@ -93,7 +93,7 @@ that provides a ready-to-use, complete and fairly configurable vectorization pip
              │
              ▼
 ┌───────────────────────────────┐
-│   VectorStoreInterface        │  (ex: OpenSearch, In Memory) 
+│   VectorStoreInterface        │  (ex: OpenSearch, In Memory)
 └───────────────────────────────┘
              │
              ▼
@@ -168,8 +168,8 @@ knowledge_flow_app/
 All main settings are controlled by a `configuration.yaml` file.
 Refer to the [config/configuration.yaml](config/configuration.yaml)  for a documented example.
 
-By default it uses only local and in memory stores. It should work without 
-third-party cots. Docker files are provided to help you start with a production setup easily. 
+By default it uses only local and in memory stores. It should work without
+third-party cots. Docker files are provided to help you start with a production setup easily.
 
 ---
 
@@ -182,7 +182,7 @@ Before starting the application, you must configure your environment variables.
 Copy the provided template:
 
 ```bash
-cp knowledge_flow_app/config/.env.template .env
+cp config/.env.template .env
 ```
 
 Edit the `.env` file according to your setup.
@@ -202,10 +202,10 @@ This file controls:
 
 ```env
 # Content Storage
-LOCAL_STORAGE_PATH=~/.fred/knowledge-flow/content-store
+LOCAL_CONTENT_STORAGE_PATH="~/.knowledge-flow/content-store"
 
 # Metadata Storage
-LOCAL_STORAGE_PATH=~/.fred/knowledge-flow/metadata-store.json
+LOCAL_METADATA_STORAGE_PATH="~/.knowledge-flow/metadata-store.json"
 
 # OpenAI Settings
 OPENAI_API_KEY="your-openai-api-key"
@@ -240,7 +240,7 @@ OPENAI_MODEL_NAME="text-embedding-ada-002"
 
 ## Installation
 
-Use Python 3.12+ and Poetry for dependency management.
+This project used [**uv**](https://github.com/astral-sh/uv) for dependency management.
 
 ### Setup Environment
 
@@ -273,7 +273,7 @@ Then open:
 
 ### VsCode configuration
 
-Here is a typical launch.json file you need in knowledge-flow/.vscode folder: 
+Here is a typical launch.json file you need in knowledge-flow/.vscode folder:
 
 ```json
 {
@@ -300,7 +300,7 @@ Here is a typical launch.json file you need in knowledge-flow/.vscode folder:
           "${file}"
         ]
       }
-      
+
     ]
   }
 ```
@@ -357,7 +357,7 @@ docker run -d --name knowledge-flow \
 
 This docker-compose.yml sets up the core services required to run Knowledge Flow OSS locally. It provides a consistent and automated way to start the development environment, including authentication (Keycloak), search (OpenSearch), and storage (MinIO) components. All these components are configured and connected. This simplifies onboarding, reduces setup errors, and ensures all developers work with the same infrastructure by running a few command lines.
 
-1. Add the entry `127.0.0.1 knowledge-flow-keycloak` into your file `/etc/hosts` 
+1. Add the entry `127.0.0.1 knowledge-flow-keycloak` into your file `/etc/hosts`
 2. Go to `deploy/docker-compose` folder and run the command
 ```
 docker compose up -d
