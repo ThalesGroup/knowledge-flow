@@ -14,44 +14,38 @@
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from knowledge_flow_app.common.business_exception import BusinessException, ChatProfileError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, ProfileDeletionError, ProfileNotFound, TokenLimitExceeded
+from knowledge_flow_app.common.business_exception import BusinessException, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, KnowledgeContextError, KnowledgeContextDeletionError, KnowledgeContextNotFound, TokenLimitExceeded
 from knowledge_flow_app.common.utils import log_exception
-from knowledge_flow_app.services.chat_profile_service import ChatProfileService
+from knowledge_flow_app.services.knowledge_context_service import KnowledgeContextService
 import tempfile
 from pathlib import Path
 
 
-class UpdateChatProfileRequest(BaseModel):
+class UpdateKnowledgeContextRequest(BaseModel):
     title: str
     description: str
-class ChatProfileController:
+class KnowledgeContextController:
     def __init__(self, router: APIRouter):
-        self.service = ChatProfileService()
+        self.service = KnowledgeContextService()
         self._register_routes(router)
 
     def _register_routes(self, router: APIRouter):
-        
-        @router.get("/chatProfiles/maxTokens")
-        async def get_max_tokens():
-            from knowledge_flow_app.application_context import ApplicationContext
-            context = ApplicationContext.get_instance()
-            return {"max_tokens": context.get_chat_profile_max_tokens()}
 
-        @router.get("/chatProfiles")
-        async def list_profiles():
-            return await self.service.list_profiles()
+        @router.get("/knowledgeContexts")
+        async def list_knowledge_contexts():
+            return await self.service.list_knowledge_contexts()
 
-        @router.get("/chatProfiles/{chatProfile_id}")
-        async def get_profile(chatProfile_id: str):
+        @router.get("/knowledgeContexts/{knowledgeContext_id}")
+        async def get_knowledgeContext(knowledgeContext_id: str):
             try:
-                return await self.service.get_profile_with_markdown(chatProfile_id)
+                return await self.service.get_knowledge_context_with_markdown(knowledgeContext_id)
             except FileNotFoundError:
-                raise HTTPException(status_code=404, detail="Profile not found")
+                raise HTTPException(status_code=404, detail="KnowledgeContext not found")
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Failed to load profile: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Failed to load knowledgeContext: {str(e)}")
 
-        @router.post("/chatProfiles")
-        async def create_profile(
+        @router.post("/knowledgeContexts")
+        async def create_knowledge_context(
             title: str = Form(...),
             description: str = Form(...),
             files: list[UploadFile] = File(default=[])
@@ -65,8 +59,8 @@ class ChatProfileController:
                             content = await f.read()
                             out_file.write(content)
 
-                    profile = await self.service.create_profile(title, description, tmp_path)
-                    return profile
+                    knowledgeContext = await self.service.create_knowledge_context(title, description, tmp_path)
+                    return knowledgeContext
             except TokenLimitExceeded:
                 raise HTTPException(status_code=400, detail="Token limit exceeded")
             except DocumentProcessingError as e:
@@ -74,52 +68,52 @@ class ChatProfileController:
             except BusinessException as e:
                 raise HTTPException(status_code=400, detail=str(e))
             except Exception as e:
-                log_exception(e, "Unexpected error during profile creation")
+                log_exception(e, "Unexpected error during knowledgeContext creation")
                 raise HTTPException(status_code=500, detail="Internal Server Error")
 
-        @router.put("/chatProfiles/{chatProfile_id}")
-        async def update_profile(
-            chatProfile_id: str,
+        @router.put("/knowledgeContexts/{knowledgeContext_id}")
+        async def update_knowledgeContext(
+            knowledgeContext_id: str,
             title: str = Form(...),
             description: str = Form(...),
             files: list[UploadFile] = File(default=[])
         ):
             try:
-                return await self.service.update_profile(chatProfile_id, title, description, files)
-            except ProfileNotFound as e:
+                return await self.service.update_knowledge_context(knowledgeContext_id, title, description, files)
+            except KnowledgeContextNotFound as e:
                 raise HTTPException(status_code=404, detail=str(e))
             except TokenLimitExceeded as e:
                 raise HTTPException(status_code=400, detail=str(e))
             except DocumentProcessingError as e:
                 raise HTTPException(status_code=500, detail=f"Failed to process one or more documents: {e}")
             except Exception as e:
-                log_exception(e, f"Unexpected error while updating profile {chatProfile_id}")
-                raise HTTPException(status_code=500, detail="Unexpected server error during profile update.")
+                log_exception(e, f"Unexpected error while updating knowledgeContext {knowledgeContext_id}")
+                raise HTTPException(status_code=500, detail="Unexpected server error during knowledgeContext update.")
 
-        @router.delete("/chatProfiles/{chatProfile_id}")
-        async def delete_profile(chatProfile_id: str):
+        @router.delete("/knowledgeContexts/{knowledgeContext_id}")
+        async def delete_knowledgeContext(knowledgeContext_id: str):
             try:
-                return await self.service.delete_profile(chatProfile_id)
-            except ProfileNotFound as e:
+                return await self.service.delete_knowledge_context(knowledgeContext_id)
+            except KnowledgeContextNotFound as e:
                 raise HTTPException(status_code=404, detail=str(e))
-            except ProfileDeletionError as e:
+            except KnowledgeContextDeletionError as e:
                 raise HTTPException(status_code=500, detail=str(e))
-            except ChatProfileError as e:
+            except KnowledgeContextError as e:
                 raise HTTPException(status_code=400, detail=str(e))
             except Exception as e:
-                log_exception(e, f"Unexpected error while deleting chat profile {chatProfile_id}")
+                log_exception(e, f"Unexpected error while deleting chat knowledgeContext {knowledgeContext_id}")
                 raise HTTPException(status_code=500, detail="Internal server error")
 
-        @router.delete("/chatProfiles/{chatProfile_id}/documents/{document_id}")
-        async def delete_document(chatProfile_id: str, document_id: str):
+        @router.delete("/knowledgeContexts/{knowledgeContext_id}/documents/{document_id}")
+        async def delete_document(knowledgeContext_id: str, document_id: str):
             try:
-                return await self.service.delete_document(chatProfile_id, document_id)
-            except ProfileNotFound as e:
+                return await self.service.delete_document(knowledgeContext_id, document_id)
+            except KnowledgeContextNotFound as e:
                 raise HTTPException(status_code=404, detail=str(e))
             except DocumentNotFound as e:
                 raise HTTPException(status_code=404, detail=str(e))
             except DocumentDeletionError as e:
                 raise HTTPException(status_code=500, detail=str(e))
             except Exception as e:
-                log_exception(e, f"Unexpected error deleting document '{document_id}' from profile '{chatProfile_id}'")
+                log_exception(e, f"Unexpected error deleting document '{document_id}' from knowledgeContext '{knowledgeContext_id}'")
                 raise HTTPException(status_code=500, detail="Internal server error")
