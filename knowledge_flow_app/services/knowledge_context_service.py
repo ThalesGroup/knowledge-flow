@@ -41,12 +41,16 @@ class KnowledgeContextService:
         self.store = get_knowledge_context_store()
         self.processor = InputProcessorService()
 
-    async def list_knowledge_contexts(self):
-        raw_knowledgeContexts = self.store.list_knowledge_contexts()
+    async def list_knowledge_contexts(self, tag: str):
+        raw_knowledgeContexts = self.store.list_knowledge_contexts(tag)
         all_knowledgeContexts = []
 
         for knowledgeContext_data in raw_knowledgeContexts:
             try:
+                
+                if knowledgeContext_data.get("tag") != tag:
+                    continue
+
                 knowledgeContext_data["created_at"] = knowledgeContext_data.get("created_at", utc_now_iso())
                 knowledgeContext_data["updated_at"] = knowledgeContext_data.get("updated_at", utc_now_iso())
                 knowledgeContext_data["user_id"] = knowledgeContext_data.get("user_id", "local")
@@ -66,7 +70,8 @@ class KnowledgeContextService:
                     creator=knowledgeContext_data["creator"],
                     user_id=knowledgeContext_data["user_id"],
                     #tokens=knowledgeContext_data["tokens"],
-                    documents=documents
+                    documents=documents,
+                    tag=knowledgeContext_data["tag"]
                 )
 
                 all_knowledgeContexts.append(knowledgeContext)
@@ -75,7 +80,7 @@ class KnowledgeContextService:
 
         return all_knowledgeContexts
 
-    async def create_knowledge_context(self, title: str, description: str, files_dir: Path) -> KnowledgeContext:
+    async def create_knowledge_context(self, title: str, description: str, files_dir: Path, tag: str, file_descriptions: dict[str, str]) -> KnowledgeContext:
         knowledgeContext_id = str(uuid4())
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -128,6 +133,7 @@ class KnowledgeContextService:
                             document_type=file.suffix[1:],
                             size=file.stat().st_size,
                             #tokens=token_count
+                            description=file_descriptions.get(file.name, "")
                         ))
 
                     except Exception as e:
@@ -144,7 +150,8 @@ class KnowledgeContextService:
                 "creator": "system",
                 "documents": [doc.model_dump() for doc in documents],
                 #"tokens": total_tokens,
-                "user_id": "local"
+                "user_id": "local",
+                "tag": tag
             }
 
             (knowledgeContext_dir / "knowledge_context.json").write_text(
@@ -189,19 +196,19 @@ class KnowledgeContextService:
             logger.error(f"Error loading knowledgeContext with markdown: {e}")
             raise
 
-
     async def update_knowledge_context(
         self,
         knowledgeContext_id: str,
         title: str,
         description: str,
-        files: list[UploadFile]
+        files: list[UploadFile],
+        document_descriptions: dict
     ) -> KnowledgeContext:
         try:
             try:
                 metadata = self.store.get_knowledge_context_description(knowledgeContext_id)
             except FileNotFoundError:
-                raise KnowledgeContextNotFound(f"Chat knowledgeContext '{knowledgeContext_id}' does not exist.")
+                raise KnowledgeContextNotFound(f"KnowledgeContext '{knowledgeContext_id}' does not exist.")
 
             metadata["title"] = title
             metadata["description"] = description
@@ -209,6 +216,13 @@ class KnowledgeContextService:
 
             existing_documents = {doc["id"]: doc for doc in metadata.get("documents", [])}
             total_tokens = sum(doc.get("tokens", 0) for doc in existing_documents.values())
+
+            for doc_id, doc in existing_documents.items():
+                doc_name = doc.get("document_name")
+                new_description = document_descriptions.get(doc_name)
+                logger.debug(f"[UPDATE] Checking existing doc '{doc_name}' for new description")
+                if new_description is not None:
+                    doc["description"] = new_description
 
             processed_documents = []
 
@@ -238,18 +252,14 @@ class KnowledgeContextService:
                         if not md_output:
                             raise DocumentProcessingError(f"No markdown generated for '{file_path.name}'")
 
-                        # token_count = count_tokens_from_markdown(md_output)
-                        # if total_tokens + token_count > ApplicationContext.get_instance().get_chat_knowledge_context_max_tokens:
-                        #     raise TokenLimitExceeded("Token limit exceeded for chat knowledgeContext.")
-
-                        # total_tokens += token_count
+                        description_value = document_descriptions.get(file_path.name, "")
 
                         doc = KnowledgeContextDocument(
                             id=file_path.stem,
                             document_name=file_path.name,
                             document_type=file_path.suffix[1:],
                             size=file_path.stat().st_size,
-                            #tokens=token_count
+                            description=description_value
                         )
 
                         existing_documents[doc.id] = doc.model_dump()
@@ -286,13 +296,12 @@ class KnowledgeContextService:
                 self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
             return KnowledgeContext(**metadata)
-    
+
         except KnowledgeContextError:
-            raise  # Let the controller catch and translate
+            raise
         except Exception as e:
             logger.error(f"Unexpected error while updating knowledgeContext '{knowledgeContext_id}': {e}", exc_info=True)
             raise DocumentProcessingError("Unexpected internal error during knowledgeContext update.") from e
-
 
     async def delete_document(self, knowledgeContext_id: str, document_id: str):
         try:

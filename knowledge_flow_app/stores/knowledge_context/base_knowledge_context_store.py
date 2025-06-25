@@ -53,7 +53,10 @@ class BaseKnowledgeContextStore(ABC):
         pass
 
     @abstractmethod
-    def list_knowledge_contexts(self) -> List[dict]:
+    def list_knowledge_contexts(self, tag: str) -> List[dict]:
+        """
+        Returns a list of context with the right tag (workspace or chat_profile).
+        """
         pass
     
     @abstractmethod

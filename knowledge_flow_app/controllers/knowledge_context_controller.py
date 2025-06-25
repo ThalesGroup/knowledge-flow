@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+import json
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 from pydantic import BaseModel
 from knowledge_flow_app.common.business_exception import BusinessException, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, KnowledgeContextError, KnowledgeContextDeletionError, KnowledgeContextNotFound, TokenLimitExceeded
 from knowledge_flow_app.common.utils import log_exception
@@ -32,8 +34,10 @@ class KnowledgeContextController:
     def _register_routes(self, router: APIRouter):
 
         @router.get("/knowledgeContexts")
-        async def list_knowledge_contexts():
-            return await self.service.list_knowledge_contexts()
+        async def list_knowledge_contexts(
+            tag: str = Query(...)
+        ):
+            return await self.service.list_knowledge_contexts(tag)
 
         @router.get("/knowledgeContexts/{knowledgeContext_id}")
         async def get_knowledgeContext(knowledgeContext_id: str):
@@ -48,7 +52,9 @@ class KnowledgeContextController:
         async def create_knowledge_context(
             title: str = Form(...),
             description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
+            files: list[UploadFile] = File(default=[]),
+            tag: str = Form(...),
+            file_descriptions: Optional[str] = Form(None)
         ):
             try:
                 with tempfile.TemporaryDirectory() as tmp_dir:
@@ -59,7 +65,8 @@ class KnowledgeContextController:
                             content = await f.read()
                             out_file.write(content)
 
-                    knowledgeContext = await self.service.create_knowledge_context(title, description, tmp_path)
+                    file_desc_dict = json.loads(file_descriptions) if file_descriptions else {}
+                    knowledgeContext = await self.service.create_knowledge_context(title, description, tmp_path, tag, file_desc_dict)
                     return knowledgeContext
             except TokenLimitExceeded:
                 raise HTTPException(status_code=400, detail="Token limit exceeded")
@@ -72,14 +79,18 @@ class KnowledgeContextController:
                 raise HTTPException(status_code=500, detail="Internal Server Error")
 
         @router.put("/knowledgeContexts/{knowledgeContext_id}")
-        async def update_knowledgeContext(
+        async def update_knowledge_context(
             knowledgeContext_id: str,
             title: str = Form(...),
             description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
+            files: list[UploadFile] = File(default=[]),
+            documents_description: str = Form(default="{}")
         ):
             try:
-                return await self.service.update_knowledge_context(knowledgeContext_id, title, description, files)
+                parsed_descriptions = json.loads(documents_description)
+                return await self.service.update_knowledge_context(
+                    knowledgeContext_id, title, description, files, parsed_descriptions
+                )
             except KnowledgeContextNotFound as e:
                 raise HTTPException(status_code=404, detail=str(e))
             except TokenLimitExceeded as e:

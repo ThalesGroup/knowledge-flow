@@ -48,7 +48,7 @@ class LocalKnowledgeContextStore(BaseKnowledgeContextStore):
             raise FileNotFoundError("Document not found in chat knowledge_context")
         return open(doc_path, "rb")
     
-    def list_knowledge_contexts(self) -> List[dict]:
+    def list_knowledge_contexts(self, tag: str) -> List[dict]:
         knowledge_contexts = []
         for dir_path in self.root_path.iterdir():
             if dir_path.is_dir():
@@ -57,11 +57,12 @@ class LocalKnowledgeContextStore(BaseKnowledgeContextStore):
                     try:
                         with open(knowledge_context_path, encoding="utf-8") as f:
                             knowledge_context_data = json.load(f)
+                            if knowledge_context_data.get("tag") != tag:
+                                continue
                             knowledge_contexts.append(knowledge_context_data)
                     except Exception as e:
                         logger.error(f"Failed to load knowledge_context at {knowledge_context_path}: {e}", exc_info=True)
         return knowledge_contexts
-
 
     def list_markdown_files(self, knowledge_context_id: str) -> list[tuple[str, str]]:
         """

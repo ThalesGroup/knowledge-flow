@@ -92,6 +92,7 @@ class KnowledgeContextDocument(BaseModel):
     document_type: str
     size: Optional[int] = None
     tokens: Optional[int] = Field(default=0)
+    description: Optional[str] = ""
 class KnowledgeContext(BaseModel):
     id: str
     title: str
@@ -101,3 +102,4 @@ class KnowledgeContext(BaseModel):
     documents: List[KnowledgeContextDocument]
     creator: str
     tokens: Optional[int] = Field(default=0)
+    tag: Optional[str] = Field(default="workspace")
