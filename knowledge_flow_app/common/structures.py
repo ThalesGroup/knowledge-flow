@@ -73,8 +73,12 @@ class VectorStorageConfig(BaseModel):
 class EmbeddingConfig(BaseModel):
     type: str = Field(..., description="The embedding backend to use (e.g., 'openai', 'azureopenai')")
 
+class KnowledgeContextStorageSettings(BaseModel):
+    local_path: str = Field(..., description="The path of the local metrics store")
+
 class KnowledgeContextStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'minio')")
+    settings: KnowledgeContextStorageSettings
 
 class Configuration(BaseModel):
     security: Security

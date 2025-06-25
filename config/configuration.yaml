@@ -56,7 +56,6 @@ input_processors:
 #  - prefix: ".txt"
 #    class_path: knowledge_flow_app.output_processors.empty_output_processor.EmptyOutputProcessor
 
-
 content_storage:
   # The content store type can be either "local" or "minio" or "gcs"
   # If you are using minio, make sure to set the following environment variables:
@@ -155,28 +154,12 @@ knowledge_context_storage:
   # -----------------------------------------------------------------------------
   # KNOWLEDGE CONTEXT STORAGE BACKEND
   # -----------------------------------------------------------------------------
-  # Backend used to store Knowledge Contexts (Workspaces) and their documents:
-  #   - "local"   → Store contexts and documents on the local filesystem
-  #   - "minio"   → Use an S3-compatible object storage like MinIO
-  #
-  # Required environment variables based on the selected backend:
-  #
-  # BACKEND: "local"
+  # Backend used to store Knowledge Contexts (Workspaces) and user profiles.
+  # Both can have associated files. 
   # -------------------------------------
-  # - KNOWLEDGE_CONTEXT_LOCAL_DIR
-  #
-  # BACKEND: "minio"
-  # -------------------------------------
-  # - MINIO_ENDPOINT
-  # - MINIO_ACCESS_KEY
-  # - MINIO_SECRET_KEY
-  # - MINIO_REGION
-  # - MINIO_BUCKET_NAME (e.g. knowledge-context-data)
-  #
-  # All environment variables should be defined in your `.env` file,
-  # which must be referenced by the ENV_FILE variable in your Makefile.
-  #
-  type: local  # can be "local" or "minio"
+  type: local  # as of now only local storage is supported
+  settings:
+    local_path: "~/.fred/knowledge-context"
 
 knowledge_context_max_tokens: 8000
 # -----------------------------------------------------------------------------
