@@ -56,7 +56,6 @@ input_processors:
 #  - prefix: ".txt"
 #    class_path: knowledge_flow_app.output_processors.empty_output_processor.EmptyOutputProcessor
 
-
 content_storage:
   # The content store type can be either "local" or "minio" or "gcs"
   # If you are using minio, make sure to set the following environment variables:
@@ -147,6 +146,24 @@ embedding:
   #
   type: "openai"  # can be "openai" or "azureopenai" or "azureapim" or "ollama"
 
-chat_profile_storage:
-  type: local
-chat_profile_max_tokens: 8000
+knowledge_context_storage:
+  # -----------------------------------------------------------------------------
+  # KNOWLEDGE CONTEXT STORAGE BACKEND
+  # -----------------------------------------------------------------------------
+  # Backend used to store Knowledge Contexts (Workspaces) and user profiles.
+  # Both can have associated files. 
+  # -------------------------------------
+  type: local  # as of now only local storage is supported
+  settings:
+    local_path: "~/.fred/knowledge-context"
+
+knowledge_context_max_tokens: 8000
+# -----------------------------------------------------------------------------
+# TOKEN LIMIT PER KNOWLEDGE CONTEXT
+# -----------------------------------------------------------------------------
+# Maximum total token count allowed for all documents in a single knowledge context.
+# This limit ensures consistent performance and avoids processing overhead.
+# If the total tokens of uploaded documents exceeds this value,
+# the upload or update will fail with a clear error (400).
+#
+# Use a value aligned with your model capabilities (e.g. 8192 for GPT-4 Turbo).

@@ -23,12 +23,12 @@ from fastapi import UploadFile
 import tiktoken
 import logging
 
-from knowledge_flow_app.common.business_exception import ChatProfileError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, ProfileNotFound, TokenLimitExceeded
-from knowledge_flow_app.common.structures import ChatProfile, ChatProfileDocument
+from knowledge_flow_app.common.business_exception import KnowledgeContextError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, KnowledgeContextNotFound, TokenLimitExceeded
+from knowledge_flow_app.common.structures import KnowledgeContext, KnowledgeContextDocument
 from knowledge_flow_app.common.utils import count_tokens, log_exception, utc_now_iso
 from knowledge_flow_app.services.input_processor_service import InputProcessorService
-from knowledge_flow_app.stores.chatProfile.chat_profile_storage_factory import get_chat_profile_store
 from knowledge_flow_app.application_context import ApplicationContext
+from knowledge_flow_app.stores.knowledge_context.knowledge_context_storage_factory import get_knowledge_context_store
 
 logger = logging.getLogger(__name__)
 
@@ -36,52 +36,57 @@ def count_tokens_from_markdown(md_path: Path) -> int:
     text = md_path.read_text(encoding="utf-8")
     return count_tokens(text)
 
-class ChatProfileService:
+class KnowledgeContextService:
     def __init__(self):
-        self.store = get_chat_profile_store()
+        self.store = get_knowledge_context_store()
         self.processor = InputProcessorService()
 
-    async def list_profiles(self):
-        raw_profiles = self.store.list_profiles()
-        all_profiles = []
+    async def list_knowledge_contexts(self, tag: str):
+        raw_knowledgeContexts = self.store.list_knowledge_contexts(tag)
+        all_knowledgeContexts = []
 
-        for profile_data in raw_profiles:
+        for knowledgeContext_data in raw_knowledgeContexts:
             try:
-                profile_data["created_at"] = profile_data.get("created_at", utc_now_iso())
-                profile_data["updated_at"] = profile_data.get("updated_at", utc_now_iso())
-                profile_data["user_id"] = profile_data.get("user_id", "local")
-                profile_data["tokens"] = profile_data.get("tokens", 0)
-                profile_data["creator"] = profile_data.get("creator", "system")
+                
+                if knowledgeContext_data.get("tag") != tag:
+                    continue
+
+                knowledgeContext_data["created_at"] = knowledgeContext_data.get("created_at", utc_now_iso())
+                knowledgeContext_data["updated_at"] = knowledgeContext_data.get("updated_at", utc_now_iso())
+                knowledgeContext_data["user_id"] = knowledgeContext_data.get("user_id", "local")
+                knowledgeContext_data["tokens"] = knowledgeContext_data.get("tokens", 0)
+                knowledgeContext_data["creator"] = knowledgeContext_data.get("creator", "system")
 
                 documents = []
-                if "documents" in profile_data:
-                    documents = [ChatProfileDocument(**doc) for doc in profile_data["documents"]]
+                if "documents" in knowledgeContext_data:
+                    documents = [KnowledgeContextDocument(**doc) for doc in knowledgeContext_data["documents"]]
 
-                profile = ChatProfile(
-                    id=profile_data["id"],
-                    title=profile_data.get("title", ""),
-                    description=profile_data.get("description", ""),
-                    created_at=profile_data["created_at"],
-                    updated_at=profile_data["updated_at"],
-                    creator=profile_data["creator"],
-                    user_id=profile_data["user_id"],
-                    tokens=profile_data["tokens"],
-                    documents=documents
+                knowledgeContext = KnowledgeContext(
+                    id=knowledgeContext_data["id"],
+                    title=knowledgeContext_data.get("title", ""),
+                    description=knowledgeContext_data.get("description", ""),
+                    created_at=knowledgeContext_data["created_at"],
+                    updated_at=knowledgeContext_data["updated_at"],
+                    creator=knowledgeContext_data["creator"],
+                    user_id=knowledgeContext_data["user_id"],
+                    #tokens=knowledgeContext_data["tokens"],
+                    documents=documents,
+                    tag=knowledgeContext_data["tag"]
                 )
 
-                all_profiles.append(profile)
+                all_knowledgeContexts.append(knowledgeContext)
             except Exception as e:
-                logger.error(f"Failed to parse profile: {e}", exc_info=True)
+                logger.error(f"Failed to parse knowledgeContext: {e}", exc_info=True)
 
-        return all_profiles
+        return all_knowledgeContexts
 
-    async def create_profile(self, title: str, description: str, files_dir: Path) -> ChatProfile:
-        profile_id = str(uuid4())
+    async def create_knowledge_context(self, title: str, description: str, files_dir: Path, tag: str, file_descriptions: dict[str, str]) -> KnowledgeContext:
+        knowledgeContext_id = str(uuid4())
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
-            profile_dir = tmp_path / profile_id
-            files_subdir = profile_dir / "files"
+            knowledgeContext_dir = tmp_path / knowledgeContext_id
+            files_subdir = knowledgeContext_dir / "files"
             files_subdir.mkdir(parents=True, exist_ok=True)
 
             documents = []
@@ -111,23 +116,24 @@ class ChatProfileService:
                         if not output_md:
                             raise FileNotFoundError(f"No .md output found for {file.name}")
 
-                        token_count = count_tokens_from_markdown(output_md)
-                        if total_tokens + token_count > ApplicationContext.get_instance().get_chat_profile_max_tokens:
-                            raise TokenLimitExceeded()
+                        #token_count = count_tokens_from_markdown(output_md)
+                        #if total_tokens + token_count > ApplicationContext.get_instance().get_chat_knowledgeContext_max_tokens():
+                        #    raise TokenLimitExceeded()
 
                         # Only now that we're safe, move the file and record the doc
                         new_md_name = f"{file.stem}.md"
                         dest_path = files_subdir / new_md_name
                         shutil.move(str(output_md), dest_path)
 
-                        total_tokens += token_count
+                        #total_tokens += token_count
 
-                        documents.append(ChatProfileDocument(
+                        documents.append(KnowledgeContextDocument(
                             id=file.stem,
                             document_name=file.name,
                             document_type=file.suffix[1:],
                             size=file.stat().st_size,
-                            tokens=token_count
+                            #tokens=token_count
+                            description=file_descriptions.get(file.name, "")
                         ))
 
                     except Exception as e:
@@ -136,73 +142,73 @@ class ChatProfileService:
 
             now = utc_now_iso()
             metadata = {
-                "id": profile_id,
+                "id": knowledgeContext_id,
                 "title": title,
                 "description": description,
                 "created_at": now,
                 "updated_at": now,
                 "creator": "system",
                 "documents": [doc.model_dump() for doc in documents],
-                "tokens": total_tokens,
-                "user_id": "local"
+                #"tokens": total_tokens,
+                "user_id": "local",
+                "tag": tag
             }
 
-            (profile_dir / "profile.json").write_text(
+            (knowledgeContext_dir / "knowledge_context.json").write_text(
                 json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
             )
 
-            self.store.save_profile(profile_id, profile_dir)
+            self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
-        return ChatProfile(**metadata)
+        return KnowledgeContext(**metadata)
 
-
-    async def delete_profile(self, profile_id: str):
+    async def delete_knowledge_context(self, knowledgeContext_id: str):
         try:
-            self.store.delete_profile(profile_id)
+            self.store.delete_knowledge_context(knowledgeContext_id)
             return {"success": True}
-        except ChatProfileError:
+        except KnowledgeContextError:
             raise  # Let controller decide HTTP mapping
         except Exception as e:
-            logger.exception(f"Unexpected error deleting profile {profile_id}")
-            raise ChatProfileError("Unexpected error while deleting profile") from e
+            logger.exception(f"Unexpected error deleting knowledgeContext {knowledgeContext_id}")
+            raise KnowledgeContextError("Unexpected error while deleting knowledgeContext") from e
     
-    async def get_profile_with_markdown(self, profile_id: str) -> dict:
+    async def get_knowledge_context_with_markdown(self, knowledgeContext_id: str) -> dict:
         """
-        Load profile metadata and associated markdown content.
+        Load knowledgeContext metadata and associated markdown content.
         """
         try:
-            profile_data = self.store.get_profile_description(profile_id)
+            knowledgeContext_data = self.store.get_knowledge_context_description(knowledgeContext_id)
 
             markdown = ""
             if hasattr(self.store, "list_markdown_files"):
-                md_files = self.store.list_markdown_files(profile_id)
+                md_files = self.store.list_markdown_files(knowledgeContext_id)
                 for filename, content in md_files:
                     markdown += f"\n\n# {filename}\n\n{content}"
 
             return {
-                "id": profile_data["id"],
-                "title": profile_data.get("title", ""),
-                "description": profile_data.get("description", ""),
+                "id": knowledgeContext_data["id"],
+                "title": knowledgeContext_data.get("title", ""),
+                "description": knowledgeContext_data.get("description", ""),
                 "markdown": markdown.strip()
             }
 
         except Exception as e:
-            logger.error(f"Error loading profile with markdown: {e}")
+            logger.error(f"Error loading knowledgeContext with markdown: {e}")
             raise
 
-
-    async def update_profile(
+    async def update_knowledge_context(
         self,
-        profile_id: str,
+        knowledgeContext_id: str,
         title: str,
         description: str,
-        files: list[UploadFile]
-    ) -> ChatProfile:
+        files: list[UploadFile],
+        document_descriptions: dict
+    ) -> KnowledgeContext:
         try:
             try:
-                metadata = self.store.get_profile_description(profile_id)
+                metadata = self.store.get_knowledge_context_description(knowledgeContext_id)
             except FileNotFoundError:
-                raise ProfileNotFound(f"Chat profile '{profile_id}' does not exist.")
+                raise KnowledgeContextNotFound(f"KnowledgeContext '{knowledgeContext_id}' does not exist.")
 
             metadata["title"] = title
             metadata["description"] = description
@@ -210,6 +216,13 @@ class ChatProfileService:
 
             existing_documents = {doc["id"]: doc for doc in metadata.get("documents", [])}
             total_tokens = sum(doc.get("tokens", 0) for doc in existing_documents.values())
+
+            for doc_id, doc in existing_documents.items():
+                doc_name = doc.get("document_name")
+                new_description = document_descriptions.get(doc_name)
+                logger.debug(f"[UPDATE] Checking existing doc '{doc_name}' for new description")
+                if new_description is not None:
+                    doc["description"] = new_description
 
             processed_documents = []
 
@@ -239,18 +252,14 @@ class ChatProfileService:
                         if not md_output:
                             raise DocumentProcessingError(f"No markdown generated for '{file_path.name}'")
 
-                        token_count = count_tokens_from_markdown(md_output)
-                        if total_tokens + token_count > ApplicationContext.get_instance().get_chat_profile_max_tokens:
-                            raise TokenLimitExceeded("Token limit exceeded for chat profile.")
+                        description_value = document_descriptions.get(file_path.name, "")
 
-                        total_tokens += token_count
-
-                        doc = ChatProfileDocument(
+                        doc = KnowledgeContextDocument(
                             id=file_path.stem,
                             document_name=file_path.name,
                             document_type=file_path.suffix[1:],
                             size=file_path.stat().st_size,
-                            tokens=token_count
+                            description=description_value
                         )
 
                         existing_documents[doc.id] = doc.model_dump()
@@ -265,14 +274,14 @@ class ChatProfileService:
                 metadata["tokens"] = total_tokens
                 metadata["documents"] = list(existing_documents.values())
 
-                # Prepare new profile directory
-                profile_dir = tmp_path / profile_id
-                files_dir = profile_dir / "files"
+                # Prepare new knowledgeContext directory
+                knowledgeContext_dir = tmp_path / knowledgeContext_id
+                files_dir = knowledgeContext_dir / "files"
                 files_dir.mkdir(parents=True, exist_ok=True)
 
                 # Copy existing files not overwritten
                 existing_filenames = [f"{doc_id}.md" for doc_id, _ in processed_documents]
-                for filename, content in self.store.list_markdown_files(profile_id):
+                for filename, content in self.store.list_markdown_files(knowledgeContext_id):
                     if filename not in existing_filenames:
                         (files_dir / filename).write_text(content, encoding="utf-8")
 
@@ -280,32 +289,31 @@ class ChatProfileService:
                 for doc_id, md_file in processed_documents:
                     shutil.copy(md_file, files_dir / f"{doc_id}.md")
 
-                # Save profile metadata
-                (profile_dir / "profile.json").write_text(
+                # Save knowledgeContext metadata
+                (knowledgeContext_dir / "knowledge_context.json").write_text(
                     json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
                 )
-                self.store.save_profile(profile_id, profile_dir)
+                self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
-            return ChatProfile(**metadata)
+            return KnowledgeContext(**metadata)
 
-        except ChatProfileError:
-            raise  # Let the controller catch and translate
+        except KnowledgeContextError:
+            raise
         except Exception as e:
-            logger.error(f"Unexpected error while updating profile '{profile_id}': {e}", exc_info=True)
-            raise DocumentProcessingError("Unexpected internal error during profile update.") from e
+            logger.error(f"Unexpected error while updating knowledgeContext '{knowledgeContext_id}': {e}", exc_info=True)
+            raise DocumentProcessingError("Unexpected internal error during knowledgeContext update.") from e
 
-
-    async def delete_document(self, profile_id: str, document_id: str):
+    async def delete_document(self, knowledgeContext_id: str, document_id: str):
         try:
             try:
-                metadata = self.store.get_profile_description(profile_id)
+                metadata = self.store.get_knowledge_context_description(knowledgeContext_id)
             except FileNotFoundError:
-                raise ProfileNotFound(f"Profile '{profile_id}' not found")
+                raise KnowledgeContextNotFound(f"Profile '{knowledgeContext_id}' not found")
 
             documents = metadata.get("documents", [])
             matching = [doc for doc in documents if doc["id"] == document_id]
             if not matching:
-                raise DocumentNotFound(f"Document '{document_id}' not found in profile '{profile_id}'")
+                raise DocumentNotFound(f"Document '{document_id}' not found in knowledgeContext '{knowledgeContext_id}'")
 
             # Remove document entry
             updated_documents = [doc for doc in documents if doc["id"] != document_id]
@@ -313,53 +321,53 @@ class ChatProfileService:
             metadata["updated_at"] = utc_now_iso()
 
             # Recalculate tokens
-            total_tokens = 0
-            for doc in updated_documents:
-                try:
-                    with self.store.get_document(profile_id, f"{doc['id']}.md") as f:
-                        content = f.read().decode("utf-8")
-                        tokens = count_tokens(content)
-                        doc["tokens"] = tokens
-                        total_tokens += tokens
-                except Exception as e:
-                    logger.warning(f"Could not read markdown for token count: {e}")
+            # total_tokens = 0
+            # for doc in updated_documents:
+            #     try:
+            #         with self.store.get_document(knowledgeContext_id, f"{doc['id']}.md") as f:
+            #             content = f.read().decode("utf-8")
+            #             tokens = count_tokens(content)
+            #             doc["tokens"] = tokens
+            #             total_tokens += tokens
+            #     except Exception as e:
+            #         logger.warning(f"Could not read markdown for token count: {e}")
 
-            metadata["tokens"] = total_tokens
+            # metadata["tokens"] = total_tokens
 
             # Delete markdown file
             if hasattr(self.store, "delete_markdown_file"):
                 try:
-                    self.store.delete_markdown_file(profile_id, document_id)
+                    self.store.delete_markdown_file(knowledgeContext_id, document_id)
                 except Exception as e:
                     logger.warning(f"Failed to delete markdown file for {document_id}: {e}")
                     raise DocumentDeletionError(f"Failed to delete markdown file: {e}")
 
-            # Reconstruct profile dir
+            # Reconstruct knowledgeContext dir
             with tempfile.TemporaryDirectory() as tmp_dir:
                 tmp_path = Path(tmp_dir)
-                profile_dir = tmp_path / profile_id
-                files_dir = profile_dir / "files"
+                knowledgeContext_dir = tmp_path / knowledgeContext_id
+                files_dir = knowledgeContext_dir / "files"
                 files_dir.mkdir(parents=True, exist_ok=True)
 
                 for doc in updated_documents:
                     filename = f"{doc['id']}.md"
                     try:
-                        with self.store.get_document(profile_id, filename) as f:
+                        with self.store.get_document(knowledgeContext_id, filename) as f:
                             content = f.read().decode("utf-8")
                             (files_dir / filename).write_text(content, encoding="utf-8")
                     except Exception as e:
                         logger.warning(f"Could not copy file {filename}: {e}")
 
-                (profile_dir / "profile.json").write_text(
+                (knowledgeContext_dir / "knowledge_context.json").write_text(
                     json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
                 )
-                self.store.save_profile(profile_id, profile_dir)
+                self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
             return {"success": True}
 
-        except ChatProfileError:
+        except KnowledgeContextError:
             raise
         except Exception as e:
-            logger.exception(f"Unexpected error deleting document '{document_id}' from profile '{profile_id}'")
+            logger.exception(f"Unexpected error deleting document '{document_id}' from knowledgeContext '{knowledgeContext_id}'")
             raise DocumentDeletionError("Unexpected error during document deletion") from e
 

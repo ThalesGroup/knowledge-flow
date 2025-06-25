@@ -33,7 +33,6 @@ from rich.logging import RichHandler
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import Configuration
 from knowledge_flow_app.common.utils import parse_server_configuration
-from knowledge_flow_app.controllers.chat_profile_controller import ChatProfileController
 from knowledge_flow_app.controllers.content_controller import ContentController
 from knowledge_flow_app.controllers.ingestion_controller import \
     IngestionController
@@ -41,6 +40,8 @@ from knowledge_flow_app.controllers.metadata_controller import \
     MetadataController
 from knowledge_flow_app.controllers.vector_search_controller import \
     VectorSearchController
+from knowledge_flow_app.controllers.knowledge_context_controller import \
+    KnowledgeContextController
 
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ def create_app(config_path: str = "./config/configuration.yaml", base_url: str =
     VectorSearchController(router)
     MetadataController(router)
     ContentController(router)
-    ChatProfileController(router)
+    KnowledgeContextController(router)
 
     logger.info("🧩 All controllers registered.")
     app.include_router(router, prefix=base_url)

@@ -73,8 +73,12 @@ class VectorStorageConfig(BaseModel):
 class EmbeddingConfig(BaseModel):
     type: str = Field(..., description="The embedding backend to use (e.g., 'openai', 'azureopenai')")
 
-class ChatProfileStorageConfig(BaseModel):
+class KnowledgeContextStorageSettings(BaseModel):
+    local_path: str = Field(..., description="The path of the local metrics store")
+
+class KnowledgeContextStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'minio')")
+    settings: KnowledgeContextStorageSettings
 
 class Configuration(BaseModel):
     security: Security
@@ -84,20 +88,22 @@ class Configuration(BaseModel):
     metadata_storage: MetadataStorageConfig = Field(..., description="Metadata storage configuration")
     vector_storage: VectorStorageConfig = Field(..., description="Vector storage configuration")
     embedding: EmbeddingConfig = Field(..., description="Embedding configuration")  
-    chat_profile_storage: ChatProfileStorageConfig = Field(...,description="Chat Profile storage configuration")
-    chat_profile_max_tokens: int = 50000
-class ChatProfileDocument(BaseModel):
+    knowledge_context_storage: KnowledgeContextStorageConfig = Field(...,description="Knowledge context storage configuration")
+    knowledge_context_max_tokens: int = 50000
+class KnowledgeContextDocument(BaseModel):
     id: str
     document_name: str
     document_type: str
     size: Optional[int] = None
     tokens: Optional[int] = Field(default=0)
-class ChatProfile(BaseModel):
+    description: Optional[str] = ""
+class KnowledgeContext(BaseModel):
     id: str
     title: str
     description: str
     created_at: str
     updated_at: str
-    documents: List[ChatProfileDocument]
+    documents: List[KnowledgeContextDocument]
     creator: str
-    tokens: int
+    tokens: Optional[int] = Field(default=0)
+    tag: Optional[str] = Field(default="workspace")

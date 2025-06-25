@@ -17,28 +17,28 @@ class BusinessException(Exception):
     pass
 
 
-class ChatProfileError(Exception):
-    """Base class for chat profile errors."""
+class KnowledgeContextError(Exception):
+    """Base class for knowledge context errors."""
     pass
 
-class TokenLimitExceeded(ChatProfileError):
+class TokenLimitExceeded(KnowledgeContextError):
     pass
 
-class DocumentProcessingError(ChatProfileError):
+class DocumentProcessingError(KnowledgeContextError):
     def __init__(self, filename: str):
         super().__init__(f"Failed to process file '{filename}'")
         self.filename = filename
 
-class ProfileNotFound(ChatProfileError):
+class KnowledgeContextNotFound(KnowledgeContextError):
     def __init__(self, profile_id: str):
-        super().__init__(f"Profile '{profile_id}' not found")
+        super().__init__(f"KnowledgeContext '{profile_id}' not found")
         self.profile_id = profile_id
 
-class ProfileDeletionError(ChatProfileError):
+class KnowledgeContextDeletionError(KnowledgeContextError):
     pass
 
-class DocumentDeletionError(ChatProfileError):
+class DocumentDeletionError(KnowledgeContextError):
     pass
 
-class DocumentNotFound(ChatProfileError):
+class DocumentNotFound(KnowledgeContextError):
     pass
