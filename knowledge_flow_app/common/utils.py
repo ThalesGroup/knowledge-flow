@@ -19,7 +19,7 @@ from pydantic import ValidationError
 from pydantic_settings import BaseSettings
 import tiktoken
 import yaml
-from typing import Dict, Optional
+from typing import Dict, Optional, TypeVar
 
 from knowledge_flow_app.common.structures import Configuration
 logger = logging.getLogger(__name__)
@@ -52,8 +52,9 @@ def get_embedding_model_name(embedding_model: object) -> str:
         return getattr(inner, "model", type(inner).__name__)
     return getattr(embedding_model, "model", type(embedding_model).__name__)
 
+B = TypeVar('B', bound=BaseSettings)
 
-def validate_settings_or_exit(cls: type[BaseSettings], name: str = "Settings") -> BaseSettings:
+def validate_settings_or_exit(cls: type[B], name: str = "Settings") -> B:
     try:
         return cls()
     except ValidationError as e:
