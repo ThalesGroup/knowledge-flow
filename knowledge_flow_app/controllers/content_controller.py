@@ -28,7 +28,6 @@ class DocumentContent(BaseModel):
     uid: str
     file_name: str
     title: str = ""
-    agent_name: str = ""
     content: Any = None
     has_binary_content: bool = False
     content_type: str = "application/octet-stream"

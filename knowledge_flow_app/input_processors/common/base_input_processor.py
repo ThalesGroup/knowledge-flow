@@ -34,13 +34,9 @@ class BaseInputProcessor(ABC):
         Generate a unique identifier for the file based on its metadata.
         This identifier is used to track the file in the system.
         """
-        #return shortuuid.uuid()
-        logger.error(f"MEEEERDE: {front_metadata}")
-        agent_name = front_metadata.get("agent_name", "unknown")
-       
         document_name = metadata.get("document_name", "")
         # Combine both fields into a deterministic string
-        identifier_str = f"{agent_name}::{document_name}"
+        identifier_str = f"{document_name}"
         return hashlib.sha256(identifier_str.encode('utf-8')).hexdigest()
 
     def _add_common_metadata(self, file_path: Path, front_metadata: dict) -> dict:
@@ -74,7 +70,6 @@ class BaseInputProcessor(ABC):
 
         Args:
             file_path (Path): The path to the input file.
-            front_metadata (dict): Additional metadata provided by the user. If None, defaults to an dictionary with "agent_name" set to "unknown".
         Returns:
             dict: A dictionary containing the processed metadata.
         Raises:
@@ -82,12 +77,6 @@ class BaseInputProcessor(ABC):
         """
         if not self.check_file_validity(file_path):
             return {"document_name": file_path.name, "error": "Invalid file structure"}
-
-        if front_metadata is None:
-            front_metadata = {
-                "agent_name": "unknown",
-            }
-
         final_metadata = {}
         file_metadata = self.extract_file_metadata(file_path)
         common_metadata = self._add_common_metadata(file_path, front_metadata)

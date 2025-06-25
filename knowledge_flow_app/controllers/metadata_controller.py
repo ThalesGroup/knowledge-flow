@@ -95,7 +95,7 @@ class MetadataController:
                 "Provide an optional JSON body with filters.\n"
                 "Example:\n"
                 "{\n"
-                "   \"front_metadata\": {\"agent_name\": \"fred\"},\n"
+                "   \"front_metadata\": {\"GBU\": \"SIX\"},\n"
                 "   \"retrievable\": true\n"
                 "}\n"
                 "If no filters are given, all documents are returned."
