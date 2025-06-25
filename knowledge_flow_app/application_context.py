@@ -382,7 +382,7 @@ class ApplicationContext:
             try:
                 s = validate_settings_or_exit(OpenSearchSettings, "OpenSearch Settings")
                 logger.info(f"     ↳ OPENSEARCH_HOST: {s.opensearch_host}")
-                logger.info(f"     ↳ OPENSEARCH_INDEX: {s.opensearch_vector_index}")
+                logger.info(f"     ↳ OPENSEARCH_VECTOR_INDEX: {s.opensearch_vector_index}")
                 self._log_sensitive("OPENSEARCH_USER", s.opensearch_user)
                 self._log_sensitive("OPENSEARCH_PASSWORD", s.opensearch_password)
             except Exception:

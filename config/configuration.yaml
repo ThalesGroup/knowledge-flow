@@ -67,9 +67,8 @@ content_storage:
   # - MINIO_SECURE
   # If you are using gcs, make sure to set the following environment variables:
   # - GCS_PROJECT_ID
-  # - GCS_BUCKET
-  # - GCS_KEY_FILE
-  # - GCS_SECURE
+  # - GCS_BUCKET_NAME
+  # - GCS_CREDENTIALS_PATH
   # If you are using local storage, make sure to set the following environment variable:
   # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/content-store'
   type: "local"
@@ -81,7 +80,7 @@ metadata_storage:
   # - OPENSEARCH_PORT
   # - OPENSEARCH_USERNAME
   # - OPENSEARCH_PASSWORD
-  # - OPENSEARCH_INDEX
+  # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
   # If you are using local storage, make sure to set the following environment variable:
   # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/metadata-store.json'
   type: "local"
@@ -94,10 +93,7 @@ vector_storage:
   # - OPENSEARCH_PASSWORD="Azerty123_"
   # - OPENSEARCH_SECURE="false"
   # - OPENSEARCH_VERIFY_CERTS="false"
-  # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
   # - OPENSEARCH_VECTOR_INDEX = "fred-dev-embeddings"
-  # - OPENSEARCH_ACTIVE_SESSIONS_INDEX = "fred-dev-active-sessions"
-  # - OPENSEARCH_CHAT_INTERACTIONS_INDEX = "fred-dev-chat-interactions"
   #type: "opensearch"
   # If you are using local storage, make sure to set the following environment variable:
   # - LOCAL_VECTOR_STORAGE_PATH default to '~/.knowledge-flow/vector-store.json'
