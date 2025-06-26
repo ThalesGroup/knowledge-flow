@@ -1,4 +1,4 @@
-name: Build and Push Docker Nightly Image
+name: Code quality
 
 on:
   # schedule:
