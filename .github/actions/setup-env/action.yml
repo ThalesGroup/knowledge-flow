@@ -15,5 +15,7 @@ runs:
         enable-cache: true
 
     - name: Install the project
-      run: uv sync --extra dev
+      run: |
+        uv sync --extra dev
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
