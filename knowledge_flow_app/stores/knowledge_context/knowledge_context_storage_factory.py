@@ -15,8 +15,8 @@
 from knowledge_flow_app.application_context import ApplicationContext
 from .local_knowledge_context_store import LocalKnowledgeContextStore
 from .base_knowledge_context_store import BaseKnowledgeContextStore
-from knowledge_flow_app.common.utils import validate_settings_or_exit
 from pathlib import Path
+
 
 def get_knowledge_context_store() -> BaseKnowledgeContextStore:
     config = ApplicationContext.get_instance().get_config()

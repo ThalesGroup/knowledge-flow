@@ -34,7 +34,7 @@ class BaseInputProcessor(ABC):
         Generate a unique identifier for the file based on its metadata.
         This identifier is used to track the file in the system.
         """
-        #return shortuuid.uuid()
+        # return shortuuid.uuid()
         agent_name = front_metadata.get("agent_name", "unknown")
         document_name = metadata.get("document_name", "")
         # Combine both fields into a deterministic string

@@ -82,8 +82,10 @@ class VectorStorageConfig(BaseModel):
 class EmbeddingConfig(BaseModel):
     type: str = Field(..., description="The embedding backend to use (e.g., 'openai', 'azureopenai')")
 
+
 class KnowledgeContextStorageSettings(BaseModel):
     local_path: str = Field(..., description="The path of the local metrics store")
+
 
 class KnowledgeContextStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'minio')")
@@ -97,9 +99,11 @@ class Configuration(BaseModel):
     content_storage: ContentStorageConfig = Field(..., description="Content Storage configuration")
     metadata_storage: MetadataStorageConfig = Field(..., description="Metadata storage configuration")
     vector_storage: VectorStorageConfig = Field(..., description="Vector storage configuration")
-    embedding: EmbeddingConfig = Field(..., description="Embedding configuration")  
-    knowledge_context_storage: KnowledgeContextStorageConfig = Field(...,description="Knowledge context storage configuration")
+    embedding: EmbeddingConfig = Field(..., description="Embedding configuration")
+    knowledge_context_storage: KnowledgeContextStorageConfig = Field(..., description="Knowledge context storage configuration")
     knowledge_context_max_tokens: int = 50000
+
+
 class KnowledgeContextDocument(BaseModel):
     id: str
     document_name: str
@@ -107,6 +111,8 @@ class KnowledgeContextDocument(BaseModel):
     size: Optional[int] = None
     tokens: Optional[int] = Field(default=0)
     description: Optional[str] = ""
+
+
 class KnowledgeContext(BaseModel):
     id: str
     title: str

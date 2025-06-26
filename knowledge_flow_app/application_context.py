@@ -394,7 +394,7 @@ class ApplicationContext:
 
         content_type = self.config.content_storage.type
         logger.info(f"  📁 Content storage backend: {content_type}")
-        
+
         knowledge_context_type = self.config.knowledge_context_storage.type
         logger.info(f"  📁 Knwoledge context storage backend: {knowledge_context_type}")
 
@@ -418,9 +418,5 @@ class ApplicationContext:
 
         logger.info("--------------------------------------------------")
 
-
     def get_knowledge_context_max_tokens(self) -> int:
         return self.config.knowledge_context_max_tokens
-
-
-

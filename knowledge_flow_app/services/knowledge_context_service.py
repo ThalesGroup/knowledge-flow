@@ -25,7 +25,6 @@ from knowledge_flow_app.common.business_exception import KnowledgeContextError, 
 from knowledge_flow_app.common.structures import KnowledgeContext, KnowledgeContextDocument
 from knowledge_flow_app.common.utils import count_tokens, log_exception, utc_now_iso
 from knowledge_flow_app.services.input_processor_service import InputProcessorService
-from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.stores.knowledge_context.knowledge_context_storage_factory import get_knowledge_context_store
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,6 @@ class ChatProfileService:
 
         for knowledgeContext_data in raw_knowledgeContexts:
             try:
-                
                 if knowledgeContext_data.get("tag") != tag:
                     continue
 
@@ -69,9 +67,9 @@ class ChatProfileService:
                     updated_at=knowledgeContext_data["updated_at"],
                     creator=knowledgeContext_data["creator"],
                     user_id=knowledgeContext_data["user_id"],
-                    #tokens=knowledgeContext_data["tokens"],
+                    # tokens=knowledgeContext_data["tokens"],
                     documents=documents,
-                    tag=knowledgeContext_data["tag"]
+                    tag=knowledgeContext_data["tag"],
                 )
 
                 all_knowledgeContexts.append(knowledgeContext)
@@ -90,7 +88,7 @@ class ChatProfileService:
             files_subdir.mkdir(parents=True, exist_ok=True)
 
             documents = []
-            total_tokens = 0
+            # total_tokens = 0
 
             for file in files_dir.iterdir():
                 if file.is_file():
@@ -109,8 +107,8 @@ class ChatProfileService:
                         if not output_md:
                             raise FileNotFoundError(f"No .md output found for {file.name}")
 
-                        #token_count = count_tokens_from_markdown(output_md)
-                        #if total_tokens + token_count > ApplicationContext.get_instance().get_chat_knowledgeContext_max_tokens():
+                        # token_count = count_tokens_from_markdown(output_md)
+                        # if total_tokens + token_count > ApplicationContext.get_instance().get_chat_knowledgeContext_max_tokens():
                         #    raise TokenLimitExceeded()
 
                         # Only now that we're safe, move the file and record the doc
@@ -118,16 +116,18 @@ class ChatProfileService:
                         dest_path = files_subdir / new_md_name
                         shutil.move(str(output_md), dest_path)
 
-                        #total_tokens += token_count
+                        # total_tokens += token_count
 
-                        documents.append(KnowledgeContextDocument(
-                            id=file.stem,
-                            document_name=file.name,
-                            document_type=file.suffix[1:],
-                            size=file.stat().st_size,
-                            #tokens=token_count
-                            description=file_descriptions.get(file.name, "")
-                        ))
+                        documents.append(
+                            KnowledgeContextDocument(
+                                id=file.stem,
+                                document_name=file.name,
+                                document_type=file.suffix[1:],
+                                size=file.stat().st_size,
+                                # tokens=token_count
+                                description=file_descriptions.get(file.name, ""),
+                            )
+                        )
 
                     except Exception as e:
                         log_exception(e, "document processing error")
@@ -142,14 +142,12 @@ class ChatProfileService:
                 "updated_at": now,
                 "creator": "system",
                 "documents": [doc.model_dump() for doc in documents],
-                #"tokens": total_tokens,
+                # "tokens": total_tokens,
                 "user_id": "local",
-                "tag": tag
+                "tag": tag,
             }
 
-            (knowledgeContext_dir / "knowledge_context.json").write_text(
-                json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-            )
+            (knowledgeContext_dir / "knowledge_context.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
 
             self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
@@ -164,7 +162,7 @@ class ChatProfileService:
         except Exception as e:
             logger.exception(f"Unexpected error deleting knowledgeContext {knowledgeContext_id}")
             raise KnowledgeContextError("Unexpected error while deleting knowledgeContext") from e
-    
+
     async def get_knowledge_context_with_markdown(self, knowledgeContext_id: str) -> dict:
         """
         Load knowledgeContext metadata and associated markdown content.
@@ -178,25 +176,13 @@ class ChatProfileService:
                 for filename, content in md_files:
                     markdown += f"\n\n# {filename}\n\n{content}"
 
-            return {
-                "id": knowledgeContext_data["id"],
-                "title": knowledgeContext_data.get("title", ""),
-                "description": knowledgeContext_data.get("description", ""),
-                "markdown": markdown.strip()
-            }
+            return {"id": knowledgeContext_data["id"], "title": knowledgeContext_data.get("title", ""), "description": knowledgeContext_data.get("description", ""), "markdown": markdown.strip()}
 
         except Exception as e:
             logger.error(f"Error loading knowledgeContext with markdown: {e}")
             raise
 
-    async def update_knowledge_context(
-        self,
-        knowledgeContext_id: str,
-        title: str,
-        description: str,
-        files: list[UploadFile],
-        document_descriptions: dict
-    ) -> KnowledgeContext:
+    async def update_knowledge_context(self, knowledgeContext_id: str, title: str, description: str, files: list[UploadFile], document_descriptions: dict) -> KnowledgeContext:
         try:
             try:
                 metadata = self.store.get_knowledge_context_description(knowledgeContext_id)
@@ -241,11 +227,7 @@ class ChatProfileService:
                         description_value = document_descriptions.get(file_path.name, "")
 
                         doc = KnowledgeContextDocument(
-                            id=file_path.stem,
-                            document_name=file_path.name,
-                            document_type=file_path.suffix[1:],
-                            size=file_path.stat().st_size,
-                            description=description_value
+                            id=file_path.stem, document_name=file_path.name, document_type=file_path.suffix[1:], size=file_path.stat().st_size, description=description_value
                         )
 
                         existing_documents[doc.id] = doc.model_dump()
@@ -276,9 +258,7 @@ class ChatProfileService:
                     shutil.copy(md_file, files_dir / f"{doc_id}.md")
 
                 # Save knowledgeContext metadata
-                (knowledgeContext_dir / "knowledge_context.json").write_text(
-                    json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
+                (knowledgeContext_dir / "knowledge_context.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
                 self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
             return KnowledgeContext(**metadata)
@@ -344,9 +324,7 @@ class ChatProfileService:
                     except Exception as e:
                         logger.warning(f"Could not copy file {filename}: {e}")
 
-                (knowledgeContext_dir / "knowledge_context.json").write_text(
-                    json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
+                (knowledgeContext_dir / "knowledge_context.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
                 self.store.save_knowledge_context(knowledgeContext_id, knowledgeContext_dir)
 
             return {"success": True}

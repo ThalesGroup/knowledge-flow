@@ -21,26 +21,33 @@ class BusinessException(Exception):
 
 class KnowledgeContextError(Exception):
     """Base class for knowledge context errors."""
+
     pass
+
 
 class TokenLimitExceeded(KnowledgeContextError):
     pass
+
 
 class DocumentProcessingError(KnowledgeContextError):
     def __init__(self, filename: str):
         super().__init__(f"Failed to process file '{filename}'")
         self.filename = filename
 
+
 class KnowledgeContextNotFound(KnowledgeContextError):
     def __init__(self, profile_id: str):
         super().__init__(f"KnowledgeContext '{profile_id}' not found")
         self.profile_id = profile_id
 
+
 class KnowledgeContextDeletionError(KnowledgeContextError):
     pass
 
+
 class DocumentDeletionError(KnowledgeContextError):
     pass
+
 
 class DocumentNotFound(KnowledgeContextError):
     pass
