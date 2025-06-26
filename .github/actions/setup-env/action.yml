@@ -17,5 +17,5 @@ runs:
     - name: Install the project
       run: |
         uv sync --extra dev
-        echo "$HOME/.cache/uv/bin" >> $GITHUB_PATH
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
