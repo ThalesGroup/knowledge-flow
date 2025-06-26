@@ -92,7 +92,7 @@ To ensure the code you are about to push is quite clean and safe, we provide som
 
 - Check PEP8 compliance and fix errors if possible: `ruff check --fix`
 - Format the code: `ruff format`
-- Detect secrets: `detect-secret`
+- Detect secrets: `detect-secrets`  # pragma: allowlist secret
 - Analyzer the code: `bandit`
 
 To install the pre commit hooks on your environment after it is ready (see the `dev` target of the Makefile), type this command:
