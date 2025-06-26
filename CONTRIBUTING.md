@@ -92,7 +92,7 @@ To ensure the code you are about to push is quite clean and safe, we provide som
 
 - Check PEP8 compliance and fix errors if possible: `ruff check --fix`
 - Format the code: `ruff format`
-- Detect secrets: `detect-secrets`  # pragma: allowlist secre
+- Detect secrets: `detect-secrets`  # pragma: allowlist secret
 
 - Analyzer the code: `bandit`
 

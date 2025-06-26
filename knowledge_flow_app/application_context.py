@@ -394,9 +394,9 @@ class ApplicationContext:
 
         content_type = self.config.content_storage.type
         logger.info(f"  📁 Content storage backend: {content_type}")
-
-        chat_profile_type = self.config.chat_profile_storage.type
-        logger.info(f"  📁 Chat profile storage backend: {chat_profile_type}")
+        
+        knowledge_context_type = self.config.knowledge_context_storage.type
+        logger.info(f"  📁 Knwoledge context storage backend: {knowledge_context_type}")
 
         logger.info("  🧩 Input Processor Mappings:")
         for ext, cls in self.input_processor_registry.items():
@@ -418,5 +418,9 @@ class ApplicationContext:
 
         logger.info("--------------------------------------------------")
 
-    def get_chat_profile_max_tokens(self) -> int:
-        return self.config.chat_profile_max_tokens
+
+    def get_knowledge_context_max_tokens(self) -> int:
+        return self.config.knowledge_context_max_tokens
+
+
+
