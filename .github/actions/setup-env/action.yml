@@ -1,5 +1,5 @@
 name: Setup environment
-description: Prépare un venv et installe les deps via uv
+description: Create a virtual environment and install dependencies with uv 
 runs:
   using: "composite"
   steps:
