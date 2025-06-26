@@ -27,15 +27,11 @@ from .base_chat_profile_store import BaseChatProfileStore
 
 logger = logging.getLogger(__name__)
 
+
 class MinioChatProfileStore(BaseChatProfileStore):
     def __init__(self, endpoint: str, access_key: str, secret_key: str, bucket_name: str, secure: bool):
         self.bucket_name = bucket_name
-        self.client = Minio(
-            endpoint,
-            access_key=access_key,
-            secret_key=secret_key,
-            secure=secure
-        )
+        self.client = Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
 
         if not self.client.bucket_exists(bucket_name):
             self.client.make_bucket(bucket_name)
@@ -49,11 +45,7 @@ class MinioChatProfileStore(BaseChatProfileStore):
             if file_path.is_file():
                 object_name = f"{profile_id}/{file_path.relative_to(directory)}"
                 try:
-                    self.client.fput_object(
-                        self.bucket_name,
-                        object_name,
-                        str(file_path)
-                    )
+                    self.client.fput_object(self.bucket_name, object_name, str(file_path))
                     logger.info(f"Uploaded '{object_name}' to bucket '{self.bucket_name}'.")
                 except S3Error as e:
                     logger.error(f"Failed to upload '{file_path}': {e}")
@@ -110,7 +102,6 @@ class MinioChatProfileStore(BaseChatProfileStore):
             logger.error(f"Error listing markdowns for profile {profile_id}: {e}")
         return result
 
-
     def list_profiles(self) -> List[dict]:
         """
         Liste les profils disponibles dans le bucket MinIO.
@@ -122,10 +113,7 @@ class MinioChatProfileStore(BaseChatProfileStore):
             # Récupère les objets profile.json à la racine de chaque dossier de profil
             objects = self.client.list_objects(self.bucket_name, recursive=True)
 
-            profile_json_paths = [
-                obj.object_name for obj in objects
-                if obj.object_name.endswith("profile.json") and obj.object_name.count("/") == 1
-            ]
+            profile_json_paths = [obj.object_name for obj in objects if obj.object_name.endswith("profile.json") and obj.object_name.count("/") == 1]
 
             for obj_path in profile_json_paths:
                 try:
@@ -139,7 +127,7 @@ class MinioChatProfileStore(BaseChatProfileStore):
             logger.error(f"Erreur lors de la liste des profils MinIO : {e}", exc_info=True)
 
         return profiles
-    
+
     def delete_markdown_file(self, profile_id: str, document_id: str) -> None:
         key = f"{profile_id}/files/{document_id}.md"
         try:

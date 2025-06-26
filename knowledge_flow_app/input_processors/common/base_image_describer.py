@@ -16,6 +16,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class BaseImageDescriber(ABC):
     @abstractmethod
     def describe(self, image_base64: str) -> str:

@@ -24,10 +24,12 @@ unit tests. It helps to decouple the different components of the application and
 to define clear workflows and data structures.
 """
 
+
 class Status(str, Enum):
     SUCCESS = "success"
     IGNORED = "ignored"
     ERROR = "error"
+
 
 class VectorizationResponse(BaseModel):
     """
@@ -40,20 +42,23 @@ class VectorizationResponse(BaseModel):
         chunks (int): The number of chunks embedded in the vector store.
         reason (Optional[str]): An optional reason for failure, if applicable.
     """
+
     status: Status
     chunks: int
 
 
 class ProcessorConfig(BaseModel):
     """
-    Configuration structure for a file processor. 
+    Configuration structure for a file processor.
     Attributes:
         name (str): The name of the processor.
         prefix (str): The file extension this processor handles (e.g., '.pdf').
         class_path (str): Dotted import path of the processor class.
     """
+
     prefix: str = Field(..., description="The file extension this processor handles (e.g., '.pdf')")
     class_path: str = Field(..., description="Dotted import path of the processor class")
+
 
 class Security(BaseModel):
     enabled: bool = True
@@ -61,37 +66,47 @@ class Security(BaseModel):
     client_id: str = "knowledge-flow"
     authorized_origins: List[str] = ["http://localhost:5173"]
 
+
 class ContentStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'minio')")
+
 
 class MetadataStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'opensearch')")
 
+
 class VectorStorageConfig(BaseModel):
     type: str = Field(..., description="The vector backend to use (e.g., 'opensearch', 'chromadb')")
+
 
 class EmbeddingConfig(BaseModel):
     type: str = Field(..., description="The embedding backend to use (e.g., 'openai', 'azureopenai')")
 
+
 class ChatProfileStorageConfig(BaseModel):
     type: str = Field(..., description="The storage backend to use (e.g., 'local', 'minio')")
+
 
 class Configuration(BaseModel):
     security: Security
     input_processors: List[ProcessorConfig]
-    output_processors: Optional[List[ProcessorConfig]] = None 
+    output_processors: Optional[List[ProcessorConfig]] = None
     content_storage: ContentStorageConfig = Field(..., description="Content Storage configuration")
     metadata_storage: MetadataStorageConfig = Field(..., description="Metadata storage configuration")
     vector_storage: VectorStorageConfig = Field(..., description="Vector storage configuration")
-    embedding: EmbeddingConfig = Field(..., description="Embedding configuration")  
-    chat_profile_storage: ChatProfileStorageConfig = Field(...,description="Chat Profile storage configuration")
+    embedding: EmbeddingConfig = Field(..., description="Embedding configuration")
+    chat_profile_storage: ChatProfileStorageConfig = Field(..., description="Chat Profile storage configuration")
     chat_profile_max_tokens: int = 50000
+
+
 class ChatProfileDocument(BaseModel):
     id: str
     document_name: str
     document_type: str
     size: Optional[int] = None
     tokens: Optional[int] = Field(default=0)
+
+
 class ChatProfile(BaseModel):
     id: str
     title: str

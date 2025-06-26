@@ -15,6 +15,7 @@
 from pathlib import Path
 import os
 
+
 class ChatProfileLocalSettings:
     def __init__(self):
         # Default local path unless overridden by env var

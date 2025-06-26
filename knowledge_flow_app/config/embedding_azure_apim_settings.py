@@ -15,9 +15,10 @@
 import logging
 from pydantic_settings import BaseSettings
 from pydantic import Field
-import os
 
 logger = logging.getLogger(__name__)
+
+
 class EmbeddingAzureApimSettings(BaseSettings):
     azure_tenant_id: str = Field(..., validation_alias="AZURE_TENANT_ID")
     azure_client_id: str = Field(..., validation_alias="AZURE_CLIENT_ID")
@@ -33,5 +34,5 @@ class EmbeddingAzureApimSettings(BaseSettings):
     azure_deployment_embedding: str = Field(..., validation_alias="AZURE_DEPLOYMENT_EMBEDDING")
 
     model_config = {
-        "extra": "ignore" # allows unrelated variables in .env or os.environ
+        "extra": "ignore"  # allows unrelated variables in .env or os.environ
     }

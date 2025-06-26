@@ -26,14 +26,16 @@ from knowledge_flow_app.stores.content.content_storage_factory import get_conten
 
 logger = logging.getLogger(__name__)
 
+
 class IngestionService:
     """
-    A simple service to help ingesting new files. 
+    A simple service to help ingesting new files.
     ----------------
     This service is responsible for the inital steps of the ingestion process:
     1. Saving the uploaded file to a temporary directory.
     2. Extracting metadata from the file using the appropriate processor based on the file extension.
-    """ 
+    """
+
     def __init__(self):
         self.context = ApplicationContext.get_instance()
         self.processor = InputProcessorService()
@@ -41,13 +43,13 @@ class IngestionService:
 
     def save_file_to_temp(self, file: Union[UploadFile, pathlib.Path]) -> pathlib.Path:
         """
-            Creates a temporary directory, saves the uploaded file into 
-            it inside a subdirectory named "ingestion", and returns the full path to the saved file.
-            The directory structure will look like this:
+        Creates a temporary directory, saves the uploaded file into
+        it inside a subdirectory named "ingestion", and returns the full path to the saved file.
+        The directory structure will look like this:
 
-                /tmp/abcd1234/
-                    ├── input
-                        └── sample.docx
+            /tmp/abcd1234/
+                ├── input
+                    └── sample.docx
         """
         # 1. Create the temp directory
         temp_dir = pathlib.Path(tempfile.mkdtemp(), "input")
@@ -59,7 +61,7 @@ class IngestionService:
         elif isinstance(file, pathlib.Path):
             file_stream = file.open("rb")
             filename = file.name
-    
+
         # 2. Build the full file path using the original filename
         target_path = temp_dir / filename
 
@@ -72,7 +74,7 @@ class IngestionService:
         # 4. Return the full file path
         logger.info(f"File saved to temporary location: {target_path}")
         return target_path
-     
+
     def extract_metadata(self, file_path: pathlib.Path, front_metadata: dict) -> dict:
         """
         Extracts metadata from the file using the appropriate processor based on the file extension.
@@ -96,6 +98,3 @@ class IngestionService:
             raise ValueError("Metadata extraction failed: missing 'document_uid'")
 
         return metadata
-  
-
-    

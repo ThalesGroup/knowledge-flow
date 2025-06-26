@@ -1,0 +1,22 @@
+name: Setup environment
+description: Prépare un venv et installe les deps via uv
+runs:
+  using: "composite"
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12.8
+
+    - name: Install uv
+      env:
+        UV_VERSION: 0.7.12
+        UV_PROJECT_ENVIRONMENT: $HOME/.venv
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+        curl -Ls https://astral.sh/uv/${UV_VERSION}/install.sh | bash
+        uv venv
+        uv sync --all-extras
+        echo "$UV_PROJECT_ENVIRONMENT/bin" >> $GITHUB_PATH

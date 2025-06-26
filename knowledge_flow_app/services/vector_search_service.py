@@ -17,11 +17,13 @@ from typing import List
 from langchain.schema.document import Document
 from knowledge_flow_app.application_context import ApplicationContext
 
+
 class VectorSearchService:
     """
     Vector Search Service
     ------------------------------------------------------
-    """ 
+    """
+
     def __init__(self):
         context = ApplicationContext.get_instance()
         embedder = context.get_embedder()

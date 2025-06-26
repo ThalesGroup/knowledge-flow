@@ -14,7 +14,16 @@
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from knowledge_flow_app.common.business_exception import BusinessException, ChatProfileError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, ProfileDeletionError, ProfileNotFound, TokenLimitExceeded
+from knowledge_flow_app.common.business_exception import (
+    BusinessException,
+    ChatProfileError,
+    DocumentDeletionError,
+    DocumentNotFound,
+    DocumentProcessingError,
+    ProfileDeletionError,
+    ProfileNotFound,
+    TokenLimitExceeded,
+)
 from knowledge_flow_app.common.utils import log_exception
 from knowledge_flow_app.services.chat_profile_service import ChatProfileService
 import tempfile
@@ -24,16 +33,18 @@ from pathlib import Path
 class UpdateChatProfileRequest(BaseModel):
     title: str
     description: str
+
+
 class ChatProfileController:
     def __init__(self, router: APIRouter):
         self.service = ChatProfileService()
         self._register_routes(router)
 
     def _register_routes(self, router: APIRouter):
-        
         @router.get("/chatProfiles/maxTokens")
         async def get_max_tokens():
             from knowledge_flow_app.application_context import ApplicationContext
+
             context = ApplicationContext.get_instance()
             return {"max_tokens": context.get_chat_profile_max_tokens()}
 
@@ -51,11 +62,7 @@ class ChatProfileController:
                 raise HTTPException(status_code=500, detail=f"Failed to load profile: {str(e)}")
 
         @router.post("/chatProfiles")
-        async def create_profile(
-            title: str = Form(...),
-            description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
-        ):
+        async def create_profile(title: str = Form(...), description: str = Form(...), files: list[UploadFile] = File(default=[])):
             try:
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_path = Path(tmp_dir)
@@ -78,12 +85,7 @@ class ChatProfileController:
                 raise HTTPException(status_code=500, detail="Internal Server Error")
 
         @router.put("/chatProfiles/{chatProfile_id}")
-        async def update_profile(
-            chatProfile_id: str,
-            title: str = Form(...),
-            description: str = Form(...),
-            files: list[UploadFile] = File(default=[])
-        ):
+        async def update_profile(chatProfile_id: str, title: str = Form(...), description: str = Form(...), files: list[UploadFile] = File(default=[])):
             try:
                 return await self.service.update_profile(chatProfile_id, title, description, files)
             except ProfileNotFound as e:

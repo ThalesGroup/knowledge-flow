@@ -25,10 +25,12 @@ from knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_pro
 dotenv_path = os.getenv("ENV_FILE", "./config/.env")
 load_dotenv(dotenv_path)
 
+
 class MockImageDescriber(BaseImageDescriber):
     def describe(self, image_base64: str) -> str:
         return "There is an image showing a mocked description."
-    
+
+
 @pytest.fixture
 def processor():
     return PdfMarkdownProcessor(image_describer=MockImageDescriber())
@@ -46,13 +48,13 @@ def test_pdf_processor_end_to_end(processor, sample_pdf_file):
     assert processor.check_file_validity(sample_pdf_file)
 
     metadata = processor.process_metadata(sample_pdf_file)
-    
+
     assert metadata["document_name"] == "sample.pdf"
     assert metadata["num_pages"] == 2
     assert "document_uid" in metadata
 
     result = processor.convert_file_to_markdown(sample_pdf_file, output_dir)
-    
+
     assert result["status"] == "fallback_to_text"
     md_file = Path(result["md_file"])
     assert md_file.exists()

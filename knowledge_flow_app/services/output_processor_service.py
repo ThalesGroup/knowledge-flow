@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import pathlib
-from fastapi import UploadFile
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import VectorizationResponse
-from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor, BaseTabularProcessor
+
 
 class OutputProcessorService:
     """
@@ -28,21 +26,19 @@ class OutputProcessorService:
 
     By default, all markdown and tabular files are processed. Markdown files
     are processed using the default VectorizationPipeline, while tabular files
-    are processed using the TabularPipeline. 
+    are processed using the TabularPipeline.
 
     These processors can be replaced by custom processors
     by implementing the `BaseOutputProcessor` interface and registering them
     in the `ApplicationContext`.
-    """ 
+    """
+
     def __init__(self):
         self.context = ApplicationContext.get_instance()
 
-    def process(self, 
-                working_dir: pathlib.Path, 
-                input_file: str,
-                input_file_metadata: dict) -> VectorizationResponse:
+    def process(self, working_dir: pathlib.Path, input_file: str, input_file_metadata: dict) -> VectorizationResponse:
         """
-        Processes data resulting from the input processing. 
+        Processes data resulting from the input processing.
         """
         suffix = pathlib.Path(input_file).suffix.lower()
         processor = self.context.get_output_processor_instance(suffix)
@@ -70,4 +66,3 @@ class OutputProcessorService:
             return processor.process(output_file, input_file_metadata)
         else:
             raise ValueError(f"Output file {output_file} is not a markdown or csv file")
-        

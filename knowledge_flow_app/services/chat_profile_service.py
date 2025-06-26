@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime, timezone
 import shutil
 from uuid import uuid4
 from pathlib import Path
@@ -20,7 +19,6 @@ import tempfile
 import json
 
 from fastapi import UploadFile
-import tiktoken
 import logging
 
 from knowledge_flow_app.common.business_exception import ChatProfileError, DocumentDeletionError, DocumentNotFound, DocumentProcessingError, ProfileNotFound, TokenLimitExceeded
@@ -32,9 +30,11 @@ from knowledge_flow_app.application_context import ApplicationContext
 
 logger = logging.getLogger(__name__)
 
+
 def count_tokens_from_markdown(md_path: Path) -> int:
     text = md_path.read_text(encoding="utf-8")
     return count_tokens(text)
+
 
 class ChatProfileService:
     def __init__(self):
@@ -66,7 +66,7 @@ class ChatProfileService:
                     creator=profile_data["creator"],
                     user_id=profile_data["user_id"],
                     tokens=profile_data["tokens"],
-                    documents=documents
+                    documents=documents,
                 )
 
                 all_profiles.append(profile)
@@ -93,19 +93,12 @@ class ChatProfileService:
                         processing_dir = tmp_path / f"{file.stem}_processing"
                         processing_dir.mkdir(parents=True, exist_ok=True)
 
-                        input_metadata = {
-                            "source_file": file.name,
-                            "document_uid": file.stem
-                        }
+                        input_metadata = {"source_file": file.name, "document_uid": file.stem}
 
                         temp_input_file = processing_dir / file.name
                         shutil.copy(file, temp_input_file)
 
-                        self.processor.process(
-                            output_dir=processing_dir,
-                            input_file=file.name,
-                            input_file_metadata=input_metadata
-                        )
+                        self.processor.process(output_dir=processing_dir, input_file=file.name, input_file_metadata=input_metadata)
 
                         output_md = next((processing_dir / "output").glob("*.md"), None)
                         if not output_md:
@@ -122,13 +115,7 @@ class ChatProfileService:
 
                         total_tokens += token_count
 
-                        documents.append(ChatProfileDocument(
-                            id=file.stem,
-                            document_name=file.name,
-                            document_type=file.suffix[1:],
-                            size=file.stat().st_size,
-                            tokens=token_count
-                        ))
+                        documents.append(ChatProfileDocument(id=file.stem, document_name=file.name, document_type=file.suffix[1:], size=file.stat().st_size, tokens=token_count))
 
                     except Exception as e:
                         log_exception(e, "document processing error")
@@ -144,17 +131,14 @@ class ChatProfileService:
                 "creator": "system",
                 "documents": [doc.model_dump() for doc in documents],
                 "tokens": total_tokens,
-                "user_id": "local"
+                "user_id": "local",
             }
 
-            (profile_dir / "profile.json").write_text(
-                json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-            )
+            (profile_dir / "profile.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
 
             self.store.save_profile(profile_id, profile_dir)
 
         return ChatProfile(**metadata)
-
 
     async def delete_profile(self, profile_id: str):
         try:
@@ -165,7 +149,7 @@ class ChatProfileService:
         except Exception as e:
             logger.exception(f"Unexpected error deleting profile {profile_id}")
             raise ChatProfileError("Unexpected error while deleting profile") from e
-    
+
     async def get_profile_with_markdown(self, profile_id: str) -> dict:
         """
         Load profile metadata and associated markdown content.
@@ -179,25 +163,13 @@ class ChatProfileService:
                 for filename, content in md_files:
                     markdown += f"\n\n# {filename}\n\n{content}"
 
-            return {
-                "id": profile_data["id"],
-                "title": profile_data.get("title", ""),
-                "description": profile_data.get("description", ""),
-                "markdown": markdown.strip()
-            }
+            return {"id": profile_data["id"], "title": profile_data.get("title", ""), "description": profile_data.get("description", ""), "markdown": markdown.strip()}
 
         except Exception as e:
             logger.error(f"Error loading profile with markdown: {e}")
             raise
 
-
-    async def update_profile(
-        self,
-        profile_id: str,
-        title: str,
-        description: str,
-        files: list[UploadFile]
-    ) -> ChatProfile:
+    async def update_profile(self, profile_id: str, title: str, description: str, files: list[UploadFile]) -> ChatProfile:
         try:
             try:
                 metadata = self.store.get_profile_description(profile_id)
@@ -226,14 +198,7 @@ class ChatProfileService:
                         processing_dir.mkdir(parents=True, exist_ok=True)
                         shutil.copy(file_path, processing_dir / file_path.name)
 
-                        self.processor.process(
-                            output_dir=processing_dir,
-                            input_file=file_path.name,
-                            input_file_metadata={
-                                "source_file": file_path.name,
-                                "document_uid": file_path.stem
-                            }
-                        )
+                        self.processor.process(output_dir=processing_dir, input_file=file_path.name, input_file_metadata={"source_file": file_path.name, "document_uid": file_path.stem})
 
                         md_output = next((processing_dir / "output").glob("*.md"), None)
                         if not md_output:
@@ -245,13 +210,7 @@ class ChatProfileService:
 
                         total_tokens += token_count
 
-                        doc = ChatProfileDocument(
-                            id=file_path.stem,
-                            document_name=file_path.name,
-                            document_type=file_path.suffix[1:],
-                            size=file_path.stat().st_size,
-                            tokens=token_count
-                        )
+                        doc = ChatProfileDocument(id=file_path.stem, document_name=file_path.name, document_type=file_path.suffix[1:], size=file_path.stat().st_size, tokens=token_count)
 
                         existing_documents[doc.id] = doc.model_dump()
                         processed_documents.append((doc.id, md_output))
@@ -281,9 +240,7 @@ class ChatProfileService:
                     shutil.copy(md_file, files_dir / f"{doc_id}.md")
 
                 # Save profile metadata
-                (profile_dir / "profile.json").write_text(
-                    json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
+                (profile_dir / "profile.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
                 self.store.save_profile(profile_id, profile_dir)
 
             return ChatProfile(**metadata)
@@ -293,7 +250,6 @@ class ChatProfileService:
         except Exception as e:
             logger.error(f"Unexpected error while updating profile '{profile_id}': {e}", exc_info=True)
             raise DocumentProcessingError("Unexpected internal error during profile update.") from e
-
 
     async def delete_document(self, profile_id: str, document_id: str):
         try:
@@ -350,9 +306,7 @@ class ChatProfileService:
                     except Exception as e:
                         logger.warning(f"Could not copy file {filename}: {e}")
 
-                (profile_dir / "profile.json").write_text(
-                    json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
+                (profile_dir / "profile.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
                 self.store.save_profile(profile_id, profile_dir)
 
             return {"success": True}
@@ -362,4 +316,3 @@ class ChatProfileService:
         except Exception as e:
             logger.exception(f"Unexpected error deleting document '{document_id}' from profile '{profile_id}'")
             raise DocumentDeletionError("Unexpected error during document deletion") from e
-

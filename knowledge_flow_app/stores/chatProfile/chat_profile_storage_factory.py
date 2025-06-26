@@ -21,6 +21,7 @@ from .base_chat_profile_store import BaseChatProfileStore
 from knowledge_flow_app.common.utils import validate_settings_or_exit
 from pathlib import Path
 
+
 def get_chat_profile_store() -> BaseChatProfileStore:
     config = ApplicationContext.get_instance().get_config()
     backend_type = config.chat_profile_storage.type
@@ -35,7 +36,7 @@ def get_chat_profile_store() -> BaseChatProfileStore:
             access_key=settings.minio_access_key,
             secret_key=settings.minio_secret_key,
             bucket_name=settings.minio_chat_profile_bucket_name,
-            secure=settings.minio_secure
+            secure=settings.minio_secure,
         )
     else:
         raise ValueError(f"Unsupported backend for chat profile: {backend_type}")

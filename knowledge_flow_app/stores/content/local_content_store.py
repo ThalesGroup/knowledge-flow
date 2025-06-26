@@ -18,7 +18,9 @@ from pathlib import Path
 from typing import BinaryIO
 
 from knowledge_flow_app.stores.content.base_content_store import BaseContentStore
+
 logger = logging.getLogger(__name__)
+
 
 class LocalStorageBackend(BaseContentStore):
     def __init__(self, destination_root: Path):
@@ -60,7 +62,6 @@ class LocalStorageBackend(BaseContentStore):
         else:
             logger.warning(f"⚠️ Tried to delete content for document {document_uid}, but it does not exist at {destination}")
 
-
     def get_content(self, document_uid: str) -> BinaryIO:
         """
         Returns a file stream (BinaryIO) for the first file in the `input` subfolder.
@@ -88,4 +89,3 @@ class LocalStorageBackend(BaseContentStore):
         except Exception as e:
             logger.error(f"Error reading markdown file for {document_uid}: {e}")
             raise
-

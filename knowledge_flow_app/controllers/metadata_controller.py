@@ -20,27 +20,30 @@ from pydantic import BaseModel
 from knowledge_flow_app.common.structures import Status
 from knowledge_flow_app.services.metadata_service import MetadataService
 from knowledge_flow_app.stores.content.content_storage_factory import get_content_store
-
-logger = logging.getLogger(__name__)
-# --- Flexible Response Models ---
 from threading import Lock
 
+logger = logging.getLogger(__name__)
+
 lock = Lock()
+
 
 class GetDocumentsMetadataResponse(BaseModel):
     """
     Response model for the endpoint that returns several documents' metadata.
-    
+
     The 'documents' field is a list of flexible dictionaries,
     allowing for various document metadata structures.
     """
+
     status: str
     documents: List[Dict[str, Any]]
+
 
 class DeleteDocumentMetadataResponse(BaseModel):
     """
     Response model for deleting a document's metadata.
     """
+
     status: str
     message: str
 
@@ -48,9 +51,10 @@ class DeleteDocumentMetadataResponse(BaseModel):
 class GetDocumentMetadataResponse(BaseModel):
     """
     Response model for retrieving metadata for a single document.
-    
+
     The 'metadata' field is a dictionary with arbitrary structure.
     """
+
     status: str
     metadata: Dict[str, Any]
 
@@ -59,6 +63,7 @@ class UpdateRetrievableRequest(BaseModel):
     """
     Request model used to update the 'retrievable' field of a document.
     """
+
     retrievable: bool
 
 
@@ -66,6 +71,7 @@ class UpdateDocumentRetrievableResponse(BaseModel):
     """
     Response model for updating the 'retrievable' field of a document.
     """
+
     status: str
     response: Any  # Can be a more specific type if needed
 
@@ -78,7 +84,7 @@ class MetadataController:
     - List document metadata with optional filters
     - Retrieve metadata for a specific document
     - Update specific metadata fields (e.g., 'retrievable')
-    
+
     This controller delegates all core logic to the MetadataService.
     """
 
@@ -95,12 +101,12 @@ class MetadataController:
                 "Provide an optional JSON body with filters.\n"
                 "Example:\n"
                 "{\n"
-                "   \"front_metadata\": {\"agent_name\": \"fred\"},\n"
-                "   \"retrievable\": true\n"
+                '   "front_metadata": {"agent_name": "fred"},\n'
+                '   "retrievable": true\n'
                 "}\n"
                 "If no filters are given, all documents are returned."
             ),
-            response_model=GetDocumentsMetadataResponse
+            response_model=GetDocumentsMetadataResponse,
         )
         def get_documents_metadata(filters: Dict[str, Any] = Body(default={})):
             """
@@ -117,20 +123,14 @@ class MetadataController:
                 result = self.service.get_documents_metadata(filters)
                 return result
             except Exception as e:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to fetch document metadata. Reason: {str(e)}"
-                )
+                raise HTTPException(status_code=500, detail=f"Failed to fetch document metadata. Reason: {str(e)}")
 
         @router.get(
             "/document/{document_uid}",
             tags=["Metadata"],
             summary="Get metadata for a specific document",
-            description=(
-                "Fetch metadata for a single document using its unique UID.\n\n"
-                "The returned metadata dictionary may contain any fields."
-            ),
-            response_model=GetDocumentMetadataResponse
+            description=("Fetch metadata for a single document using its unique UID.\n\nThe returned metadata dictionary may contain any fields."),
+            response_model=GetDocumentMetadataResponse,
         )
         def get_document_metadata(document_uid: str):
             """
@@ -149,11 +149,8 @@ class MetadataController:
             "/document/{document_uid}",
             tags=["Metadata"],
             summary="Update 'retrievable' field of a document",
-            description=(
-                "Set the 'retrievable' flag in a document's metadata. This flag indicates whether the document "
-                "can be queried or retrieved in downstream services."
-            ),
-            response_model=UpdateDocumentRetrievableResponse
+            description=("Set the 'retrievable' flag in a document's metadata. This flag indicates whether the document can be queried or retrieved in downstream services."),
+            response_model=UpdateDocumentRetrievableResponse,
         )
         def update_document_retrievable(document_uid: str, update: UpdateRetrievableRequest):
             """
@@ -175,11 +172,8 @@ class MetadataController:
             "/document/{document_uid}",
             tags=["Metadata"],
             summary="Delete document metadata",
-            description=(
-                "Deletes the metadata associated with the given document UID. "
-                "This operation is permanent and cannot be undone."
-            ),
-            response_model=DeleteDocumentMetadataResponse
+            description=("Deletes the metadata associated with the given document UID. This operation is permanent and cannot be undone."),
+            response_model=DeleteDocumentMetadataResponse,
         )
         def delete_document_metadata(document_uid: str):
             """
@@ -189,7 +183,7 @@ class MetadataController:
             - **document_uid**: The unique identifier for the document
             Returns:
             - **status**: "success" or "error"
-            - **message**: Confirmation message     
+            - **message**: Confirmation message
             """
             try:
                 # Acquire the lock to ensure thread safety
@@ -199,10 +193,7 @@ class MetadataController:
                     # Delete the document metadata and content
                     self.service.delete_document_metadata(document_uid)
                     self.content_store.delete_content(document_uid)
-                    return DeleteDocumentMetadataResponse(
-                        status=Status.SUCCESS,
-                        message=f"Metadata for document {document_uid} has been deleted."
-                    )
+                    return DeleteDocumentMetadataResponse(status=Status.SUCCESS, message=f"Metadata for document {document_uid} has been deleted.")
             except Exception as e:
                 logger.error(f"Failed to delete document metadata: {e}")
                 logger.exception(e)

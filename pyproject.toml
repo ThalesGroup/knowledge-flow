@@ -45,11 +45,14 @@ dependencies = [
 dev = [
   "pytest-cov==6.1.1",
   "reportlab==4.3.1",
+  "pytest==8.3.5",
   "pytest-asyncio==0.26.0",
   "black==23.1.0",
   "isort==5.10.1",
-  "pytest>=8.3.5,<9.0.0",
-  "pytest-cov>=6.1.1,<7.0.0"
+  "tox==4.27.0",
+  "pre-commit==4.2.0",
+  "bandit==1.8.5",
+  "ruff==0.12.0"
 ]
 
 [build-system]
@@ -59,9 +62,13 @@ packages = [
   { include = "knowledge_flow_app" }
 ]
 
+[tool.ruff]
+line-length = 200
+
 [tool.setuptools.packages.find]
 include = ["knowledge_flow_app*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
+cache_dir = "/tmp/.pytest"

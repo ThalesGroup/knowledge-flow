@@ -22,13 +22,14 @@ from knowledge_flow_app.config.embedding_openai_settings import EmbeddingOpenAIS
 
 logger = logging.getLogger(__name__)
 
+
 class OpenaiImageDescriber(BaseImageDescriber):
     def __init__(self):
         self.settings = EmbeddingOpenAISettings()
 
     def describe(self, image_base64: str) -> str:
         try:
-            image_bytes = base64.b64decode(image_base64)
+            base64.b64decode(image_base64)
 
             headers = {
                 "Authorization": f"Bearer {self.settings.openai_api_key}",
@@ -43,10 +44,7 @@ class OpenaiImageDescriber(BaseImageDescriber):
                         "content": [
                             {
                                 "type": "text",
-                                "text": (
-                                    "Describe the image in detail. "
-                                    "Start with 'There is an image showing...' and include structure, relationships, and context."
-                                ),
+                                "text": ("Describe the image in detail. Start with 'There is an image showing...' and include structure, relationships, and context."),
                             },
                             {
                                 "type": "image_url",
@@ -60,10 +58,12 @@ class OpenaiImageDescriber(BaseImageDescriber):
                 "max_tokens": 512,
             }
 
+            # TODO: set the timeout as a variable
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers=headers,
                 json=data,
+                timeout=120,
             )
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"].strip()

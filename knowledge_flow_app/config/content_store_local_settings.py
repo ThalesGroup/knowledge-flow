@@ -15,9 +15,8 @@
 # settings_minio.py
 
 from pathlib import Path
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict, Field
 import os
+
 
 class ContentStoreLocalSettings:
     def __init__(self):

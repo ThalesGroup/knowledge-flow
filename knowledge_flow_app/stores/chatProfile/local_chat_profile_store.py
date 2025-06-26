@@ -18,6 +18,7 @@ import shutil
 from pathlib import Path
 from typing import BinaryIO, List
 from .base_chat_profile_store import BaseChatProfileStore
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ class LocalChatProfileStore(BaseChatProfileStore):
         if not doc_path.exists():
             raise FileNotFoundError("Document not found in chat profile")
         return open(doc_path, "rb")
-    
+
     def list_profiles(self) -> List[dict]:
         profiles = []
         for dir_path in self.root_path.iterdir():
@@ -61,7 +62,6 @@ class LocalChatProfileStore(BaseChatProfileStore):
                     except Exception as e:
                         logger.error(f"Failed to load profile at {profile_path}: {e}", exc_info=True)
         return profiles
-
 
     def list_markdown_files(self, profile_id: str) -> list[tuple[str, str]]:
         """

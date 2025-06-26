@@ -13,23 +13,15 @@
 # limitations under the License.
 
 import logging
-from pathlib import Path
 from opensearchpy import OpenSearch, RequestsHttpConnection, OpenSearchException
 
 from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataStore
 
 logger = logging.getLogger(__name__)
 
-class OpenSearchMetadataStore(BaseMetadataStore):
 
-    def __init__(self, 
-                 host: str, 
-                 metadata_index_name: str,
-                 vector_index_name: str, 
-                 username: str = None,
-                 password: str = None,
-                 secure: bool = False,
-                 verify_certs: bool = False):
+class OpenSearchMetadataStore(BaseMetadataStore):
+    def __init__(self, host: str, metadata_index_name: str, vector_index_name: str, username: str = None, password: str = None, secure: bool = False, verify_certs: bool = False):
         self.client = OpenSearch(
             host,
             http_auth=(username, password),
@@ -46,7 +38,6 @@ class OpenSearchMetadataStore(BaseMetadataStore):
         else:
             logger.warning(f"Opensearch index '{metadata_index_name}' already exists.")
 
-
     def get_metadata_by_uid(self, document_uid: str) -> dict:
         """Fetch metadata of a specific document by UID."""
         try:
@@ -62,37 +53,28 @@ class OpenSearchMetadataStore(BaseMetadataStore):
         except Exception as e:
             logger.error(f"Error while retrieving metadata for UID '{document_uid}': {e}")
             return {}
-        
+
     def uid_exists(self, document_uid: str) -> bool:
         try:
             return self.client.exists(index=self.metadata_index_name, id=document_uid)
         except Exception as e:
             logger.error(f"Error while checking existence of UID '{document_uid}' in OpenSearch: {e}")
             return False
-        
+
     def write_metadata(self, document_uid: str, metadata: dict):
         """Write metadata to OpenSearch using the UID as document ID."""
         try:
-            response = self.client.index(
-                index=self.metadata_index_name,
-                id=document_uid,
-                body=metadata
-            )
+            response = self.client.index(index=self.metadata_index_name, id=document_uid, body=metadata)
             logger.info(f"Metadata written to index '{self.metadata_index_name}' for UID '{document_uid}'.")
             return response
         except OpenSearchException as e:
             logger.error(f"❌ Failed to write metadata with UID {document_uid}: {e}")
             raise ValueError(f"Failed to write metadata to Opensearch: {e}")
 
- 
     def update_metadata_field(self, document_uid: str, field: str, value: any):
         try:
             # 1) Partial update of the document in the metadata index
-            response_meta = self.client.update(
-                index=self.metadata_index_name,
-                id=document_uid,
-                body={"doc": {field: value}}
-            )
+            response_meta = self.client.update(index=self.metadata_index_name, id=document_uid, body={"doc": {field: value}})
             logger.info(f"[METADATA INDEX] Field '{field}' updated for UID '{document_uid}' => {value}")
             # 2) Update (in bulk) chunks in the "vector store" index
             #    - The Painless script will set `ctx._source.metadata.<field>`
@@ -105,32 +87,12 @@ class OpenSearchMetadataStore(BaseMetadataStore):
             #    - The `term` query is used to match the documents with the specified UID.
             #    - The `update_by_query` API is used to update all matching documents in the vector index.
             script_source = f"ctx._source.metadata.{field} = params.value"
-            query_body = {
-                "script": {
-                    "source": script_source,
-                    "lang": "painless",
-                    "params": {"value": value}
-                },
-                "query": {
-                    "term": {
-                        "metadata.document_uid": document_uid
-                    }
-                }
-            }
+            query_body = {"script": {"source": script_source, "lang": "painless", "params": {"value": value}}, "query": {"term": {"metadata.document_uid": document_uid}}}
 
-            response_vector = self.client.update_by_query(
-                index=self.vector_index_name,
-                body=query_body
-            )
-            logger.info(
-                f"[VECTOR INDEX] Field 'metadata.{field}' updated for "
-                f"all chunks with UID='{document_uid}' => {value}"
-            )
+            response_vector = self.client.update_by_query(index=self.vector_index_name, body=query_body)
+            logger.info(f"[VECTOR INDEX] Field 'metadata.{field}' updated for all chunks with UID='{document_uid}' => {value}")
 
-            return {
-                "metadata_index_response": response_meta,
-                "vector_index_response": response_vector
-            }
+            return {"metadata_index_response": response_meta, "vector_index_response": response_vector}
         except Exception as e:
             logger.error(f"Error while updating field '{field}' for UID '{document_uid}': {e}")
             raise e
@@ -146,9 +108,7 @@ class OpenSearchMetadataStore(BaseMetadataStore):
             # For each parameter, build a term query
             # Ex.: field_name="GBU", field_value="TAS"
             for field_name, field_value in filters_dict.items():
-                clause = {
-                    "term": {f"front_metadata.{field_name}.keyword": field_value}
-                }
+                clause = {"term": {f"front_metadata.{field_name}.keyword": field_value}}
                 must_clauses.append(clause)
 
             if not must_clauses:
@@ -158,23 +118,10 @@ class OpenSearchMetadataStore(BaseMetadataStore):
             else:
                 # Combine all filters into a bool must
                 # This will return documents that match all the filters
-                query = {
-                    "bool": {
-                        "must": must_clauses
-                    }
-                }
+                query = {"bool": {"must": must_clauses}}
 
             response = self.client.search(
-                index=self.metadata_index_name,
-                body={"query": query},
-                _source=[
-                    "document_name", 
-                    "document_uid", 
-                    "date_added_to_kb", 
-                    "retrievable", 
-                    "front_metadata"
-                ],
-                size=1000
+                index=self.metadata_index_name, body={"query": query}, _source=["document_name", "document_uid", "date_added_to_kb", "retrievable", "front_metadata"], size=1000
             )
 
             hits = response["hits"]["hits"]
@@ -192,7 +139,7 @@ class OpenSearchMetadataStore(BaseMetadataStore):
         except Exception as e:
             logger.error(f"Error while retrieving metadata: {e}")
             return []
-        
+
     def delete_metadata(self, metadata: dict):
         """Delete metadata from OpenSearch using the UID."""
         try:
@@ -205,13 +152,7 @@ class OpenSearchMetadataStore(BaseMetadataStore):
             logger.info(f"Metadata with UID '{document_uid}' deleted from index '{self.metadata_index_name}'.")
 
             # Delete from the vector index
-            query_delete_document_vector_index = {
-                "query": {
-                    "match": {
-                        "metadata.document_uid": document_uid
-                    }
-                }
-            }
+            query_delete_document_vector_index = {"query": {"match": {"metadata.document_uid": document_uid}}}
             self.client.delete_by_query(index=self.vector_index_name, body=query_delete_document_vector_index)
             logger.info(f"Metadata with UID '{document_uid}' deleted from index '{self.vector_index_name}'.")
 
@@ -228,5 +169,5 @@ class OpenSearchMetadataStore(BaseMetadataStore):
         try:
             self.write_metadata(document_uid=metadata.get("document_uid"), metadata=metadata)
         except Exception as e:
-            logger.error(f"❌ Failed to write metadata with UID {metadata.get("document_uid")}: {e}")
+            logger.error(f"❌ Failed to write metadata with UID {metadata.get('document_uid')}: {e}")
             raise ValueError(e)

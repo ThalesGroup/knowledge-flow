@@ -18,6 +18,7 @@ from fastapi import UploadFile
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor, BaseTabularProcessor
 
+
 class InputProcessorService:
     """
     Input Processor Service
@@ -31,7 +32,8 @@ class InputProcessorService:
     that can be used by the output processors. As of now, tere are only two output processors:
     1. Markdown processor: generates a well structured markdown file from the input file.
     2. Tabular processor: generates a well structured tabular CSV like format.
-    """ 
+    """
+
     def __init__(self):
         self.context = ApplicationContext.get_instance()
 
@@ -49,11 +51,8 @@ class InputProcessorService:
             raise ValueError("Metadata extraction failed: missing 'document_uid'")
 
         return metadata
-    
-    def process(self, 
-                output_dir: pathlib.Path, 
-                input_file: str,
-                input_file_metadata: dict) -> None:
+
+    def process(self, output_dir: pathlib.Path, input_file: str, input_file_metadata: dict) -> None:
         """
         Processes input document
         ------------------------------------------------------
@@ -117,4 +116,3 @@ class InputProcessorService:
             json.dump(metadata, meta_file, indent=4, ensure_ascii=False)
 
         processor.convert_file_to_markdown(file_path, document_dir)
-

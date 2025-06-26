@@ -16,6 +16,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import BinaryIO, List
 
+
 class BaseChatProfileStore(ABC):
     @abstractmethod
     def save_profile(self, profile_id: str, directory: Path) -> None:
@@ -44,7 +45,7 @@ class BaseChatProfileStore(ABC):
         Fetch a specific markdown document related to the profile.
         """
         pass
-    
+
     @abstractmethod
     def list_markdown_files(self, profile_id: str) -> list[tuple[str, str]]:
         """
