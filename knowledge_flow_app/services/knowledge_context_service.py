@@ -35,7 +35,7 @@ def count_tokens_from_markdown(md_path: Path) -> int:
     return count_tokens(text)
 
 
-class ChatProfileService:
+class KnowledgeContextService:
     def __init__(self):
         self.store = get_knowledge_context_store()
         self.processor = InputProcessorService()
