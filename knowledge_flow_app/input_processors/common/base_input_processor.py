@@ -35,9 +35,7 @@ class BaseInputProcessor(ABC):
         This identifier is used to track the file in the system.
         """
         #return shortuuid.uuid()
-        logger.error(f"MEEEERDE: {front_metadata}")
         agent_name = front_metadata.get("agent_name", "unknown")
-       
         document_name = metadata.get("document_name", "")
         # Combine both fields into a deterministic string
         identifier_str = f"{agent_name}::{document_name}"

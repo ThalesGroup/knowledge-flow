@@ -29,7 +29,7 @@ class AzureApimEmbedder(Embeddings):
     """
 
     def __init__(self, settings: EmbeddingAzureApimSettings):
-        logger.info("✅ MEEEEEEEERDE Initializing Azure APIM Embedder")
+        logger.info("✅ Initializing Azure APIM Embedder")
         self.settings = settings
 
     def _get_bearer_token(self) -> str:
