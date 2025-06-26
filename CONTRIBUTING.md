@@ -92,7 +92,8 @@ To ensure the code you are about to push is quite clean and safe, we provide som
 
 - Check PEP8 compliance and fix errors if possible: `ruff check --fix`
 - Format the code: `ruff format`
-- Detect secrets: `detect-secrets`  # pragma: allowlist secret
+- Detect secrets: `detect-secrets`  # pragma: allowlist secre
+
 - Analyzer the code: `bandit`
 
 To install the pre commit hooks on your environment after it is ready (see the `dev` target of the Makefile), type this command:
@@ -140,17 +141,6 @@ pre-commit run --all-files
 
 - Extension for easier commit writing : [VSCode Conventional Commits](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
 - Extansion for ruff (python linter and formatter) : [Ruff extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) 
-
-Your `.vscode/extensions.json` might contain:
-```json
-{
-  "recommendations": [
-    ...    
-    "vivaxy.vscode-conventional-commits",
-    "charliermarsh.ruff"
-  ]
-}
-```
 
 ### Clean Commit History
 
