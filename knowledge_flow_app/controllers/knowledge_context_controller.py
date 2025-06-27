@@ -44,6 +44,7 @@ class KnowledgeContextController:
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Failed to load knowledgeContext: {str(e)}")
 
+        # @TODO rather that landing on this endpoint, land on an IngestionController
         @router.post("/knowledgeContexts")
         async def create_knowledge_context(
             title: str = Form(...),

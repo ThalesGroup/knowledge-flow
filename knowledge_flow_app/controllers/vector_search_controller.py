@@ -67,7 +67,8 @@ class VectorSearchController:
 
     def __init__(self, router: APIRouter):
         self.service = VectorSearchService()
-
+        # @TODO Add a route to select the right vector search: library & workspace
+        # Maybe Create a VectorSearch interface or 2 different services.
         @router.post("/vector/search", 
                  tags=["Vector Search"],
                  summary="Search documents using vectorization",

@@ -52,7 +52,7 @@ class KnowledgeContextService:
                 knowledgeContext_data["user_id"] = knowledgeContext_data.get("user_id", "local")
                 knowledgeContext_data["tokens"] = knowledgeContext_data.get("tokens", 0)
                 knowledgeContext_data["creator"] = knowledgeContext_data.get("creator", "system")
-
+                # @TODO: Add workspace_id in metadata
                 documents = []
                 if "documents" in knowledgeContext_data:
                     documents = [KnowledgeContextDocument(**doc) for doc in knowledgeContext_data["documents"]]

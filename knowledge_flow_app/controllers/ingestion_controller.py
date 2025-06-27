@@ -62,7 +62,15 @@ class StatusAwareStreamingResponse(StreamingResponse):
         if not self.all_success_flag[0]:
             self.status_code = 422  # or 207 if you prefer partial success
 
-
+"""
+We also want to use it to ingest workspace data
+@TODO: 
+- Add keycloak authentication
+    - needs user_id/user.email in chunk metadata
+    - needs workspace_id (created by create_workspace)
+- Need isProfile/Document or isContext to handle multiple document "source". Maybe have 2 different endpoints or a conditional single one
+- Add workspace_id in knowledge_flow request param
+"""
 class IngestionController:
     """
     Controller responsible for uploading documents, executing the ingestion pipeline,
@@ -139,6 +147,7 @@ class IngestionController:
                                                 filename=filename).model_dump_json() + "\n"
 
                         # Step 5: Metadata saving
+                        # @TODO: Add user_id & workspace_id & KnowledgeContext attr from knowledge_flow_app.common.structures 
                         current_step = "metadata saving"
                         self.metadata_store.save_metadata(metadata=metadata)
                         logger.info(f"Metadata saved for {filename}: {metadata}")
@@ -146,6 +155,7 @@ class IngestionController:
                                                 status=Status.SUCCESS,
                                                 document_uid=metadata["document_uid"],
                                                 filename=filename).model_dump_json() + "\n"
+
                         # Step 6: Uploading to backend storage
                         current_step = "raw content saving"
                         self.content_store.save_content(metadata.get("document_uid"), output_temp_dir)
