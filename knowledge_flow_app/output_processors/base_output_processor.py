@@ -17,6 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BaseOutputProcessor(ABC):
     """
     Base output Processor
@@ -30,6 +31,7 @@ class BaseOutputProcessor(ABC):
     - Testability: enables unit testing of post-processing logic without involving actual file I/O.
     - Uniformity: keeps the processing pipeline modular and easy to extend.
     """
+
     @abstractmethod
     def process(self, file_path: str, metadata: dict):
         """

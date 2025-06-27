@@ -62,6 +62,7 @@ EXTENSION_CATEGORY = {
 
 logger = logging.getLogger(__name__)
 
+
 def validate_input_processor_config(config: Configuration):
     """Ensure all input processor classes can be imported and subclass BaseProcessor."""
     for entry in config.input_processors:
@@ -74,6 +75,7 @@ def validate_input_processor_config(config: Configuration):
             logger.debug(f"Validated input processor: {entry.class_path} for prefix: {entry.prefix}")
         except (ImportError, AttributeError, TypeError) as e:
             raise ImportError(f"Input Processor '{entry.class_path}' could not be loaded: {e}")
+
 
 def validate_output_processor_config(config: Configuration):
     """Ensure all output processor classes can be imported and subclass BaseProcessor."""
@@ -95,7 +97,6 @@ class ApplicationContext:
     _instance: Optional["ApplicationContext"] = None
     _output_processor_instances: Dict[str, BaseOutputProcessor] = {}
     _vector_store_instance: Optional[BaseVectoreStore] = None
-
 
     def __init__(self, config: Configuration):
         # Allow reuse if already initialized with same config
@@ -126,16 +127,16 @@ class ApplicationContext:
 
         if processor_class is None:
             raise ValueError(f"No output processor found for extension '{extension}'")
-        
+
         class_path = f"{processor_class.__module__}.{processor_class.__name__}"
 
         if class_path not in self._output_processor_instances:
             logger.debug(f"Creating new instance of output processor: {class_path}")
             self._output_processor_instances[class_path] = processor_class()
-        
+
         return self._output_processor_instances[class_path]
-    
-    def get_input_processor_instance(self, extension: str) -> BaseInputProcessor:   
+
+    def get_input_processor_instance(self, extension: str) -> BaseInputProcessor:
         """
         Get an instance of the input processor for a given file extension.
         This method ensures that the processor is instantiated only once per class path.
@@ -150,14 +151,14 @@ class ApplicationContext:
 
         if processor_class is None:
             raise ValueError(f"No input processor found for extension '{extension}'")
-        
+
         class_path = f"{processor_class.__module__}.{processor_class.__name__}"
 
         if class_path not in self._output_processor_instances:
             logger.debug(f"Creating new instance of input processor: {class_path}")
             self._output_processor_instances[class_path] = processor_class()
-        
-        return self._output_processor_instances[class_path] 
+
+        return self._output_processor_instances[class_path]
 
     @classmethod
     def get_instance(cls) -> "ApplicationContext":
@@ -185,7 +186,7 @@ class ApplicationContext:
             logger.debug(f"Loaded input processor: {entry.class_path} for prefix: {entry.prefix}")
             registry[entry.prefix.lower()] = cls
         return registry
-    
+
     def _load_output_processor_registry(self) -> Dict[str, Type[BaseOutputProcessor]]:
         registry = {}
         if not self.config.output_processors:
@@ -211,7 +212,7 @@ class ApplicationContext:
             Optional[Type[BaseInputProcessor]]: The input processor class, or None if not found.
         """
         return self.input_processor_registry.get(extension.lower())
-    
+
     def _get_output_processor_class(self, extension: str) -> Optional[Type[BaseOutputProcessor]]:
         """
         Get the output processor class for a given file extension. The mapping is
@@ -231,7 +232,7 @@ class ApplicationContext:
             default_class_path = DEFAULT_OUTPUT_PROCESSORS.get(category)
             if default_class_path:
                 return self._dynamic_import(default_class_path)
-    
+
         raise ValueError(f"No output processor found for extension '{extension}'")
 
     def _dynamic_import(self, class_path: str) -> Type:
@@ -241,7 +242,6 @@ class ApplicationContext:
         cls = getattr(module, class_name)
         return cls
 
-    
     def get_embedder(self) -> BaseEmbeddingModel:
         """
         Factory method to create an embedding model instance based on the configuration.
@@ -263,21 +263,23 @@ class ApplicationContext:
                 embedding_params["openai_api_version"] = settings.openai_api_version
 
             return Embedder(OpenAIEmbeddings(**embedding_params))
-        
+
         elif backend_type == "azureopenai":
             openai_settings = EmbeddingAzureOpenAISettings()
-            return Embedder(AzureOpenAIEmbeddings(
+            return Embedder(
+                AzureOpenAIEmbeddings(
                     deployment=openai_settings.azure_deployment_embedding,
                     openai_api_type="azure",
                     azure_endpoint=openai_settings.azure_openai_base_url,
                     openai_api_version=openai_settings.azure_api_version,
                     openai_api_key=openai_settings.azure_openai_api_key,
-            ))
-        
+                )
+            )
+
         elif backend_type == "azureapim":
             settings = validate_settings_or_exit(EmbeddingAzureApimSettings, "Azure APIM Embedding Settings")
             return AzureApimEmbedder(settings)
-        
+
         elif backend_type == "ollama":
             ollama_settings = OllamaSettings()
             embedding_params = {
@@ -285,12 +287,11 @@ class ApplicationContext:
             }
             if ollama_settings.api_url:
                 embedding_params["base_url"] = ollama_settings.api_url
-            
+
             return Embedder(OllamaEmbeddings(**embedding_params))
 
         else:
             raise ValueError(f"Unsupported embedding backend: {backend_type}")
-
 
     def get_vector_store(self, embedding_model: BaseEmbeddingModel) -> BaseVectoreStore:
         """
@@ -300,8 +301,8 @@ class ApplicationContext:
         This method creates a vector store instance based on the configuration.
 
         Usage:
-        
-            # In your main service (example)   
+
+            # In your main service (example)
             embedder = application_context.get_embedder()
 
             # Used in your business logic
@@ -333,14 +334,14 @@ class ApplicationContext:
         """
         # TODO: In future we can allow other backends, based on config.
         return LocalFileLoader()
-    
+
     def get_text_splitter(self) -> BaseTextSplitter:
         """
         Factory method to create a text splitter instance based on configuration.
         Currently returns RecursiveSplitter.
         """
         return RecursiveSplitter()
-    
+
     def _log_sensitive(self, name: str, value: Optional[str]):
         logger.info(f"     ↳ {name} set: {'✅' if value else '❌'}")
 
@@ -393,7 +394,7 @@ class ApplicationContext:
 
         content_type = self.config.content_storage.type
         logger.info(f"  📁 Content storage backend: {content_type}")
-        
+
         knowledge_context_type = self.config.knowledge_context_storage.type
         logger.info(f"  📁 Knwoledge context storage backend: {knowledge_context_type}")
 
@@ -417,9 +418,5 @@ class ApplicationContext:
 
         logger.info("--------------------------------------------------")
 
-
     def get_knowledge_context_max_tokens(self) -> int:
         return self.config.knowledge_context_max_tokens
-
-
-

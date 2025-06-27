@@ -12,7 +12,7 @@ TARGET=$(CURDIR)/target
 VENV=$(CURDIR)/.venv
 PIP=$(VENV)/bin/pip
 PYTHON=$(VENV)/bin/python
-UV=$(VENV)/bin/uv
+UV=uv
 
 IMG=$(PROJECT_REGISTRY)/$(PROJECT_NAME):$(VERSION)
 HELM_ARCHIVE=./knowledge_flow_app-0.1.0.tgz
@@ -153,6 +153,30 @@ clean-pyc: ## Clean Python bytecode
 clean-test: ## Clean test cache
 	@echo "************ CLEANING TESTS ************"
 	rm -rf .tox .coverage htmlcov $(TARGET)/.tested
+
+##@ Code quality
+
+.PHONY: lint lint-fix format sast code-quality
+
+lint: ## Run the linter (ruff) on all the project
+	@echo "************ Executing Ruff linter ************"
+	$(UV) run ruff check
+
+lint-fix: ## Run the linter (ruff) to fix all the auto fixable linter error
+	@echo "************ Executing Ruff linter and apply fix if possible ************"
+	$(UV) run ruff check --fix
+
+format: ## Run the formatter (ruff)
+	@echo "************ Executing Ruff formatter ************"
+	$(UV) run ruff format
+
+sast: ## Run bandit
+	@echo "************ Executing Ruff formatter with rules B101 (assert_used) and B108 (hardcoded_tmp_directory) ignored ************"
+	$(UV) run bandit -r knowledge_flow_app -s B101,B108
+
+code-quality: ## Run all pre-commit checks
+	@echo "************ Executing pre-commit ************"
+	$(UV) run pre-commit run --all-files
 
 ##@ Review 
 

@@ -26,7 +26,9 @@ from knowledge_flow_app.services.ingestion_service import IngestionService
 from knowledge_flow_app.services.input_processor_service import InputProcessorService
 from knowledge_flow_app.stores.content.content_storage_factory import get_content_store
 from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
+
 logger = logging.getLogger(__name__)
+
 
 class ProcessingProgress(BaseModel):
     """
@@ -38,6 +40,7 @@ class ProcessingProgress(BaseModel):
         status (str): The status of the processing operation.
         document_uid (Optional[str]): A unique identifier for the document, if available.
     """
+
     step: str
     filename: str
     status: Status
@@ -52,6 +55,7 @@ class StatusAwareStreamingResponse(StreamingResponse):
     This is useful for streaming responses where the final status may not be known
     until the generator has completed.
     """
+
     def __init__(self, content: Generator, all_success_flag: list, **kwargs):
         super().__init__(content, media_type="application/x-ndjson", **kwargs)
         self.all_success_flag = all_success_flag
@@ -69,6 +73,7 @@ class IngestionController:
     and if all goes well, storing the documents in the configured backend storage.
     It also handles the metadata extraction and storage.
     """
+
     def __init__(self, router: APIRouter):
         self.context = ApplicationContext.get_instance()
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -77,14 +82,15 @@ class IngestionController:
         self.content_store = get_content_store()
         self.input_processor_service = InputProcessorService()
         self.output_processor_service = OutputProcessorService()
-       
-       # self.vectorization_pipeline = VectorizationPipeline()
+
+        # self.vectorization_pipeline = VectorizationPipeline()
         logger.info("IngestionController initialized.")
 
-        @router.post("/process-files", 
-                     tags=["Ingestion"])
-        def stream_process(files: List[UploadFile] = File(...),
-                           metadata_json: str = Form(...),) -> StreamingResponse:
+        @router.post("/process-files", tags=["Ingestion"])
+        def stream_process(
+            files: List[UploadFile] = File(...),
+            metadata_json: str = Form(...),
+        ) -> StreamingResponse:
             input_metadata = json.loads(metadata_json)
             agent_name = input_metadata.get("agent_name")
             logger.info(f"Agent name received: {agent_name}")
@@ -94,7 +100,7 @@ class IngestionController:
             preloaded_files = []
             for file in files:
                 input_temp_file = self.ingestion_service.save_file_to_temp(file)
-                logger.info(f"File {file.filename} saved to temp storage at {input_temp_file}")  
+                logger.info(f"File {file.filename} saved to temp storage at {input_temp_file}")
                 preloaded_files.append((file.filename, input_temp_file))
             all_success_flag = [False]  # Track success across all files
 
@@ -108,10 +114,7 @@ class IngestionController:
                         # Step 2: Metadata extraction
                         metadata = self.input_processor_service.extract_metadata(input_temp_file, input_metadata)
                         logger.info(f"Metadata extracted for {filename}: {metadata}")
-                        yield ProcessingProgress(step=current_step,
-                                                status=Status.SUCCESS,
-                                                document_uid=metadata["document_uid"],
-                                                filename=filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=Status.SUCCESS, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
 
                         # check if metadata is already known if so delete it to replace it and process the
                         # document again
@@ -124,46 +127,30 @@ class IngestionController:
                         current_step = "document knowledge extraction"
                         self.input_processor_service.process(output_temp_dir, input_temp_file, metadata)
                         logger.info(f"Document processed for {filename}: {metadata}")
-                        yield ProcessingProgress(step=current_step,
-                                                status=Status.SUCCESS,
-                                                document_uid=metadata["document_uid"],
-                                                filename=filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=Status.SUCCESS, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
 
                         # Step 4: Post-processing (optional)
                         current_step = "knowledge post processing"
                         vectorization_response = self.output_processor_service.process(output_temp_dir, input_temp_file, metadata)
                         logger.info(f"Post-processing completed for {filename}: {metadata} with chunks {vectorization_response.chunks}")
-                        yield ProcessingProgress(step=current_step,
-                                                status=vectorization_response.status,
-                                                document_uid=metadata["document_uid"],
-                                                filename=filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=vectorization_response.status, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
 
                         # Step 5: Metadata saving
                         current_step = "metadata saving"
                         self.metadata_store.save_metadata(metadata=metadata)
                         logger.info(f"Metadata saved for {filename}: {metadata}")
-                        yield ProcessingProgress(step=current_step,
-                                                status=Status.SUCCESS,
-                                                document_uid=metadata["document_uid"],
-                                                filename=filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=Status.SUCCESS, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
                         # Step 6: Uploading to backend storage
                         current_step = "raw content saving"
                         self.content_store.save_content(metadata.get("document_uid"), output_temp_dir)
-                        yield ProcessingProgress(step=current_step,
-                                                status=Status.SUCCESS,
-                                                document_uid=metadata["document_uid"],
-                                                filename=filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=Status.SUCCESS, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
                         # ✅ At least one file succeeded
                         all_success_flag[0] = True
                     except Exception as e:
                         logger.exception(f"Failed to process {file.filename}")
                         # Send detailed error message (safe for frontend)
                         error_message = f"{type(e).__name__}: {str(e).strip() or 'No error message'}"
-                        yield ProcessingProgress(step=current_step,
-                                                status=Status.ERROR,
-                                                error=error_message,
-                                                filename=file.filename).model_dump_json() + "\n"
+                        yield ProcessingProgress(step=current_step, status=Status.ERROR, error=error_message, filename=file.filename).model_dump_json() + "\n"
                 yield json.dumps({"step": "done", "status": Status.SUCCESS if all_success_flag[0] else "error"}) + "\n"
 
             return StatusAwareStreamingResponse(event_generator(), all_success_flag=all_success_flag)
-

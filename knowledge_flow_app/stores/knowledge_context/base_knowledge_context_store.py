@@ -16,6 +16,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import BinaryIO, List
 
+
 class BaseKnowledgeContextStore(ABC):
     @abstractmethod
     def save_knowledge_context(self, knowledge_context_id: str, directory: Path) -> None:
@@ -44,7 +45,7 @@ class BaseKnowledgeContextStore(ABC):
         Fetch a specific markdown document related to the knowledge_context.
         """
         pass
-    
+
     @abstractmethod
     def list_markdown_files(self, knowledge_context_id: str) -> list[tuple[str, str]]:
         """
@@ -58,7 +59,7 @@ class BaseKnowledgeContextStore(ABC):
         Returns a list of context with the right tag (workspace or chat_profile).
         """
         pass
-    
+
     @abstractmethod
     def delete_markdown_file(self, knowledge_context_id: str, document_name: str) -> None:
         pass

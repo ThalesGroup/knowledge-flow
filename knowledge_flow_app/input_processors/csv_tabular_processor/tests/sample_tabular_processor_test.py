@@ -23,7 +23,7 @@ from knowledge_flow_app.input_processors.csv_tabular_processor.csv_tabular_proce
 def test_valid_csv():
     processor = CsvTabularProcessor()
     content = "name,age\nAlice,30\nBob,25"
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.csv') as f:
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".csv") as f:
         f.write(content)
         temp_path = Path(f.name)
 
@@ -33,7 +33,7 @@ def test_valid_csv():
     assert df.shape == (2, 2)
 
     metadata = processor.extract_file_metadata(temp_path)
-    assert metadata['num_columns'] == 2
-    assert metadata['sample_columns'] == ['name', 'age']
+    assert metadata["num_columns"] == 2
+    assert metadata["sample_columns"] == ["name", "age"]
 
     temp_path.unlink()

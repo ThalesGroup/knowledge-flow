@@ -19,17 +19,17 @@ from langchain.schema.document import Document
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import Status, VectorizationResponse
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
-from knowledge_flow_app.output_processors.vectorization_processor.interfaces import BaseDocumentLoader, BaseEmbeddingModel, BaseTextSplitter, BaseVectoreStore
-from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataStore
 from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
 
 logger = logging.getLogger(__name__)
+
 
 class VectorizationProcessor(BaseOutputProcessor):
     """
     A pipeline for vectorizing documents.
     It orchestrates the loading, splitting, embedding, and storing of document vectors.
     """
+
     def __init__(self):
         self.context = ApplicationContext.get_instance()
         self.file_loader = self.context.get_document_loader()
@@ -47,7 +47,6 @@ class VectorizationProcessor(BaseOutputProcessor):
         self.metadata_store = get_metadata_store()
         logger.info(f"📝 Metadata store initialized: {self.metadata_store.__class__.__name__}")
 
-
     def process(self, file_path: str, metadata: dict):
         """
         Process a document for vectorization.
@@ -61,7 +60,7 @@ class VectorizationProcessor(BaseOutputProcessor):
         return self._vectorize_document(file_path, metadata)
 
     def _vectorize_document(
-            self,
+        self,
         file_path: str,
         metadata: dict,
     ) -> VectorizationResponse:
@@ -87,8 +86,8 @@ class VectorizationProcessor(BaseOutputProcessor):
             logger.info(f"Document split into {len(chunks)} chunks.")
 
             # 3. Embed the chunks
-            #embedded_chunks = embedder.embed_documents(chunks)
-            #logger.info(f"{len(embedded_chunks)} chunks embedded.")
+            # embedded_chunks = embedder.embed_documents(chunks)
+            # logger.info(f"{len(embedded_chunks)} chunks embedded.")
 
             # 4. Check if document already exists
             document_uid = metadata.get("document_uid")
@@ -105,20 +104,14 @@ class VectorizationProcessor(BaseOutputProcessor):
             # 5. Store embeddings
             try:
                 for i, doc in enumerate(chunks):
-                    logger.info(
-                        f"[Chunk {i}] Document content preview: {doc.page_content[:100]!r} | "
-                        f"Metadata: {doc.metadata}"
-                )
+                    logger.info(f"[Chunk {i}] Document content preview: {doc.page_content[:100]!r} | Metadata: {doc.metadata}")
                 result = self.vector_store.add_documents(chunks)
                 logger.debug(f"Documents added to Vector Store: {result}")
             except Exception as e:
                 logger.exception("Failed to add documents to OpenSearch: %s", e)
                 raise HTTPException(status_code=500, detail="Failed to add documents to OpenSearch") from e
 
-            return VectorizationResponse(
-                status=Status.SUCCESS,
-                chunks=len(chunks)
-            )
+            return VectorizationResponse(status=Status.SUCCESS, chunks=len(chunks))
 
         except Exception as e:
             logger.exception(f"Error during vectorization: {e}")

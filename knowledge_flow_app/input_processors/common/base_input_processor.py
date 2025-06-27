@@ -15,7 +15,6 @@
 import hashlib
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
 from pathlib import Path
 import pandas
 
@@ -29,17 +28,18 @@ class BaseInputProcessor(ABC):
     Base class for all processors that handle file metadata extraction and processing.
     This class provides a common interface and utility methods for file processing.
     """
+
     def _generate_file_unique_id(self, metadata: dict, front_metadata: dict) -> str:
         """
         Generate a unique identifier for the file based on its metadata.
         This identifier is used to track the file in the system.
         """
-        #return shortuuid.uuid()
+        # return shortuuid.uuid()
         agent_name = front_metadata.get("agent_name", "unknown")
         document_name = metadata.get("document_name", "")
         # Combine both fields into a deterministic string
         identifier_str = f"{agent_name}::{document_name}"
-        return hashlib.sha256(identifier_str.encode('utf-8')).hexdigest()
+        return hashlib.sha256(identifier_str.encode("utf-8")).hexdigest()
 
     def _add_common_metadata(self, file_path: Path, front_metadata: dict) -> dict:
         common_metadata = {
@@ -51,11 +51,7 @@ class BaseInputProcessor(ABC):
         return common_metadata
 
     def _sanitize_front_metadata(self, front_metadata: dict) -> dict:
-        sanitized = {
-            key.replace(' ', '_'): (value if value else "unknown")
-            for key, value in front_metadata.items()
-            if value not in (None, '', [], {})
-        }
+        sanitized = {key.replace(" ", "_"): (value if value else "unknown") for key, value in front_metadata.items() if value not in (None, "", [], {})}
         return sanitized
 
     def validate_metadata(self, metadata: dict) -> None:
@@ -112,11 +108,7 @@ class BaseMarkdownProcessor(BaseInputProcessor):
     """For processors that convert to Markdown."""
 
     @abstractmethod
-    def convert_file_to_markdown(
-        self, 
-        file_path: Path, 
-        output_dir: Path
-    ) -> dict:
+    def convert_file_to_markdown(self, file_path: Path, output_dir: Path) -> dict:
         """
         Convert the input file to a Markdown format and save it in the output directory.
         Args:

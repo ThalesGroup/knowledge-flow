@@ -19,6 +19,7 @@ from pathlib import Path
 
 from knowledge_flow_app.input_processors.text_markdown_processor.text_markdown_processor import TextMarkdownProcessor
 
+
 def test_sample_markdown_processor_end_to_end():
     processor = TextMarkdownProcessor()
     test_content = "This is a test document.\nIt should become markdown."
@@ -40,7 +41,5 @@ def test_sample_markdown_processor_end_to_end():
 
         output_dir.mkdir(parents=True, exist_ok=True)  # Ensure output_dir exists
         # Convert to markdown
-        result = processor.convert_file_to_markdown(
-            input_file, output_dir
-        )
+        result = processor.convert_file_to_markdown(input_file, output_dir)
         assert Path(result["md_file"]).exists()

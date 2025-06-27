@@ -15,6 +15,7 @@
 from pathlib import Path
 import os
 
+
 class MetadataStoreLocalSettings:
     def __init__(self):
         env_value = os.getenv("LOCAL_METADATA_STORAGE_PATH")

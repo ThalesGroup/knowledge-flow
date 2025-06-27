@@ -19,6 +19,7 @@ import requests
 from knowledge_flow_app.config.ollama_settings import OllamaSettings
 from knowledge_flow_app.input_processors.common.base_image_describer import BaseImageDescriber
 
+
 class OllamaImageDescriber(BaseImageDescriber):
     def __init__(self, settings: OllamaSettings | None = None):
         self.settings = settings or OllamaSettings()
@@ -43,10 +44,11 @@ class OllamaImageDescriber(BaseImageDescriber):
                 Do not include any code or markdown formatting.
                 Do not include any image URLs or references.
             """,
-            "images": [image_base64]
+            "images": [image_base64],
         }
         url = f"{self.settings.api_url}/api/generate"
-        response = requests.post(url, json=payload)
+        # TODO: set the timeout as a variable
+        response = requests.post(url, json=payload, timeout=120)
 
         description = ""
         for line in response.iter_lines():

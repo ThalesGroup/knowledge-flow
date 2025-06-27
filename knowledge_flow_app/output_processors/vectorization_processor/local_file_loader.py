@@ -24,12 +24,13 @@ class LocalFileLoader(BaseDocumentLoader):
     -------------------
     LocalFileLoader is a concrete implementation of DocumentLoaderInterface.
     It loads documents from a local file system. It reads the file content and wraps it in a LangChain Document.
-    
+
     This class is designed to be used in a vectorization pipeline where documents need to be loaded,
     processed, and stored in a vector store.
 
     It is a simple implementation that does not require any external dependencies.
     """
+
     def load(self, file_path: str, metadata: dict) -> Document:
         """
         Load a document from a local file and wrap it as a LangChain Document.
@@ -41,7 +42,4 @@ class LocalFileLoader(BaseDocumentLoader):
 
         content = path.read_text(encoding="utf-8")
 
-        return Document(
-            page_content=content,
-            metadata=metadata
-        )
+        return Document(page_content=content, metadata=metadata)

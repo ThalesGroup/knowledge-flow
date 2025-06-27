@@ -22,11 +22,13 @@ from knowledge_flow_app.stores.content.base_content_store import BaseContentStor
 
 logger = logging.getLogger(__name__)
 
+
 class MinioContentStore(BaseContentStore):
     """
     MinIO content store for uploading files to a MinIO bucket.
     This class implements the BaseContentStore interface.
     """
+
     def __init__(self, endpoint: str, access_key: str, secret_key: str, bucket_name: str, secure: bool):
         """
         Initializes the MinIO client and ensures the bucket exists.
@@ -48,16 +50,11 @@ class MinioContentStore(BaseContentStore):
             if file_path.is_file():
                 object_name = f"{document_uid}/{file_path.relative_to(document_dir)}"
                 try:
-                    self.client.fput_object(
-                        self.bucket_name,
-                        object_name,
-                        str(file_path)
-                    )
+                    self.client.fput_object(self.bucket_name, object_name, str(file_path))
                     logger.info(f"Uploaded '{object_name}' to bucket '{self.bucket_name}'.")
                 except S3Error as e:
                     logger.error(f"Failed to upload '{file_path}': {e}")
                     raise ValueError(f"Failed to upload '{file_path}': {e}")
-                
 
     def delete_content(self, document_uid: str) -> None:
         """
@@ -78,7 +75,6 @@ class MinioContentStore(BaseContentStore):
         except S3Error as e:
             logger.error(f"❌ Failed to delete objects for document {document_uid}: {e}")
             raise ValueError(f"Failed to delete document content from MinIO: {e}")
-
 
     def get_content(self, document_uid: str) -> BinaryIO:
         """

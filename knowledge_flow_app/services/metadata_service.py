@@ -20,6 +20,7 @@ from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_meta
 
 logger = logging.getLogger(__name__)
 
+
 class MetadataService:
     """
     Service for managing metadata operations.
@@ -28,6 +29,7 @@ class MetadataService:
 
     It also handles the retrieval of documents based on filters and the update of document retrievability.
     """
+
     def __init__(self):
         self.metadata_store = get_metadata_store()
 
@@ -39,7 +41,6 @@ class MetadataService:
         documents = self.metadata_store.get_all_metadata(filters_dict)
         logger.info(f"Documents metadata retrieved fore {filters_dict} : {documents}")
         return {"status": Status.SUCCESS, "documents": documents}
-
 
     def delete_document_metadata(self, document_uid: str) -> None:
         """
@@ -73,13 +74,8 @@ class MetadataService:
         if not document_uid:
             raise ValueError("Document UID cannot be empty")
         try:
-            response = self.metadata_store.update_metadata_field(
-                document_uid=document_uid,
-                field="retrievable",
-                value=update.retrievable
-            )
+            response = self.metadata_store.update_metadata_field(document_uid=document_uid, field="retrievable", value=update.retrievable)
             return {"status": Status.SUCCESS, "response": response}
         except Exception as e:
             logger.error(f"Erreur lors de la mise à jour: {e}")
             raise HTTPException(status_code=500, detail=str(e))
-

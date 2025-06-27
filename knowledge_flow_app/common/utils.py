@@ -22,7 +22,9 @@ import yaml
 from typing import Dict, Optional, TypeVar
 
 from knowledge_flow_app.common.structures import Configuration
+
 logger = logging.getLogger(__name__)
+
 
 def parse_server_configuration(configuration_path: str) -> Configuration:
     """
@@ -52,7 +54,9 @@ def get_embedding_model_name(embedding_model: object) -> str:
         return getattr(inner, "model", type(inner).__name__)
     return getattr(embedding_model, "model", type(embedding_model).__name__)
 
-B = TypeVar('B', bound=BaseSettings)
+
+B = TypeVar("B", bound=BaseSettings)
+
 
 def validate_settings_or_exit(cls: type[B], name: str = "Settings") -> B:
     try:
@@ -65,7 +69,7 @@ def validate_settings_or_exit(cls: type[B], name: str = "Settings") -> B:
             logger.critical(f"   - Missing or invalid: {field} → {msg}")
         logger.critical("📌 Tip: Check your .env file or environment variables.")
         raise SystemExit(1)
-    
+
 
 def log_exception(e: Exception, context_message: Optional[str] = None) -> str:
     """
@@ -84,7 +88,7 @@ def log_exception(e: Exception, context_message: Optional[str] = None) -> str:
     stack_trace = traceback.format_exc()
 
     # Detect root cause if chained exception
-    cause = getattr(e, '__cause__', None) or getattr(e, '__context__', None)
+    cause = getattr(e, "__cause__", None) or getattr(e, "__context__", None)
     root_cause = repr(cause) if cause else error_message
 
     # Short, user-friendly summary
@@ -112,6 +116,7 @@ def log_exception(e: Exception, context_message: Optional[str] = None) -> str:
     logger.error("🧵 Stack trace:\n%s", stack_trace, stacklevel=2)
 
     return summary
+
 
 def utc_now_iso() -> str:
     """
@@ -162,7 +167,7 @@ def count_tokens(text: str) -> int:
        if/when the embedding logic becomes more diverse.
 
     A final not: this method assumes the application context is initialized.
-    
+
     Args:
         text (str): The plain text to tokenize.
 
@@ -189,4 +194,3 @@ def count_tokens(text: str) -> int:
         logger.warning(f"Fallback to cl100k_base tokenizer due to error: {e}")
         encoding = tiktoken.get_encoding("cl100k_base")
         return len(encoding.encode(text))
-

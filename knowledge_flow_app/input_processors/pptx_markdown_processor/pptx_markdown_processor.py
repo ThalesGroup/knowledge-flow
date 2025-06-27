@@ -15,13 +15,13 @@
 # knowledge_flow_app/processors/pptx/pptx_processor.py
 
 import logging
-import shutil
 from pathlib import Path
 
 from pptx import Presentation
 from knowledge_flow_app.input_processors.common.base_input_processor import BaseMarkdownProcessor
 
 logger = logging.getLogger(__name__)
+
 
 class PptxMarkdownProcessor(BaseMarkdownProcessor):
     def check_file_validity(self, file_path: Path) -> bool:

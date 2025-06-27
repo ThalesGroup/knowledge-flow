@@ -20,21 +20,21 @@ from knowledge_flow_app.stores.content.content_storage_factory import get_conten
 
 logger = logging.getLogger(__name__)
 
+
 class ContentService:
     """
     Service for retrieving document content and converting it to markdown.
     Focuses solely on content retrieval and conversion.
     """
-    
+
     def __init__(self):
         """Initialize content service with necessary stores."""
         from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
         from knowledge_flow_app.application_context import ApplicationContext
-        
+
         self.metadata_store = get_metadata_store()
         self.content_store = get_content_store()
         self.config = ApplicationContext.get_instance().get_config()
-
 
     async def get_document_metadata(self, document_uid: str) -> Dict:
         if not document_uid:
@@ -60,7 +60,7 @@ class ContentService:
         except FileNotFoundError:
             raise FileNotFoundError(f"Original input file not found for document {document_uid}")
         return stream, document_name, content_type
-    
+
     async def get_markdown_preview(self, document_uid: str) -> str:
         """
         Returns content of output.md if it exists (as markdown).
