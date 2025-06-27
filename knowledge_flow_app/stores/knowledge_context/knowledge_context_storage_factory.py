@@ -32,7 +32,7 @@ def get_knowledge_context_store() -> BaseKnowledgeContextStore:
     - Uploaded **files** (e.g. documents, reports, contracts)
     - Any other input that contributes to the *knowledge state* associated with a user or profile.
 
-    The goal is to allow the agent to retrieve and leverage this context dynamically 
+    The goal is to allow the agent to retrieve and leverage this context dynamically
     during a chat session to offer more personalized and relevant answers.
 
     The backing implementation can vary:
