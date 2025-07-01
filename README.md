@@ -208,7 +208,7 @@ LOCAL_CONTENT_STORAGE_PATH="~/.knowledge-flow/content-store"
 LOCAL_METADATA_STORAGE_PATH="~/.knowledge-flow/metadata-store.json"
 
 # OpenAI Settings
-OPENAI_API_KEY="your-openai-api-key"
+OPENAI_API_KEY=""  # your-openai-api-key
 OPENAI_MODEL_NAME="text-embedding-ada-002"
 ```
 

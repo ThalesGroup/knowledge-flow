@@ -18,6 +18,7 @@ from typing import List, Dict, Any
 
 from knowledge_flow_app.stores.metadata.base_metadata_store import BaseMetadataStore
 
+
 @staticmethod
 def _match_nested(item: dict, filter_dict: dict) -> bool:
     """
@@ -35,12 +36,13 @@ def _match_nested(item: dict, filter_dict: dict) -> bool:
                 return False
     return True
 
+
 class LocalMetadataStore(BaseMetadataStore):
     """
     A simple file-based metadata store implementation that persists metadata in a local JSON file.
 
-    This class is primarily designed for local development or lightweight deployments where 
-    a full database is not required. It implements the BaseMetadataStore interface and stores 
+    This class is primarily designed for local development or lightweight deployments where
+    a full database is not required. It implements the BaseMetadataStore interface and stores
     a list of metadata records, each represented as a dictionary.
 
     Metadata is expected to include a unique 'document_uid' field to identify individual entries.
@@ -103,10 +105,7 @@ class LocalMetadataStore(BaseMetadataStore):
         :return: The matching metadata dictionary, or None if not found.
         """
         all_data = self._load()
-        return next(
-            (item for item in all_data if item.get("document_uid") == document_uid),
-            None
-        )
+        return next((item for item in all_data if item.get("document_uid") == document_uid), None)
 
     def update_metadata_field(self, document_uid: str, field: str, value: Any) -> dict:
         """

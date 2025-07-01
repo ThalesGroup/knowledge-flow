@@ -19,11 +19,12 @@ from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
+
 class OllamaSettings(BaseSettings):
     api_url: Optional[str] = Field(default=None, validation_alias="OLLAMA_API_URL")
     embedding_model_name: str = Field(..., validation_alias="OLLAMA_EMBEDDING_MODEL_NAME")
     vision_model_name: Optional[str] = Field(default=None, validation_alias="OLLAMA_VISION_MODEL_NAME")
 
     model_config = {
-        "extra": "ignore" # allow extra environment variable 
+        "extra": "ignore"  # allow extra environment variable
     }

@@ -13,18 +13,20 @@
 # limitations under the License.
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+
 # --- Response Models ---
 class DocumentContent(BaseModel):
     """
     Model representing a document's content and metadata.
     """
+
     uid: str
     file_name: str
     title: str = ""
@@ -44,25 +46,27 @@ class ContentController:
     """
     FastAPI controller for managing document content operations.
     """
-    
+
     def __init__(self, router: APIRouter):
         """
         Initialize the controller with a FastAPI router and content service.
         """
         from knowledge_flow_app.services.content_service import ContentService
+
         self.service = ContentService()
         self._register_routes(router)
-    
+
     def _register_routes(self, router: APIRouter):
         """
         Register all content-related routes with the provided router.
         """
+
         @router.get(
             "/markdown/{document_uid}",
             tags=["Content"],
             summary="Get a preview of the complete document in markdown format",
             description="Fetch complete document including content using its unique UID.",
-            response_model=MarkdownContentResponse
+            response_model=MarkdownContentResponse,
         )
         async def get_markdown_preview(document_uid: str):
             """
@@ -71,37 +75,27 @@ class ContentController:
             try:
                 logger.info(f"Retrieving full document: {document_uid}")
                 content = await self.service.get_markdown_preview(document_uid)
-                return {"content": content} 
+                return {"content": content}
             except ValueError as e:
                 raise HTTPException(status_code=400, detail=str(e))
             except FileNotFoundError as e:
                 raise HTTPException(status_code=404, detail=str(e))
-            except Exception as e:
+            except Exception:
                 logger.exception("Unexpected error in get_document_preview")
                 raise HTTPException(status_code=500, detail="Internal server error")
-            
 
         @router.get(
-            "/raw_content/{document_uid}",
-            tags=["Content"],
-            summary="Download the original document content",
-            description="Serves the raw file associated with the given UID as a downloadable stream."
+            "/raw_content/{document_uid}", tags=["Content"], summary="Download the original document content", description="Serves the raw file associated with the given UID as a downloadable stream."
         )
         async def download_document(document_uid: str):
             try:
                 stream, file_name, content_type = await self.service.get_original_content(document_uid)
 
-                return StreamingResponse(
-                    content=stream,
-                    media_type=content_type,
-                    headers={
-                        "Content-Disposition": f'attachment; filename="{file_name}"'
-                    }
-                )
+                return StreamingResponse(content=stream, media_type=content_type, headers={"Content-Disposition": f'attachment; filename="{file_name}"'})
             except ValueError as e:
                 raise HTTPException(status_code=400, detail=str(e))
             except FileNotFoundError as e:
                 raise HTTPException(status_code=404, detail=str(e))
-            except Exception as e:
+            except Exception:
                 logger.exception("Unexpected error in download_document")
                 raise HTTPException(status_code=500, detail="Internal server error")

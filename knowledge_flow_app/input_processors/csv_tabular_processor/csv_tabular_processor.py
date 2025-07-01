@@ -15,12 +15,11 @@
 # knowledge_flow_app/processors/processor_example_tabular/example_tabular_processor.py
 
 from pathlib import Path
-from typing import List, Dict
-import csv
 
 import pandas
 
 from knowledge_flow_app.input_processors.common.base_input_processor import BaseTabularProcessor
+
 
 class CsvTabularProcessor(BaseTabularProcessor):
     """

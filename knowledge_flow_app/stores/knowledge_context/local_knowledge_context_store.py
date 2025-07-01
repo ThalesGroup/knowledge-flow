@@ -18,6 +18,7 @@ import shutil
 from pathlib import Path
 from typing import BinaryIO, List
 from .base_knowledge_context_store import BaseKnowledgeContextStore
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ class LocalKnowledgeContextStore(BaseKnowledgeContextStore):
         if not doc_path.exists():
             raise FileNotFoundError("Document not found in chat knowledge_context")
         return open(doc_path, "rb")
-    
+
     def list_knowledge_contexts(self, tag: str) -> List[dict]:
         knowledge_contexts = []
         for dir_path in self.root_path.iterdir():

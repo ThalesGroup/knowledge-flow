@@ -17,11 +17,11 @@ import logging
 from pathlib import Path
 import pandas as pd
 from knowledge_flow_app.input_processors.common.base_input_processor import BaseTabularProcessor
-from pathlib import Path
-import pandas as pd
 
 logger = logging.getLogger(__name__)
-class PpsTabularProcessor (BaseTabularProcessor) :
+
+
+class PpsTabularProcessor(BaseTabularProcessor):
     """
     PPS Tabular Processor
     ------------------------------------------------------
@@ -72,7 +72,6 @@ class PpsTabularProcessor (BaseTabularProcessor) :
             "sample_columns": df_preview.columns.tolist(),
         }
 
-
     def convert_file_to_table(self, file_path: Path) -> pd.DataFrame:
         df = self._read_excel_sheet(file_path, self._default_sheet)  # ✅ Read once
 
@@ -85,23 +84,20 @@ class PpsTabularProcessor (BaseTabularProcessor) :
                 except (ValueError, TypeError):
                     logger.warning(f"Failed to convert value '{value}' to float for label '{label}'")
                     pass
-            rows.append({
-                "Champ": label,
-                "Valeur extraite": value if value is not None else "NOT FOUND"
-            })
+            rows.append({"Champ": label, "Valeur extraite": value if value is not None else "NOT FOUND"})
 
         return pd.DataFrame(rows)
 
     def _extract_value(self, df: pd.DataFrame, target_text: str, target_column: str):
         row = df[df.apply(lambda r: r.astype(str).str.contains(target_text, regex=False).any(), axis=1)]
         return row.iloc[0][target_column] if not row.empty else None
-    
+
     # Private method: simple reading of Excel sheet
     def _read_excel_sheet(self, file: Path, sheet: str, n_rows: int = None) -> pd.DataFrame:
         df = pd.read_excel(file, sheet_name=sheet)
         return df.head(n_rows) if n_rows else df
 
-   #  Private method: list available sheets
+    #  Private method: list available sheets
     def _list_excel_sheets(self, file_path: Path):
         xls = pd.ExcelFile(file_path)
         return xls.sheet_names

@@ -24,6 +24,7 @@ from knowledge_flow_app.input_processors.common.base_input_processor import Base
 
 logger = logging.getLogger(__name__)
 
+
 def default_or_unknown(value: str, default="None") -> str:
     return value.strip() if value and value.strip() else default
 
@@ -31,8 +32,8 @@ def default_or_unknown(value: str, default="None") -> str:
 class DocxMarkdownProcessor(BaseMarkdownProcessor):
     def check_file_validity(self, file_path: Path) -> bool:
         try:
-            with zipfile.ZipFile(file_path, 'r') as docx_zip:
-                return 'word/document.xml' in docx_zip.namelist()
+            with zipfile.ZipFile(file_path, "r") as docx_zip:
+                return "word/document.xml" in docx_zip.namelist()
         except zipfile.BadZipFile:
             logger.error(f"{file_path} n'est pas une archive ZIP valide.")
         except Exception as e:
@@ -45,14 +46,8 @@ class DocxMarkdownProcessor(BaseMarkdownProcessor):
             return {
                 "title": default_or_unknown(doc.core_properties.title),
                 "author": default_or_unknown(doc.core_properties.author),
-                "created": (
-                    doc.core_properties.created.isoformat()
-                    if isinstance(doc.core_properties.created, datetime) else "Non disponible"
-                ),
-                "modified": (
-                    doc.core_properties.modified.isoformat()
-                    if isinstance(doc.core_properties.modified, datetime) else "Non disponible"
-                ),
+                "created": (doc.core_properties.created.isoformat() if isinstance(doc.core_properties.created, datetime) else "Non disponible"),
+                "modified": (doc.core_properties.modified.isoformat() if isinstance(doc.core_properties.modified, datetime) else "Non disponible"),
                 "last_modified_by": default_or_unknown(doc.core_properties.last_modified_by),
                 "category": default_or_unknown(doc.core_properties.category),
                 "subject": default_or_unknown(doc.core_properties.subject),
@@ -79,17 +74,9 @@ class DocxMarkdownProcessor(BaseMarkdownProcessor):
             shutil.copy(lua_filter, copied)
             extra_args.append(f"--lua-filter={copied}")
 
-        pypandoc.convert_file(
-            str(file_path),
-            to='markdown',
-            outputfile=str(md_path),
-            extra_args=extra_args
-        )
+        pypandoc.convert_file(str(file_path), to="markdown", outputfile=str(md_path), extra_args=extra_args)
 
         for f in output_dir.glob("*.lua"):
             f.unlink()
 
-        return {
-            "doc_dir": str(output_dir),
-            "md_file": str(md_path)
-        }
+        return {"doc_dir": str(output_dir), "md_file": str(md_path)}

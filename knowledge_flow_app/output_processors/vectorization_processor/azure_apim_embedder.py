@@ -22,6 +22,7 @@ from knowledge_flow_app.config.embedding_azure_apim_settings import EmbeddingAzu
 
 logger = logging.getLogger(__name__)
 
+
 class AzureApimEmbedder(Embeddings):
     """
     LangChain-compatible embedder that sends requests to Azure OpenAI via APIM.
@@ -29,7 +30,7 @@ class AzureApimEmbedder(Embeddings):
     """
 
     def __init__(self, settings: EmbeddingAzureApimSettings):
-        logger.info("✅ MEEEEEEEERDE Initializing Azure APIM Embedder")
+        logger.info("✅ Initializing Azure APIM Embedder")
         self.settings = settings
 
     def _get_bearer_token(self) -> str:
