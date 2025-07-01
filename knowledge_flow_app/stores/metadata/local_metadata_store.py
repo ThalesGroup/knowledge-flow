@@ -90,7 +90,7 @@ class LocalMetadataStore(BaseMetadataStore):
     def get_all_metadata(self, filters: dict) -> List[dict]:
         """
             Return all metadata entries matching the given (possibly nested) filters.
-            The filters are applied recursively to the metadata dictionaries.            
+            The filters are applied recursively to the metadata dictionaries.
             :param filters: Dictionary of filters to apply.
         :return: List of metadata dictionaries that match the filters.
         """
