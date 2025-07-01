@@ -100,10 +100,10 @@ class MetadataController:
                 "Fetch metadata for documents.\n"
                 "Provide an optional JSON body with filters.\n"
                 "Example:\n"
-                '{\n'
-                '   \"front_metadata\": {\"GBU\": \"SIX\"},\n'
-                '   \"retrievable\": true\n'
-                '}\n'
+                "{\n"
+                '   "front_metadata": {"GBU": "SIX"},\n'
+                '   "retrievable": true\n'
+                "}\n"
                 "If no filters are given, all documents are returned."
             ),
             response_model=GetDocumentsMetadataResponse,
