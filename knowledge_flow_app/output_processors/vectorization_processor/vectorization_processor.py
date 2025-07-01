@@ -17,7 +17,7 @@ from fastapi import HTTPException
 from langchain.schema.document import Document
 
 from knowledge_flow_app.application_context import ApplicationContext
-from knowledge_flow_app.common.structures import Status, VectorizationResponse
+from knowledge_flow_app.common.structures import Status, OutputProcessorResponse
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
 from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
 
@@ -47,7 +47,7 @@ class VectorizationProcessor(BaseOutputProcessor):
         self.metadata_store = get_metadata_store()
         logger.info(f"📝 Metadata store initialized: {self.metadata_store.__class__.__name__}")
 
-    def process(self, file_path: str, metadata: dict):
+    def process(self, file_path: str, metadata: dict) -> OutputProcessorResponse:
         """
         Process a document for vectorization.
         This method orchestrates the entire vectorization process:
@@ -63,7 +63,7 @@ class VectorizationProcessor(BaseOutputProcessor):
         self,
         file_path: str,
         metadata: dict,
-    ) -> VectorizationResponse:
+    ) -> OutputProcessorResponse:
         """
         Orchestrates the document vectorization process:
         - Loads a document
@@ -96,9 +96,8 @@ class VectorizationProcessor(BaseOutputProcessor):
 
             if self.metadata_store.get_metadata_by_uid(document_uid):
                 logger.info(f"Document with UID {document_uid} already exists. Skipping.")
-                return VectorizationResponse(
-                    status=Status.IGNORED,
-                    chunks=len(chunks),
+                return OutputProcessorResponse(
+                    status=Status.IGNORED
                 )
 
             # 5. Store embeddings
@@ -111,7 +110,7 @@ class VectorizationProcessor(BaseOutputProcessor):
                 logger.exception("Failed to add documents to OpenSearch: %s", e)
                 raise HTTPException(status_code=500, detail="Failed to add documents to OpenSearch") from e
 
-            return VectorizationResponse(status=Status.SUCCESS, chunks=len(chunks))
+            return OutputProcessorResponse(status=Status.SUCCESS, chunks=len(chunks))
 
         except Exception as e:
             logger.exception(f"Error during vectorization: {e}")

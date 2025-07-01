@@ -13,11 +13,13 @@
 # limitations under the License.
 
 from io import BytesIO
+import io
 import logging
 from pathlib import Path
 from typing import BinaryIO
 from minio import Minio
 from minio.error import S3Error
+import pandas as pd
 from knowledge_flow_app.stores.content.base_content_store import BaseContentStore
 
 logger = logging.getLogger(__name__)
@@ -96,11 +98,26 @@ class MinioContentStore(BaseContentStore):
     def get_markdown(self, document_uid: str) -> str:
         """
         Fetches the markdown content from 'output/output.md' in the document directory.
+        If not found, attempts to convert 'output/table.csv' to Markdown.
         """
-        object_name = f"{document_uid}/output/output.md"
+        md_object = f"{document_uid}/output/output.md"
+        csv_object = f"{document_uid}/output/table.csv"
+
         try:
-            response = self.client.get_object(self.bucket_name, object_name)
+            response = self.client.get_object(self.bucket_name, md_object)
             return response.read().decode("utf-8")
-        except S3Error as e:
-            logger.error(f"Error fetching markdown for {document_uid}: {e}")
-            raise FileNotFoundError(f"Markdown not found for document: {document_uid}")
+        except S3Error as e_md:
+            logger.warning(f"Markdown not found for {document_uid}: {e_md}")
+
+        # Try CSV fallback
+        try:
+            response = self.client.get_object(self.bucket_name, csv_object)
+            csv_bytes = response.read()
+            df = pd.read_csv(io.BytesIO(csv_bytes))
+            return df.to_markdown(index=False, tablefmt="github")
+        except S3Error as e_csv:
+            logger.error(f"CSV also not found for {document_uid}: {e_csv}")
+        except Exception as e:
+            logger.error(f"Error reading or converting CSV for {document_uid}: {e}")
+
+        raise FileNotFoundError(f"Neither markdown nor CSV preview found for document: {document_uid}")

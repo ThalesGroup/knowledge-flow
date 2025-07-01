@@ -132,7 +132,7 @@ class IngestionController:
                         # Step 4: Post-processing (optional)
                         current_step = "knowledge post processing"
                         vectorization_response = self.output_processor_service.process(output_temp_dir, input_temp_file, metadata)
-                        logger.info(f"Post-processing completed for {filename}: {metadata} with chunks {vectorization_response.chunks}")
+                        logger.info(f"Post-processing completed for {filename}: {metadata}")
                         yield ProcessingProgress(step=current_step, status=vectorization_response.status, document_uid=metadata["document_uid"], filename=filename).model_dump_json() + "\n"
 
                         # Step 5: Metadata saving

@@ -15,6 +15,8 @@
 from abc import ABC, abstractmethod
 import logging
 
+from knowledge_flow_app.common.structures import OutputProcessorResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +35,7 @@ class BaseOutputProcessor(ABC):
     """
 
     @abstractmethod
-    def process(self, file_path: str, metadata: dict):
+    def process(self, file_path: str, metadata: dict) -> OutputProcessorResponse:
         """
         Process the file after it has been extracted.
         Args:

@@ -14,6 +14,7 @@
 
 import logging
 
+from knowledge_flow_app.common.structures import Status, OutputProcessorResponse
 from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
 
 logger = logging.getLogger(__name__)
@@ -27,5 +28,8 @@ class TabularProcessor(BaseOutputProcessor):
     def __init__(self):
         logger.info("Initializing TabularPipeline")
 
-    def process(self, file_path: str, metadata: dict):
+    def process(self, file_path: str, metadata: dict) -> OutputProcessorResponse:
         logger.info(f"Processing file: {file_path} with metadata: {metadata}")
+        return OutputProcessorResponse(
+            status=Status.SUCCESS
+        )
