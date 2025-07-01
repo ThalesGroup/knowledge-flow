@@ -63,16 +63,12 @@ ingress:
   enabled: true
   className: ""
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: knowledge-flow-backend.test
+    - host: knowledge-flow-backend.dev.fred.thalesgroup.com
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-
-
 
 volumes:
   enabled: true
@@ -86,9 +82,9 @@ volumes:
     configMap:
       name: "knowledge-flow-backend-configmap"
   # kube/config
-  - name: "knowledge-flow-backend-ext-vol"
+  - name: "knowledge-flow-backend-kube-vol"
     configMap:
-      name: "knowledge-flow-backend-ext-configmap"
+      name: "knowledge-flow-backend-kube-configmap"
       items:
       - key: kubeconfig
         path: kubeconfig
@@ -103,288 +99,259 @@ volumeMounts:
   - name: knowledge-flow-backend-vol
     mountPath: /app/config
   # kube/config
-  - name: knowledge-flow-backend-ext-vol
+  - name: knowledge-flow-backend-kube-vol
     mountPath: /home/knowledge-flow-user/.kube/config
     subPath: kubeconfig
 
 
-ConfigMap:
-  enabled: true
-  data:
-    configuration.yaml: |
-      # Enable or disable the security layer
-      security:
-        enabled: false
-        keycloak_url: "http://keycloak.test/realms/app"
 
-      # -----------------------------------------------------------------------------
-      # INPUT PROCESSORS
-      # -----------------------------------------------------------------------------
-      # Mandatory: Input processors MUST be explicitly defined.
-      # These classes parse incoming files (e.g., PDFs, DOCXs, CSVs) into structured documents.
+configuration:
+  # Enable or disable the security layer
+  security:
+    enabled: false
+    keycloak_url: "http://keycloak/realms/app"
+    authorized_origins:
+      - "http://localhost:5173"
 
-      input_processors:
-        - prefix: ".pdf"
-          class_path: knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor
-        - prefix: ".docx"
-          class_path: knowledge_flow_app.input_processors.docx_markdown_processor.docx_markdown_processor.DocxMarkdownProcessor
-        - prefix: ".pptx"
-          class_path: knowledge_flow_app.input_processors.pptx_markdown_processor.pptx_markdown_processor.PptxMarkdownProcessor
-        - prefix: ".csv"
-          class_path: knowledge_flow_app.input_processors.csv_tabular_processor.csv_tabular_processor.CsvTabularProcessor
-        - prefix: ".txt"
-          class_path: knowledge_flow_app.input_processors.text_markdown_processor.text_markdown_processor.TextMarkdownProcessor
-        - prefix: ".md"
-          class_path: knowledge_flow_app.input_processors.markdown_markdown_processor.markdown_markdown_processor.MarkdownMarkdownProcessor
-        - prefix: ".xlsm"
-          class_path: knowledge_flow_app.input_processors.pps_tabular_processor.pps_tabular_processor.PpsTabularProcessor
+  # -----------------------------------------------------------------------------
+  # INPUT PROCESSORS
+  # -----------------------------------------------------------------------------
+  # Mandatory: Input processors MUST be explicitly defined.
+  # These classes parse incoming files (e.g., PDFs, DOCXs, CSVs) into structured documents.
+  input_processors:
+    # - prefix: ".pdf"
+    #   class_path: knowledge_flow_app.input_processors.pdf_markdown_processor.ollama_pdf_mardown_processor.OllamaPdfMarkdownProcessor
+    - prefix: ".docx"
+      class_path: knowledge_flow_app.input_processors.docx_markdown_processor.docx_markdown_processor.DocxMarkdownProcessor
+    - prefix: ".pptx"
+      class_path: knowledge_flow_app.input_processors.pptx_markdown_processor.pptx_markdown_processor.PptxMarkdownProcessor
+    - prefix: ".csv"
+      class_path: knowledge_flow_app.input_processors.csv_tabular_processor.csv_tabular_processor.CsvTabularProcessor
+    - prefix: ".txt"
+      class_path: knowledge_flow_app.input_processors.text_markdown_processor.text_markdown_processor.TextMarkdownProcessor
+    - prefix: ".md"
+      class_path: knowledge_flow_app.input_processors.markdown_markdown_processor.markdown_markdown_processor.MarkdownMarkdownProcessor
+    - prefix: ".xlsm"
+      class_path: knowledge_flow_app.input_processors.pps_tabular_processor.pps_tabular_processor.PpsTabularProcessor
 
+  # -----------------------------------------------------------------------------
+  # OUTPUT PROCESSORS (Optional)
+  # -----------------------------------------------------------------------------
+  # Optional: You can override the default behavior for output processing.
+  # If not defined, the system automatically selects based on input type:
+  #   - Markdown files → VectorizationProcessor
+  #   - Tabular files (CSV, XLSX) → TabularProcessor
+  #
+  # You can specialize behavior by mapping file extensions to custom classes.
+  #
+  # Example to OVERRIDE default behavior:
+  #
+  # output_processors:
+  #   - prefix: ".docx"
+  #     class_path: knowledge_flow_app.output_processors.vectorization_processor.vectorization_processor.VectorizationProcessor
+  #   - prefix: ".csv"
+  #     class_path: knowledge_flow_app.output_processors.tabular_processor.tabular_processor.TabularProcessor
+  #   - prefix: ".xlsx"
+  #     class_path: knowledge_flow_app.output_processors.tabular_processor.tabular_processor.TabularProcessor
+  #   - prefix: ".pptx"
+  #     class_path: knowledge_flow_app.output_processors.vectorization_processor.vectorization_processor.VectorizationProcessor
+  #
+  # To SKIP processing for a specific file type, you can specify an empty output processor.
+  #
+  # output_processors:
+  #  - prefix: ".txt"
+  #    class_path: knowledge_flow_app.output_processors.empty_output_processor.EmptyOutputProcessor
+  output_processors: []
 
-      # -----------------------------------------------------------------------------
-      # OUTPUT PROCESSORS (Optional)
-      # -----------------------------------------------------------------------------
-      # Optional: You can override the default behavior for output processing.
-      # If not defined, the system automatically selects based on input type:
-      #   - Markdown files → VectorizationProcessor
-      #   - Tabular files (CSV, XLSX) → TabularProcessor
-      #
-      # You can specialize behavior by mapping file extensions to custom classes.
-      #
-      # Example to OVERRIDE default behavior:
-      #
-      # output_processors:
-      #   - prefix: ".docx"
-      #     class_path: knowledge_flow_app.output_processors.vectorization_processor.vectorization_processor.VectorizationProcessor
-      #   - prefix: ".csv"
-      #     class_path: knowledge_flow_app.output_processors.tabular_processor.tabular_processor.TabularProcessor
-      #   - prefix: ".xlsx"
-      #     class_path: knowledge_flow_app.output_processors.tabular_processor.tabular_processor.TabularProcessor
-      #   - prefix: ".pptx"
-      #     class_path: knowledge_flow_app.output_processors.vectorization_processor.vectorization_processor.VectorizationProcessor
-      #
-      # To SKIP processing for a specific file type, you can specify an empty output processor.
-      #
-      # output_processors:
-      #  - prefix: ".txt"
-      #    class_path: knowledge_flow_app.output_processors.empty_output_processor.EmptyOutputProcessor
+  # The content store type can be either "local" or "minio" or "gcs"
+  # If you are using minio, make sure to set the following environment variables:
+  # - MINIO_ENDPOINT
+  # - MINIO_ACCESS_KEY
+  # - MINIO_SECRET_KEY
+  # - MINIO_BUCKET
+  # - MINIO_SECURE
+  # If you are using gcs, make sure to set the following environment variables:
+  # - GCS_PROJECT_ID
+  # - GCS_BUCKET_NAME
+  # - GCS_CREDENTIALS_PATH
+  # If you are using local storage, make sure to set the following environment variable:
+  # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/content-store'
+  content_storage:
+    type: "minio"
 
+  # The metadata store type can be either "local" or "opensearch
+  # If you are using opensearch, make sure to set the following environment variables:
+  # - OPENSEARCH_HOST
+  # - OPENSEARCH_PORT
+  # - OPENSEARCH_USERNAME
+  # - OPENSEARCH_PASSWORD
+  # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
+  # If you are using local storage, make sure to set the following environment variable:
+  # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/metadata-store.json'
+  metadata_storage:
+    type: "opensearch"
 
-      content_storage:
-        # The content store type can be either "local" or "minio" or "gcs"
-        # If you are using minio, make sure to set the following environment variables:
-        # - MINIO_ENDPOINT
-        # - MINIO_ACCESS_KEY
-        # - MINIO_SECRET_KEY
-        # - MINIO_BUCKET
-        # - MINIO_SECURE
-        # If you are using gcs, make sure to set the following environment variables:
-        # - GCS_PROJECT_ID
-        # - GCS_BUCKET_NAME
-        # - GCS_CREDENTIALS_PATH
-        # If you are using local storage, make sure to set the following environment variable:
-        # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/content-store'
-        type: "minio"
+  # The vector store type can be either "in_memory" or "opensearch"
+  # If you are using opensearch, make sure to set the following environment variables:
+  # - OPENSEARCH_HOST="https://localhost:9200"
+  # - OPENSEARCH_USER="admin"
+  # - OPENSEARCH_PASSWORD="Azerty123_"
+  # - OPENSEARCH_SECURE="false"
+  # - OPENSEARCH_VERIFY_CERTS="false"
+  # - OPENSEARCH_VECTOR_INDEX = "fred-dev-embeddings"
+  # If you are using local storage, make sure to set the following environment variable:
+  # - LOCAL_VECTOR_STORAGE_PATH default to '~/.knowledge-flow/vector-store.json'
+  vector_storage:
+    type: "opensearch"
 
-      metadata_storage:
-        # The metadata store type can be either "local" or "opensearch
-        # If you are using opensearch, make sure to set the following environment variables:
-        # - OPENSEARCH_HOST
-        # - OPENSEARCH_PORT
-        # - OPENSEARCH_USERNAME
-        # - OPENSEARCH_PASSWORD
-        # - OPENSEARCH_METADATA_INDEX = "fred-dev-metadata"
-        # If you are using local storage, make sure to set the following environment variable:
-        # - LOCAL_STORAGE_PATH default to '~/.knowledge-flow/metadata-store.json'
-        type: "opensearch"
+  # -----------------------------------------------------------------------------
+  # EMBEDDING BACKEND
+  # -----------------------------------------------------------------------------
+  # Set the embedding backend to use:
+  #   - "openai"      → Use OpenAI's public API
+  #   - "azureopenai" → Use Azure OpenAI service directly
+  #   - "azureapim"   → Use Azure OpenAI via Azure APIM Gateway (OAuth2 + subscription key)
+  #   - "ollama"      → Use Ollama's API
+  #
+  # Required environment variables based on the selected backend:
+  #
+  # BACKEND: "openai"
+  # -------------------------------------
+  # - OPENAI_API_KEY
+  # - OPENAI_API_BASE (optional if using default)
+  # - OPENAI_API_VERSION (optional)
+  #
+  # BACKEND: "azureopenai"
+  # -------------------------------------
+  # - AZURE_OPENAI_API_KEY
+  # - AZURE_OPENAI_BASE_URL
+  # - AZURE_API_VERSION
+  # - AZURE_DEPLOYMENT_EMBEDDING
+  #
+  # BACKEND: "azureapim"
+  # -------------------------------------
+  # - AZURE_TENANT_ID
+  # - AZURE_CLIENT_ID
+  # - AZURE_CLIENT_SECRET
+  # - AZURE_CLIENT_SCOPE
+  # - AZURE_APIM_BASE_URL
+  # - AZURE_APIM_KEY
+  # - AZURE_API_VERSION
+  # - AZURE_RESOURCE_PATH_EMBEDDINGS
+  # - AZURE_DEPLOYMENT_EMBEDDING
+  #
+  # BACKEND: "ollama"
+  # -------------------------------------
+  # - OLLAMA_API_URL (optional)
+  # - OLLAMA_EMBEDDING_MODEL_NAME
+  # - OLLAMA_VISION_MODEL_NAME (optional, for vision tasks)
+  #
+  # All environment variables are expected to be present in the .env file
+  # pointed to by the ENV_FILE variable in your Makefile.
+  #
+  embedding:
+    type: "openai"   # can be "openai" or "azureopenai" or "azureapim" or "ollama"
 
-      vector_storage:
-        # The vector store type can be either "in_memory" or "opensearch"
-        # If you are using opensearch, make sure to set the following environment variables:
-        # - OPENSEARCH_HOST="https://localhost:9200"
-        # - OPENSEARCH_USER="admin"
-        # - OPENSEARCH_PASSWORD="Azerty123_"
-        # - OPENSEARCH_SECURE="false"
-        # - OPENSEARCH_VERIFY_CERTS="false"
-        # - OPENSEARCH_VECTOR_INDEX = "fred-dev-embeddings"
-        #type: "opensearch"
-        # If you are using local storage, make sure to set the following environment variable:
-        # - LOCAL_VECTOR_STORAGE_PATH default to '~/.knowledge-flow/vector-store.json'
-        type: "opensearch"
+  # -----------------------------------------------------------------------------
+  # KNOWLEDGE CONTEXT STORAGE BACKEND
+  # -----------------------------------------------------------------------------
+  # Backend used to store Knowledge Contexts (Workspaces) and user profiles.
+  # Both can have associated files. 
+  # -------------------------------------
+  knowledge_context_storage:
+    type: "local"   # as of now only local storage is supported
+    settings:
+      local_path: "~/.fred/knowledge-context"
 
-      embedding:
-        # -----------------------------------------------------------------------------
-        # EMBEDDING BACKEND
-        # -----------------------------------------------------------------------------
-        # Set the embedding backend to use:
-        #   - "openai"      → Use OpenAI's public API
-        #   - "azureopenai" → Use Azure OpenAI service directly
-        #   - "azureapim"   → Use Azure OpenAI via Azure APIM Gateway (OAuth2 + subscription key)
-        #   - "ollama"      → Use Ollama's API
-        #
-        # Required environment variables based on the selected backend:
-        #
-        # BACKEND: "openai"
-        # -------------------------------------
-        # - OPENAI_API_KEY
-        # - OPENAI_API_BASE (optional if using default)
-        # - OPENAI_API_VERSION (optional)
-        #
-        # BACKEND: "azureopenai"
-        # -------------------------------------
-        # - AZURE_OPENAI_API_KEY
-        # - AZURE_OPENAI_BASE_URL
-        # - AZURE_API_VERSION
-        # - AZURE_DEPLOYMENT_EMBEDDING
-        #
-        # BACKEND: "azureapim"
-        # -------------------------------------
-        # - AZURE_TENANT_ID
-        # - AZURE_CLIENT_ID
-        # - AZURE_CLIENT_SECRET
-        # - AZURE_CLIENT_SCOPE
-        # - AZURE_APIM_BASE_URL
-        # - AZURE_APIM_KEY
-        # - AZURE_API_VERSION
-        # - AZURE_RESOURCE_PATH_EMBEDDINGS
-        # - AZURE_DEPLOYMENT_EMBEDDING
-        #
-        # BACKEND: "ollama"
-        # -------------------------------------
-        # - OLLAMA_API_URL (optional)
-        # - OLLAMA_EMBEDDING_MODEL_NAME
-        # - OLLAMA_VISION_MODEL_NAME (optional, for vision tasks)
-        #
-        # All environment variables are expected to be present in the .env file
-        # pointed to by the ENV_FILE variable in your Makefile.
-        #
-        type: "openai"  # can be "openai" or "azureopenai" or "azureapim" or "ollama"
-    .env: |
-        # This file contains the environment variables for the application
+  knowledge_context_max_tokens: 8000
 
-        # -----------------------------------------------------------------------------
-        # 🔵 AZURE AUTHENTICATION (for getting OAuth token)
-        # -----------------------------------------------------------------------------
+dotenv:
 
-        AZURE_TENANT_ID=""
-        # Azure Active Directory Tenant ID for your application (OAuth 2.0 flow)
+  # -----------------------------------------------------------------------------
+  # 🔵 AZURE AUTHENTICATION (for getting OAuth token)
+  # -----------------------------------------------------------------------------
+  AZURE_TENANT_ID: ""             # Azure Active Directory Tenant ID for your application (OAuth 2.0 flow)
+  AZURE_CLIENT_ID: ""             # Client ID of your registered Azure AD Application (Service Principal)
+  AZURE_CLIENT_SECRET: ""         # Client Secret of your Azure AD Application
+  AZURE_CLIENT_SCOPE: ""          # OAuth2 scope for requesting tokens (typically "https://cognitiveservices.azure.com/.default")
 
-        AZURE_CLIENT_ID=""
-        # Client ID of your registered Azure AD Application (Service Principal)
+  # -----------------------------------------------------------------------------
+  # 🔵 AZURE API SETTINGS
+  # -----------------------------------------------------------------------------
 
-        AZURE_CLIENT_SECRET=""
-        # Client Secret of your Azure AD Application
+  AZURE_API_VERSION: "2024-06-01"           # API version used for Azure OpenAI API requests (depends on your Azure resource)
 
-        AZURE_CLIENT_SCOPE=""
-        # OAuth2 scope for requesting tokens (typically "https://cognitiveservices.azure.com/.default")
+  # -----------------------------------------------------------------------------
+  # 🔵 API GATEWAY (APIM) SETTINGS
+  # -----------------------------------------------------------------------------
+  AZURE_APIM_BASE_URL: "https://trustnest.azure-api.net"          # Base URL of your Azure API Management Gateway (APIM)
+                                                                  # Example: https://company-apim-gateway.azure-api.net
+  AZURE_RESOURCE_PATH_EMBEDDINGS: "/genai-aoai-inference/v1"      # Path after base URL for Embeddings API (before /deployments/...)
+  AZURE_RESOURCE_PATH_LLM: "/genai-aoai-inference/v2"             # Path after base URL for LLM Chat API (before /deployments/...)
+  AZURE_APIM_KEY: ""                                              # Subscription Key required by the APIM Gateway ("TrustNest-Apim-Subscription-Key" header)
 
+  # -----------------------------------------------------------------------------
+  # 🔵 AZURE OPENAI DIRECT SETTINGS (if AZURE_USE_APIM=false)
+  # -----------------------------------------------------------------------------
+  AZURE_OPENAI_BASE_URL: "https://your-azure-openai-resource.openai.azure.com"    # Base URL for direct Azure OpenAI access (no APIM)
+  AZURE_OPENAI_API_KEY: ""                                                        # Azure OpenAI API Key (directly from Azure portal, not APIM key)
 
-        # -----------------------------------------------------------------------------
-        # 🔵 AZURE API SETTINGS
-        # -----------------------------------------------------------------------------
+  # -----------------------------------------------------------------------------
+  # 🔵 AZURE OPENAI DEPLOYMENT NAMES
+  # -----------------------------------------------------------------------------
+  AZURE_DEPLOYMENT_LLM: "gpt-4o"                                                  # Deployment name in Azure OpenAI for Chat LLMs (ex: GPT-4 Turbo, GPT-4o)
+  AZURE_DEPLOYMENT_EMBEDDING: "fred-text-embedding-3-large"                       # Deployment name in Azure OpenAI for Embedding Models
 
-        AZURE_API_VERSION="2024-06-01"
-        # API version used for Azure OpenAI API requests (depends on your Azure resource)
+  # -----------------------------------------------------------------------------
+  # 🔵 OPENAI EMBEDDING (Public API - NOT Azure)
+  # -----------------------------------------------------------------------------
+  OPENAI_API_KEY: "sk-****"                     # Your OpenAI API key from https://platform.openai.com/account/api-keys
+  # OPENAI_API_BASE="https://api.openai.com/v1" # Optional. Defaults to https://api.openai.com/v1 for OpenAI public API
+  OPENAI_API_VERSION: ""                        # Leave blank for OpenAI public API (only needed for Azure)
+                                                # Example (Azure only): "2024-06-01"
 
+  # Example model for embeddings (default for OpenAI)
+  # OPENAI_MODEL_NAME="text-embedding-ada-002"
 
-        # -----------------------------------------------------------------------------
-        # 🔵 API GATEWAY (APIM) SETTINGS
-        # -----------------------------------------------------------------------------
+  # -----------------------------------------------------------------------------
+  # 🔵 OLLAMA SETTINGS
+  # -----------------------------------------------------------------------------
 
-        AZURE_APIM_BASE_URL="https://trustnest.azure-api.net"
-        # Base URL of your Azure API Management Gateway (APIM)
-        # Example: https://company-apim-gateway.azure-api.net
+  OLLAMA_API_URL: "http://localhost:11434"                          # Ollama API URL (optional)
+  OLLAMA_EMBEDDING_MODEL_NAME: "snowflake-arctic-embed2:latest"     # Model name for embeddings
+  OLLAMA_VISION_MODEL_NAME: "llama3-vision:latest"                  # Model name for vision tasks (optional)
 
-        AZURE_RESOURCE_PATH_EMBEDDINGS="/genai-aoai-inference/v1"
-        # Path after base URL for Embeddings API (before /deployments/...)
+  # KEYCLOAK
+  KEYCLOAK_SERVER_URL: "http://keycloak"
+  KEYCLOAK_REALM_NAME: "app"
+  KEYCLOAK_CLIENT_ID: "app"
 
-        AZURE_RESOURCE_PATH_LLM="/genai-aoai-inference/v2"
-        # Path after base URL for LLM Chat API (before /deployments/...)
+  # OPENSEARCH
+  OPENSEARCH_HOST: "https://opensearch:9200"
+  OPENSEARCH_USER: "admin"
+  OPENSEARCH_PASSWORD: "Azerty123_"
+  OPENSEARCH_SECURE: "false"
+  OPENSEARCH_VERIFY_CERTS: "false"
+  OPENSEARCH_METADATA_INDEX: "metadata-index"
+  OPENSEARCH_VECTOR_INDEX: "vector-index"
 
-        AZURE_APIM_KEY="your-subscription-key"
-        # Subscription Key required by the APIM Gateway ("TrustNest-Apim-Subscription-Key" header)
+  # MINIO
+  MINIO_ENDPOINT: "minio:9000"
+  MINIO_ACCESS_KEY: "admin"
+  MINIO_SECRET_KEY: "Azerty123_"
+  MINIO_BUCKET_NAME: "app"
+  MINIO_SECURE: "false"
 
-        # -----------------------------------------------------------------------------
-        # 🔵 AZURE OPENAI DIRECT SETTINGS (if AZURE_USE_APIM=false)
-        # -----------------------------------------------------------------------------
+  # GCS
+  GCS_CREDENTIALS_PATH: "/path/to/sa-key.json"
+  GCS_BUCKET_NAME: "my-bucket"
+  GCS_PROJECT_ID: "my-gcp-project"
 
-        AZURE_OPENAI_BASE_URL="https://your-azure-openai-resource.openai.azure.com"
-        # Base URL for direct Azure OpenAI access (no APIM)
+  # LOCAL STORAGE
+  LOCAL_CONTENT_STORAGE_PATH: "~/.knowledge-flow/content-store"
+  LOCAL_METADATA_STORAGE_PATH: "~/.knowledge-flow/metadata-store.json"
 
-        AZURE_OPENAI_API_KEY="your-real-azure-openai-api-key"
-        # Azure OpenAI API Key (directly from Azure portal, not APIM key)
-
-        # -----------------------------------------------------------------------------
-        # 🔵 AZURE OPENAI DEPLOYMENT NAMES
-        # -----------------------------------------------------------------------------
-
-        AZURE_DEPLOYMENT_LLM="gpt-4o"
-        # Deployment name in Azure OpenAI for Chat LLMs (ex: GPT-4 Turbo, GPT-4o)
-
-        AZURE_DEPLOYMENT_EMBEDDING="fred-text-embedding-3-large"
-        # Deployment name in Azure OpenAI for Embedding Models
-
-
-        # -----------------------------------------------------------------------------
-        # 🔵 OPENAI EMBEDDING (Public API - NOT Azure)
-        # -----------------------------------------------------------------------------
-
-        OPENAI_API_KEY="sk-****"
-        # Your OpenAI API key from https://platform.openai.com/account/api-keys
-
-        # OPENAI_API_BASE="https://api.openai.com/v1"
-        # Optional. Defaults to https://api.openai.com/v1 for OpenAI public API
-
-        OPENAI_API_VERSION=""
-        # Leave blank for OpenAI public API (only needed for Azure)
-        # Example (Azure only): "2024-06-01"
-
-        # Example model for embeddings (default for OpenAI)
-        # OPENAI_MODEL_NAME="text-embedding-ada-002"
-
-        # -----------------------------------------------------------------------------
-        # 🔵 OLLAMA SETTINGS
-        # -----------------------------------------------------------------------------
-
-        OLLAMA_API_URL="http://localhost:11434"
-        # Ollama API URL (optional)
-
-        OLLAMA_EMBEDDING_MODEL_NAME="snowflake-arctic-embed2:latest"
-        # Model name for embeddings
-
-        OLLAMA_VISION_MODEL_NAME="llama3-vision:latest"
-        # Model name for vision tasks (optional)
-
-
-        # KEYCLOAK
-        KEYCLOAK_SERVER_URL="http://keycloak.test:80"
-        KEYCLOAK_REALM_NAME="app"
-        KEYCLOAK_CLIENT_ID="app"
-
-        # OPENSEARCH
-        OPENSEARCH_HOST="https://opensearch.test:9200"
-        OPENSEARCH_USER="admin"
-        OPENSEARCH_PASSWORD="Azerty123_"
-        OPENSEARCH_SECURE="false"
-        OPENSEARCH_VERIFY_CERTS="false"
-        OPENSEARCH_METADATA_INDEX="metadata-index"
-        OPENSEARCH_VECTOR_INDEX="vector-index"
-
-        #MINIO
-        MINIO_ENDPOINT="minio:9000"
-        MINIO_ACCESS_KEY="admin"
-        MINIO_SECRET_KEY="Azerty123_"
-        MINIO_BUCKET_NAME="app-bucket"
-        MINIO_SECURE=false
-        #GCS
-        GCS_CREDENTIALS_PATH=/path/to/sa-key.json
-        GCS_BUCKET_NAME=my-bucket
-        GCS_PROJECT_ID=my-gcp-project
-        # LOCAL STORAGE
-        LOCAL_CONTENT_STORAGE_PATH="~/.knowledge-flow/content-store"
-        LOCAL_METADATA_STORAGE_PATH="~/.knowledge-flow/metadata-store.json"
-
-ConfigMap_ext:
-  enabled: true
+kubeconfig:
   data:
     kubeconfig: |
       apiVersion: v1
