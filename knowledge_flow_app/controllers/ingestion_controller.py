@@ -92,8 +92,6 @@ class IngestionController:
             metadata_json: str = Form(...),
         ) -> StreamingResponse:
             input_metadata = json.loads(metadata_json)
-            agent_name = input_metadata.get("agent_name")
-            logger.info(f"Agent name received: {agent_name}")
             # ✅ Preload: Call save_file_to_temp on all files before the generator runs
             # This is to ensure that the files are saved to temp storage before processing
             # and to avoid blocking the generator with file I/O operations.

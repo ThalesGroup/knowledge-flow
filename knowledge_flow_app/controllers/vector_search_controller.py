@@ -34,7 +34,6 @@ class DocumentSource(BaseModel):
     file_name: str
     page: Optional[int]
     uid: str
-    agent_name: Optional[str] = None
     modified: Optional[str] = None
 
     # Required for frontend
@@ -88,7 +87,6 @@ class VectorSearchController:
             file_name=metadata.get("document_name", "Unknown"),
             page=metadata.get("page", None),
             uid=metadata.get("document_uid", "Unknown"),
-            agent_name=metadata.get("front_metadata", {}).get("agent_name", "Unknown agent"),
             modified=metadata.get("modified", "Unknown"),
             title=metadata.get("title", "Unknown"),
             author=metadata.get("author", "Unknown"),

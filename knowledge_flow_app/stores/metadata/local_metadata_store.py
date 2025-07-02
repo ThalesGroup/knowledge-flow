@@ -51,7 +51,6 @@ class LocalMetadataStore(BaseMetadataStore):
     {
         "document_uid": "abc123",
         "document_name": "example.md",
-        "agent_name": "fred",
         "date_added": "2024-04-25"
     }
 
@@ -92,12 +91,7 @@ class LocalMetadataStore(BaseMetadataStore):
         """
             Return all metadata entries matching the given (possibly nested) filters.
             The filters are applied recursively to the metadata dictionaries.
-            Example filter:
-
-                {"frontend_metadata": {"agent_name": "fred"}}
-
-            This will return all metadata entries where the agent name is "fred" and the document name is "example.md".
-        :param filters: Dictionary of filters to apply.
+            :param filters: Dictionary of filters to apply.
         :return: List of metadata dictionaries that match the filters.
         """
         all_data = self._load()
