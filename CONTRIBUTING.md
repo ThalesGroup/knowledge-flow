@@ -61,6 +61,7 @@ By contributing, you agree that your contributions may be used under the project
 Before submitting a pull request, please ensure:
 
 - [ ] Your code builds and runs locally using `make run`
+- [ ] Unit tests all pass `make test`
 - [ ] Code follows the existing style and structure
 - [ ] You included relevant unit or integration tests for your changes
 - [ ] The PR includes a clear **description** and motivation
