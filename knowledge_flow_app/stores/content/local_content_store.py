@@ -78,7 +78,6 @@ class LocalStorageBackend(BaseContentStore):
 
         return open(files[0], "rb")
 
-
     def get_markdown(self, document_uid: str) -> str:
         """
         Returns the content of the `output/output.md` file as a UTF-8 string.
@@ -106,4 +105,3 @@ class LocalStorageBackend(BaseContentStore):
                 raise
 
         raise FileNotFoundError(f"Neither markdown nor CSV preview found for document: {document_uid}")
-

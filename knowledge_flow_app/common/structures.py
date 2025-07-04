@@ -49,7 +49,7 @@ class ProcessorConfig(BaseModel):
         prefix (str): The file extension this processor handles (e.g., '.pdf').
         class_path (str): Dotted import path of the processor class.
     """
-    
+
     prefix: str = Field(..., description="The file extension this processor handles (e.g., '.pdf')")
     class_path: str = Field(..., description="Dotted import path of the processor class")
 
