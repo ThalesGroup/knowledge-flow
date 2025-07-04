@@ -96,9 +96,7 @@ class VectorizationProcessor(BaseOutputProcessor):
 
             if self.metadata_store.get_metadata_by_uid(document_uid):
                 logger.info(f"Document with UID {document_uid} already exists. Skipping.")
-                return OutputProcessorResponse(
-                    status=Status.IGNORED
-                )
+                return OutputProcessorResponse(status=Status.IGNORED)
 
             # 5. Store embeddings
             try:

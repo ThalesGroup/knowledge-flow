@@ -30,6 +30,4 @@ class TabularProcessor(BaseOutputProcessor):
 
     def process(self, file_path: str, metadata: dict) -> OutputProcessorResponse:
         logger.info(f"Processing file: {file_path} with metadata: {metadata}")
-        return OutputProcessorResponse(
-            status=Status.SUCCESS
-        )
+        return OutputProcessorResponse(status=Status.SUCCESS)
