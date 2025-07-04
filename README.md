@@ -1,69 +1,117 @@
 # Knowledge Flow Backend
 
-FastAPI microservice that ingests documents, extracts knowledge, and stores searchable vectors.
+**Knowledge Flow** is a modular FastAPI backend that extracts and structures knowledge from documents or tabular data for intelligent applications.
+
+It is used by the open-source [Fred](https://github.com/ThalesGroup/fred) multi-agent assistant, exposing both REST and MCP (Model Composition and Prompting) endpoints to serve structured knowledge to agents.
+
+---
+
+## What It Does
+
+Knowledge Flow provides two primary services:
+
+1. **Document Ingestion**  
+   Converts unstructured files (PDF, DOCX, PPTX, etc.) into clean Markdown and metadata, splits the content into chunks, and vectorizes them using an embedding model. The results can be stored locally or in a vector store for semantic search (e.g., RAG pipelines).
+
+2. **Structured Data Ingestion**  
+   Processes structured files (CSV, XLSX, etc.) into normalized data rows for downstream querying. These are stored in JSON, SQLite, or other formats and can be exposed via custom REST endpoints or MCP APIs.
+
+All processing pipelines are defined declaratively in `config/configuration.yaml`.
+
+---
 
 ## Developer Docs
 
-For a deeper understanding of how Knowledge Flow works — including how to add custom processors, services, or storage backends — see the full [**Developer Guide**](docs/DEVELOPER_GUIDE.md).
+To learn how to:
 
-## Quick start
+- Add custom input or output processors
+- Create new storage backends
+- Extend the ingestion and search logic
+
+→ See the [**Developer Guide**](docs/DEVELOPER_GUIDE.md)
+
+---
+
+## Quick Start
 
 ```bash
 git clone https://github.com/ThalesGroup/knowledge-flow.git
 cd knowledge-flow
-make dev  # sets up .venv with uv
-cp config/.env.template config/.env   # add OPENAI_API_KEY
-make run  # http://localhost:8111/knowledge/v1/docs
+make dev
+cp config/.env.template config/.env
+# Edit .env to add OPENAI_API_KEY
+make run
 ```
 
-Prefer VS Code + Docker? See **docs/devcontainer.md** for a one-click setup.
+Then visit:
 
-## ✨ Features
+- Swagger UI: http://localhost:8111/knowledge/v1/docs  
+- ReDoc: http://localhost:8111/knowledge/v1/redoc
 
-- PDF / DOCX / PPTX ingestion → Markdown
-- Vectorization pipeline with OpenAI / Azure / Ollama
-- Pluggable storage (filesystem, MinIO)
-- Metadata index (OpenSearch or in-memory)
+Prefer a zero-install workflow? Open the project in VS Code’s Dev Container and get a full stack (Knowledge-Flow + OpenSearch + MinIO) in one click. See **[docs/DEV_CONTAINER.md](docs/DEV_CONTAINER.md)** for step-by-step instructions.
 
-Supports local dev with just an OpenAI key — no external services required.
+---
 
-For advanced use cases (Keycloak, OpenSearch, MinIO, Knowledge UI), see the
-**[fred-deployment-factory](https://github.com/ThalesGroup/fred-deployment-factory)** repo.
+## Features
 
-## Model Backends
+- Ingests files: PDF, DOCX, PPTX → Markdown
+- Ingests data: CSV, Excel → structured rows
+- Vectorizes content using OpenAI, Azure, or Ollama
+- Stores content and metadata in pluggable backends
+- Runs standalone with only an OpenAI key and local file system
+- Exposes REST and MCP endpoints for agents to query
 
-Works with:
+---
 
-| Provider       | Setup Hint |
-|----------------|------------|
-| **OpenAI**     | Set `OPENAI_API_KEY` |
-| **Azure OpenAI** | See `config/configuration.yaml` for required vars |
-| **Ollama**     | Point `base_url` to your Ollama instance |
+## Supported Embedding Providers
 
-See the `ai:` block in `config/configuration.yaml` for examples.
+| Provider       | How to enable |
+|----------------|----------------|
+| OpenAI         | Set `OPENAI_API_KEY` in `.env` |
+| Azure OpenAI   | Set Azure variables and update `configuration.yaml` |
+| Ollama (local) | Set `OLLAMA_BASE_URL` and configure model block in `configuration.yaml` |
+
+See the `ai:` section in `config/configuration.yaml` for complete setup examples.
+
+---
 
 ## Make Commands
 
-| Command            | Description                     |
-|--------------------|---------------------------------|
-| `make dev`         | Setup `.venv` and install deps  |
-| `make run`         | Start FastAPI server            |
-| `make build`       | Build Python package            |
-| `make docker-build`| Build Docker image              |
-| `make test`        | Run tests                       |
-| `make clean`       | Remove build artifacts          |
+| Command             | Description                     |
+|---------------------|---------------------------------|
+| `make dev`          | Set up virtualenv with `uv`     |
+| `make run`          | Launch FastAPI server           |
+| `make build`        | Package the app                 |
+| `make docker-build` | Build Docker image              |
+| `make test`         | Run all tests                   |
+| `make clean`        | Remove build artifacts          |
 
 ---
 
-## Docs
+## Production Deployment
 
-- [Code of conduct](docs/CODE_OF_CONDUCT.md)
-- [How to extend / dev guide](docs/DEVELOPER_GUIDE.md)
-- [Contributing guide](docs/CONTRIBUTING.md)
-- [Coding guidelines](docs/CODING_GUIDELINES.md)
-- [Security guidelines](docs/SECURITY.md)
-- [Fred deployment stack](https://github.com/ThalesGroup/fred-deployment-factory)
+Use the [fred-deployment-factory](https://github.com/ThalesGroup/fred-deployment-factory) to run a full stack including:
+
+- Keycloak (authentication)
+- OpenSearch (vector + metadata index)
+- MinIO (content storage)
+- Fred + Knowledge Flow containers
+
+This is the recommended way to test a production-grade Fred deployment.
 
 ---
+
+## Documentation
+
+- [Developer Guide](docs/DEVELOPER_GUIDE.md)
+- [Contributing Guide](docs/CONTRIBUTING.md)
+- [Coding Guidelines](docs/CODING_GUIDELINES.md)
+- [Security Policy](docs/SECURITY.md)
+- [Dev Container](docs/DEV_CONTAINER.md)
+- [Code of Conduct](docs/CODE_OF_CONDUCT.md)
+
+---
+
+## License
 
 Apache 2.0 — © Thales 2025
