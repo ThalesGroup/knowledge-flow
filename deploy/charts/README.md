@@ -24,7 +24,7 @@ sudo k3s ctr images import /tmp/image.tar.gz
 ```
 IP_K3S=$(hostname -I | awk '{print $1}')
 
-echo $IP_K3S knowledge-flow-backend.test | sudo tee -a /etc/hosts
+echo $IP_K3S knowledge-flow-backend.dev.fred.thalesgroup.com | sudo tee -a /etc/hosts
 ```
 
 ## Install Knowledge-Flow
@@ -32,9 +32,11 @@ echo $IP_K3S knowledge-flow-backend.test | sudo tee -a /etc/hosts
 Overload the file `knowlegde-flow-backend/values.yaml`, specifically the three following variables, we recommend a separated customvalues.yaml file
 
 ```
-@ConfigMap.data.configuration.yaml
-@configMap.data.\.env
-@ConfigMap_ext.data.kubeconfig
+env:*
+ingress.hosts:*
+configuration:*
+dotenv:*
+kubeconfig:*
 ```
 
 Then deploy knowledge-flow-backend

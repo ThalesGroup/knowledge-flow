@@ -1,13 +1,11 @@
-{{- if .Values.ConfigMap_ext.enabled }}
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "{{ .Values.applicationName }}-ext-configmap"
+  name: "{{ .Values.applicationName }}-kube-configmap"
   namespace: {{ .Release.Namespace }}
-  {{- if .Values.ConfigMap_ext.annotations }}
+  {{- if .Values.kubeconfig.annotations }}
   annotations:
-{{ toYaml .Values.ConfigMap_ext.annotations | indent 4 }}
+{{ toYaml .Values.kubeconfig.annotations | indent 4 }}
   {{- end }}
   labels:
     name : {{ .Release.Name }}
@@ -19,5 +17,4 @@ metadata:
 {{ toYaml .Values.extraLabels.data | indent 4 }}
     {{- end }}
 data:
-{{ toYaml .Values.ConfigMap_ext.data | indent 2 }}
-{{- end }}
+{{ toYaml .Values.kubeconfig.data | indent 2 }}
