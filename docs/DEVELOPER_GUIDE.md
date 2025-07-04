@@ -4,7 +4,7 @@ This guide explains how to understand, extend, and contribute to the Knowledge F
 
 ---
 
-## 🧩 Processor Architecture
+## Processor Architecture
 
 ### Input Processors
 
@@ -28,10 +28,10 @@ Output processors transform parsed content into embeddings or structured records
 
 ---
 
-## 🔄 Vectorization Pipeline
+## Vectorization Pipeline
 
 ```txt
-[ FILE PATH + METADATA ]
+  [ FILE PATH + METADATA ]
           │
           ▼
   DocumentLoaderInterface
@@ -53,7 +53,7 @@ Each interface is pluggable. You can switch OpenSearch → Pinecone, or Azure �
 
 ---
 
-## 🗂 Project Layout
+## Project Layout
 
 ```text
 knowledge_flow_app/
@@ -70,7 +70,7 @@ knowledge_flow_app/
 
 ---
 
-## 🧑‍💻 Developer Tasks
+## Developer Tasks
 
 | Task                      | Where to implement               |
 |---------------------------|----------------------------------|
@@ -82,7 +82,7 @@ knowledge_flow_app/
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 make test
@@ -96,7 +96,7 @@ pytest tests/test_ingestion.py
 
 ---
 
-## 📦 Custom Configuration
+## Custom Configuration
 
 - See [`config/configuration.yaml`](../config/configuration.yaml)
 - Set environment variables in `.env` (based on `.env.template`)
@@ -104,7 +104,7 @@ pytest tests/test_ingestion.py
 
 ---
 
-## 🔁 Dev loop
+## Dev loop
 
 ```bash
 make dev         # setup .venv
@@ -116,7 +116,7 @@ Swagger UI: [http://localhost:8111/knowledge/v1/docs](http://localhost:8111/know
 
 ---
 
-## 👥 Contributions
+## Contributions
 
 Follow our [coding guidelines](./CODING_GUIDELINES.md) and submit PRs or issues on GitHub.
 

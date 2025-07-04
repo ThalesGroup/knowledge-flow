@@ -4,7 +4,7 @@ Thank you for your interest in contributing! This project is developed collabora
 
 ---
 
-## 🧑‍💻 Team Organization
+## Team Organization
 
 This project is maintained by a core team at **Thales**, in collaboration with external contributors.
 
@@ -27,7 +27,7 @@ This project is maintained by a core team at **Thales**, in collaboration with e
 
 ---
 
-## 🔄 Repository Structure
+## Repository Structure
 
 This project uses two synchronized repositories:
 
@@ -39,7 +39,7 @@ This project uses two synchronized repositories:
 
 ---
 
-## 🚀 How to Become a Contributor
+## How to Become a Contributor
 
 1. Fork the [GitHub repository](https://gitlab.thalesdigital.io/tsn/innovation/fred/knowledge-flow)
 2. Clone your fork and create a branch:
@@ -56,7 +56,7 @@ By contributing, you agree that your contributions may be used under the project
 
 ---
 
-## ✅ Pull Request Checklist
+## Pull Request Checklist
 
 Before submitting a pull request, please ensure:
 
@@ -70,13 +70,13 @@ A CI pipeline will automatically run all tests when you open or update a pull re
 
 ---
 
-## 🧾 License
+## License
 
 All contributions must be compatible with the project’s open source license (see `LICENSE` file in the repo).
 
 ---
 
-## 🐛 Issues Management
+## Issues Management
 
 - Use **plain English** when reporting issues or requesting features.
 - Apply only the **default GitHub labels** (e.g., `bug`, `enhancement`, `question`) — do not create custom labels.
@@ -87,7 +87,7 @@ All contributions must be compatible with the project’s open source license (s
 
 ---
 
-## 🎯 Pre-commit checks
+## Pre-commit checks
 
 To ensure the code you are about to push is quite clean and safe, we provide some pre-commit hooks:
 
@@ -151,7 +151,7 @@ Squashing helps keep the main branch history clean, readable, and easier to debu
 
 Tip: Use git rebase -i or select "Squash and merge" when merging the PR.
 
-## 📬 Contact
+## Contact
 
 For coordination or questions, please contact the internal maintainers:
 
