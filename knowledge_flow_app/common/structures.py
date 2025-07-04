@@ -31,31 +31,25 @@ class Status(str, Enum):
     ERROR = "error"
 
 
-class VectorizationResponse(BaseModel):
+class OutputProcessorResponse(BaseModel):
     """
-    Represents the response of a vectorization operation. It is used to report
-    the status of the vectorization process to the REST remote client.
+    Represents the response of a n output processor operation. It is used to report
+    the status of the output process to the REST remote client.
     Attributes:
-        filename (str): The name of the file being processed.
         status (str): The status of the vectorization operation.
-        document_uid (str): A unique identifier for the document.
-        chunks (int): The number of chunks embedded in the vector store.
-        reason (Optional[str]): An optional reason for failure, if applicable.
     """
 
     status: Status
-    chunks: int
 
 
 class ProcessorConfig(BaseModel):
     """
     Configuration structure for a file processor.
     Attributes:
-        name (str): The name of the processor.
         prefix (str): The file extension this processor handles (e.g., '.pdf').
         class_path (str): Dotted import path of the processor class.
     """
-
+    
     prefix: str = Field(..., description="The file extension this processor handles (e.g., '.pdf')")
     class_path: str = Field(..., description="Dotted import path of the processor class")
 

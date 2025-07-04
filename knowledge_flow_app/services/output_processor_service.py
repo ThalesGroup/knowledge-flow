@@ -14,7 +14,7 @@
 
 import pathlib
 from knowledge_flow_app.application_context import ApplicationContext
-from knowledge_flow_app.common.structures import VectorizationResponse
+from knowledge_flow_app.common.structures import OutputProcessorResponse
 
 
 class OutputProcessorService:
@@ -36,7 +36,7 @@ class OutputProcessorService:
     def __init__(self):
         self.context = ApplicationContext.get_instance()
 
-    def process(self, working_dir: pathlib.Path, input_file: str, input_file_metadata: dict) -> VectorizationResponse:
+    def process(self, working_dir: pathlib.Path, input_file: str, input_file_metadata: dict) -> OutputProcessorResponse:
         """
         Processes data resulting from the input processing.
         """
@@ -61,8 +61,4 @@ class OutputProcessorService:
         if output_file.stat().st_size == 0:
             raise ValueError(f"Output file {output_file} is empty")
         # check if the file is a markdown or csv file
-        if output_file.suffix.lower() == ".md" or output_file.suffix.lower() == ".markdown":
-            # check if the file is a markdown file
-            return processor.process(output_file, input_file_metadata)
-        else:
-            raise ValueError(f"Output file {output_file} is not a markdown or csv file")
+        return processor.process(output_file, input_file_metadata)

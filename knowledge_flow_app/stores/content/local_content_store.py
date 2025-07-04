@@ -17,6 +17,8 @@ import shutil
 from pathlib import Path
 from typing import BinaryIO
 
+import pandas as pd
+
 from knowledge_flow_app.stores.content.base_content_store import BaseContentStore
 
 logger = logging.getLogger(__name__)
@@ -76,16 +78,32 @@ class LocalStorageBackend(BaseContentStore):
 
         return open(files[0], "rb")
 
+
     def get_markdown(self, document_uid: str) -> str:
         """
         Returns the content of the `output/output.md` file as a UTF-8 string.
+        If not found, attempts to convert `output/table.csv` to a Markdown table.
         """
-        md_path = self.destination_root / document_uid / "output" / "output.md"
-        if not md_path.exists():
-            raise FileNotFoundError(f"Markdown not found for document: {document_uid}")
+        doc_path = self.destination_root / document_uid / "output"
+        md_path = doc_path / "output.md"
+        csv_path = doc_path / "table.csv"
 
-        try:
-            return md_path.read_text(encoding="utf-8")
-        except Exception as e:
-            logger.error(f"Error reading markdown file for {document_uid}: {e}")
-            raise
+        if md_path.exists():
+            try:
+                return md_path.read_text(encoding="utf-8")
+            except Exception as e:
+                logger.error(f"Error reading markdown file for {document_uid}: {e}")
+                raise
+
+        if csv_path.exists():
+            try:
+                df = pd.read_csv(csv_path)
+                if len(df) > 200:
+                    df = df.head(200)
+                return df.to_markdown(index=False, tablefmt="github")
+            except Exception as e:
+                logger.error(f"Error reading or converting CSV for {document_uid}: {e}")
+                raise
+
+        raise FileNotFoundError(f"Neither markdown nor CSV preview found for document: {document_uid}")
+

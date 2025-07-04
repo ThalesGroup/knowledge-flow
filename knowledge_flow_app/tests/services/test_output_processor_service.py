@@ -29,7 +29,7 @@ import pytest
 from knowledge_flow_app.services.input_processor_service import InputProcessorService
 from knowledge_flow_app.services.output_processor_service import OutputProcessorService
 from knowledge_flow_app.services import output_processor_service
-from knowledge_flow_app.common.structures import VectorizationResponse
+from knowledge_flow_app.common.structures import OutputProcessorResponse
 
 
 # ----------------------------
@@ -70,7 +70,7 @@ class DummyProcessor:
     """Mock processor returning dummy vectorization response."""
 
     def process(self, path, metadata):
-        return VectorizationResponse(chunks=1, vectors=[], metadata=metadata)
+        return OutputProcessorResponse(chunks=1, vectors=[], metadata=metadata)
 
 
 # ----------------------------
@@ -83,16 +83,14 @@ def test_process_real_pdf_success(prepared_pdf_dir):
 
     service = OutputProcessorService()
     result = service.process(prepared_pdf_dir, "sample.pdf", {"meta": "pdf", "document_uid": "uid-123"})
-    assert isinstance(result, VectorizationResponse)
-    assert result.chunks >= 0
+    assert isinstance(result, OutputProcessorResponse)
 
 
 def test_process_real_docx_success(prepared_docx_dir):
     """Test output processing on a real processed DOCX."""
     service = OutputProcessorService()
     result = service.process(prepared_docx_dir, "sample.docx", {"meta": "docx", "document_uid": "uid-456"})
-    assert isinstance(result, VectorizationResponse)
-    assert result.chunks >= 0
+    assert isinstance(result, OutputProcessorResponse)
 
 
 # ----------------------------
