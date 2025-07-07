@@ -26,7 +26,8 @@ All tests use a temporary JSON file in a clean temp directory.
 # pylint: disable=redefined-outer-name
 
 import pytest
-from knowledge_flow_app.stores.metadata.local_metadata_store import LocalMetadataStore
+
+from knowledge_flow_app.core.stores.metadata.local_metadata_store import LocalMetadataStore
 
 
 # ----------------------------

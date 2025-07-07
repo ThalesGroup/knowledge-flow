@@ -15,7 +15,7 @@
 from unittest.mock import MagicMock
 import pytest
 from knowledge_flow_app.application_context import ApplicationContext
-from knowledge_flow_app.common.structures import Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig, ChatProfileStorageConfig
+from knowledge_flow_app.common.structures import Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig
 
 from knowledge_flow_app.core.stores.content.content_storage_factory import get_content_store
 from knowledge_flow_app.core.stores.content.minio_content_store import MinioContentStore
@@ -74,7 +74,6 @@ def app_context(request):
     content_storage_type = "local"
     metadata_storage_type = "local"
     vector_storage_type = "in_memory"
-    chat_profile_storage_type = "local"
 
     # Allow test to override via marker
     marker_metadata_storage_type = request.node.get_closest_marker("metadata_storage_type")
@@ -89,10 +88,6 @@ def app_context(request):
     if marker_vector_storage_type and "type" in marker_vector_storage_type.kwargs:
         vector_storage_type = marker_vector_storage_type.kwargs["type"]
 
-    marker_chat_profile_storage_type = request.node.get_closest_marker("chat_profile_storage_type")
-    if marker_chat_profile_storage_type and "type" in marker_chat_profile_storage_type.kwargs:
-        chat_profile_storage_type = marker_chat_profile_storage_type.kwargs["type"]
-
     config = Configuration(
         security={
             "enabled": False,
@@ -102,8 +97,6 @@ def app_context(request):
         content_storage=ContentStorageConfig(type=content_storage_type),
         metadata_storage=MetadataStorageConfig(type=metadata_storage_type),
         vector_storage=VectorStorageConfig(type=vector_storage_type),
-        chat_profile_storage=ChatProfileStorageConfig(type=chat_profile_storage_type),
-        chat_profile_max_tokens=8000,
         embedding=EmbeddingConfig(type="openai"),
         input_processors=[
             ProcessorConfig(

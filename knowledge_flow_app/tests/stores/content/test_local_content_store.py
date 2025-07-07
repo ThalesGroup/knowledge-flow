@@ -28,7 +28,8 @@ All tests are isolated using pytest's tmp_path and monkeypatch fixtures.
 
 from pathlib import Path
 import pytest
-from knowledge_flow_app.stores.content.local_content_store import LocalStorageBackend
+
+from knowledge_flow_app.core.stores.content.local_content_store import LocalStorageBackend
 
 
 # ----------------------------

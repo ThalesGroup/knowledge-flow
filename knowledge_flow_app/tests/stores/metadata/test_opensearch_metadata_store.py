@@ -36,7 +36,9 @@ Mocks OpenSearch client entirely to avoid real HTTP calls.
 
 import pytest
 from opensearchpy.exceptions import OpenSearchException
-from knowledge_flow_app.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
+
+from knowledge_flow_app.core.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
+import knowledge_flow_app.core.stores.metadata.opensearch_metadata_store as oms
 
 
 # ----------------------------
@@ -249,7 +251,7 @@ def test_index_already_exists(monkeypatch):
         def __init__(self, *args, **kwargs):
             self.indices = MockIndices()
 
-    monkeypatch.setattr("knowledge_flow_app.stores.metadata.opensearch_metadata_store.OpenSearch", MockClient)
+    monkeypatch.setattr(oms, "OpenSearch", MockClient)
     OpenSearchMetadataStore("localhost", "meta", "vec")
 
 

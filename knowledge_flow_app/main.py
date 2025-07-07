@@ -123,20 +123,21 @@ def parse_cli_opts():
 
     return parser.parse_args()
 
+def main():
+    args = parse_cli_opts()
+    global app
+    app = create_app(args.server_configuration_path, args.server_base_url_path)
 
-args = parse_cli_opts()
-app = create_app(args.server_configuration_path, args.server_base_url_path)
+    mcp = FastApiMCP(
+        app,
+        name="Knowledge Flow MCP",
+        description="MCP server for Knowledge Flow",
+        include_tags=["Vector Search", "Tabular"],
+        describe_all_responses=True,
+        describe_full_response_schema=True,
+    )
+    mcp.mount()
 
-mcp = FastApiMCP(
-    app,
-    name="Knowledge Flow MCP",
-    description="MCP server for Knowledge Flow",
-    include_tags=["Vector Search", "Tabular"],
-    describe_all_responses=True,
-    describe_full_response_schema=True,
-)
-mcp.mount()
-if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host=args.server_address,
@@ -145,3 +146,7 @@ if __name__ == "__main__":
         reload=args.server_reload,
         reload_dirs=args.server_reload_dir,
     )
+
+
+if __name__ == "__main__":
+    main()
