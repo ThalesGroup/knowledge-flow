@@ -25,9 +25,10 @@ Uses monkeypatching to mock configuration and application context.
 
 import tempfile
 import pytest
-from knowledge_flow_app.stores.content.local_content_store import LocalStorageBackend
-from knowledge_flow_app.stores.content.minio_content_store import MinioContentStore
-from knowledge_flow_app.stores.content.content_storage_factory import get_content_store
+
+from knowledge_flow_app.core.stores.content.content_storage_factory import get_content_store
+from knowledge_flow_app.core.stores.content.local_content_store import LocalStorageBackend
+from knowledge_flow_app.core.stores.content.minio_content_store import MinioContentStore
 
 
 class DummyConfig:  # pylint: disable=too-few-public-methods

@@ -26,9 +26,9 @@ This test suite includes:
 import shutil
 from pathlib import Path
 import pytest
-from knowledge_flow_app.services.input_processor_service import InputProcessorService
-from knowledge_flow_app.services.output_processor_service import OutputProcessorService
-from knowledge_flow_app.services import output_processor_service
+from knowledge_flow_app.features.wip.input_processor_service import InputProcessorService
+from knowledge_flow_app.features.wip.output_processor_service import OutputProcessorService
+from knowledge_flow_app.features.wip import output_processor_service
 from knowledge_flow_app.common.structures import OutputProcessorResponse
 
 
@@ -43,7 +43,7 @@ def prepared_pdf_dir(tmp_path, monkeypatch):
         return "This is a test image description"
 
     monkeypatch.setattr(
-        "knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture",
+        "knowledge_flow_app.core.processors.input.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor._describe_picture",
         mock_describe,
     )
 

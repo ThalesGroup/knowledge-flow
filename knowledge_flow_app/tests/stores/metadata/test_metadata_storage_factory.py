@@ -24,10 +24,11 @@ Covers:
 # pylint: disable=too-few-public-methods,redefined-outer-name,missing-function-docstring,missing-class-docstring
 
 import pytest
-from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
-from knowledge_flow_app.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
-from knowledge_flow_app.stores.metadata.local_metadata_store import LocalMetadataStore
 
+from knowledge_flow_app.core.stores.metadata.local_metadata_store import LocalMetadataStore
+from knowledge_flow_app.core.stores.metadata.metadata_storage_factory import get_metadata_store
+from knowledge_flow_app.core.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
+import knowledge_flow_app.core.stores.metadata.opensearch_metadata_store as oms
 
 class DummyConfig:
     """Mock config with configurable metadata storage type."""
@@ -114,7 +115,7 @@ def test_get_opensearch_metadata_store(monkeypatch, patch_context):
         def __init__(self, *args, **kwargs):
             self.indices = DummyIndices()
 
-    monkeypatch.setattr("knowledge_flow_app.stores.metadata.opensearch_metadata_store.OpenSearch", DummyOpenSearch)
+    monkeypatch.setattr(oms, "OpenSearch", DummyOpenSearch)
     store = get_metadata_store()
     assert isinstance(store, OpenSearchMetadataStore)
 

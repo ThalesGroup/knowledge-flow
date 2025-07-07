@@ -15,15 +15,15 @@
 from unittest.mock import MagicMock
 import pytest
 from knowledge_flow_app.application_context import ApplicationContext
-from knowledge_flow_app.common.structures import Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig, ChatProfileStorageConfig
+from knowledge_flow_app.common.structures import Configuration, ContentStorageConfig, EmbeddingConfig, MetadataStorageConfig, ProcessorConfig, VectorStorageConfig
 
+from knowledge_flow_app.core.stores.content.content_storage_factory import get_content_store
+from knowledge_flow_app.core.stores.content.minio_content_store import MinioContentStore
+from knowledge_flow_app.core.stores.metadata.metadata_storage_factory import get_metadata_store
+from knowledge_flow_app.core.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
 from knowledge_flow_app.main import create_app
 from fastapi.testclient import TestClient
 from opensearchpy.exceptions import NotFoundError
-from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
-from knowledge_flow_app.stores.metadata.opensearch_metadata_store import OpenSearchMetadataStore
-from knowledge_flow_app.stores.content.minio_content_store import MinioContentStore
-from knowledge_flow_app.stores.content.content_storage_factory import get_content_store
 from langchain_community.embeddings import FakeEmbeddings
 from minio.error import S3Error
 
@@ -74,7 +74,6 @@ def app_context(request):
     content_storage_type = "local"
     metadata_storage_type = "local"
     vector_storage_type = "in_memory"
-    chat_profile_storage_type = "local"
 
     # Allow test to override via marker
     marker_metadata_storage_type = request.node.get_closest_marker("metadata_storage_type")
@@ -89,10 +88,6 @@ def app_context(request):
     if marker_vector_storage_type and "type" in marker_vector_storage_type.kwargs:
         vector_storage_type = marker_vector_storage_type.kwargs["type"]
 
-    marker_chat_profile_storage_type = request.node.get_closest_marker("chat_profile_storage_type")
-    if marker_chat_profile_storage_type and "type" in marker_chat_profile_storage_type.kwargs:
-        chat_profile_storage_type = marker_chat_profile_storage_type.kwargs["type"]
-
     config = Configuration(
         security={
             "enabled": False,
@@ -102,21 +97,19 @@ def app_context(request):
         content_storage=ContentStorageConfig(type=content_storage_type),
         metadata_storage=MetadataStorageConfig(type=metadata_storage_type),
         vector_storage=VectorStorageConfig(type=vector_storage_type),
-        chat_profile_storage=ChatProfileStorageConfig(type=chat_profile_storage_type),
-        chat_profile_max_tokens=8000,
         embedding=EmbeddingConfig(type="openai"),
         input_processors=[
             ProcessorConfig(
                 prefix=".docx",
-                class_path="knowledge_flow_app.input_processors.docx_markdown_processor.docx_markdown_processor.DocxMarkdownProcessor",
+                class_path="knowledge_flow_app.core.processors.input.docx_markdown_processor.docx_markdown_processor.DocxMarkdownProcessor",
             ),
             ProcessorConfig(
                 prefix=".pdf",
-                class_path="knowledge_flow_app.input_processors.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor",
+                class_path="knowledge_flow_app.core.processors.input.pdf_markdown_processor.pdf_markdown_processor.PdfMarkdownProcessor",
             ),
             ProcessorConfig(
                 prefix=".pptx",
-                class_path="knowledge_flow_app.input_processors.pptx_markdown_processor.pptx_markdown_processor.PptxMarkdownProcessor",
+                class_path="knowledge_flow_app.core.processors.input.pptx_markdown_processor.pptx_markdown_processor.PptxMarkdownProcessor",
             ),
         ],
     )
@@ -154,7 +147,7 @@ def fake_embedder(monkeypatch):
     """
     Monkeypatches the Embedder class's __init__ method to use a fake embedder for testing purposes.
     This function replaces the original __init__ method of the Embedder class in
-    'knowledge_flow_app.output_processors.vectorization_processor.embedder' with a fake implementation
+    'knowledge_flow_app.core.processors.output.vectorization_processor.embedder' with a fake implementation
     that initializes the model attribute with a FakeEmbeddings instance of size 1352.
 
     Args:
@@ -164,7 +157,7 @@ def fake_embedder(monkeypatch):
     def fake_embedder_init(self, config=None):
         self.model = FakeEmbeddings(size=1352)
 
-    monkeypatch.setattr("knowledge_flow_app.output_processors.vectorization_processor.embedder.Embedder.__init__", fake_embedder_init)
+    monkeypatch.setattr("knowledge_flow_app.core.processors.output.vectorization_processor.embedder.Embedder.__init__", fake_embedder_init)
 
 
 @pytest.fixture(scope="function")

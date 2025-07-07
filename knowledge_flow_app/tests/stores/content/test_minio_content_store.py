@@ -28,8 +28,9 @@ All tests use pytest monkeypatching for mocking MinIO client behavior.
 from io import BytesIO
 from pathlib import Path
 import pytest
-from knowledge_flow_app.stores.content.minio_content_store import MinioContentStore
 from minio.error import S3Error
+
+from knowledge_flow_app.core.stores.content.minio_content_store import MinioContentStore
 
 
 # ----------------------------

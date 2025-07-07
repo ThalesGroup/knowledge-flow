@@ -29,7 +29,7 @@ Mocks are used to simulate metadata_store behavior.
 
 from types import SimpleNamespace
 from fastapi import HTTPException
-from knowledge_flow_app.services.metadata_service import MetadataService
+from knowledge_flow_app.features.metadata.service import MetadataService
 import pytest
 
 
