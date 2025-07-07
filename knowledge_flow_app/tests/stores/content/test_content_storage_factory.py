@@ -27,6 +27,7 @@ import tempfile
 import pytest
 
 from knowledge_flow_app.core.stores.content.content_storage_factory import get_content_store
+from knowledge_flow_app.core.stores.content.local_content_store import LocalStorageBackend
 from knowledge_flow_app.core.stores.content.minio_content_store import MinioContentStore
 
 

@@ -19,6 +19,7 @@ from langchain.schema.document import Document
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import Status, OutputProcessorResponse
 from knowledge_flow_app.core.processors.output.base_output_processor import BaseOutputProcessor
+from knowledge_flow_app.core.stores.metadata.metadata_storage_factory import get_metadata_store
 
 logger = logging.getLogger(__name__)
 
