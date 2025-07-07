@@ -13,55 +13,42 @@
 # limitations under the License.
 
 from datetime import datetime, timezone
+from typing import List
 from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import List, Optional
 from langchain.schema.document import Document
-from pydantic import Field
+from knowledge_flow_app.features.vector_search.structures import DocumentSource, SearchRequest
 from knowledge_flow_app.services.vector_search_service import VectorSearchService
 
-router = APIRouter()
-
-
-class SearchRequest(BaseModel):
-    query: str
-    top_k: int = 10
-
-
-class DocumentSource(BaseModel):
-    content: str
-    file_path: str
-    file_name: str
-    page: Optional[int]
-    uid: str
-    modified: Optional[str] = None
-
-    # Required for frontend
-    title: str
-    author: str
-    created: str
-    type: str
-
-    # Metrics & evaluation
-    score: float = Field(..., description="Similarity score returned by the vector store (e.g., cosine distance).")
-    rank: Optional[int] = Field(None, description="Rank of the document among the retrieved results.")
-    embedding_model: Optional[str] = Field(None, description="Identifier of the embedding model used.")
-    vector_index: Optional[str] = Field(None, description="Name of the vector index used for retrieval.")
-    token_count: Optional[int] = Field(None, description="Approximate token count of the content.")
-
-    # Optional usage tracking or provenance
-    retrieved_at: Optional[str] = Field(None, description="Timestamp when the document was retrieved.")
-    retrieval_session_id: Optional[str] = Field(None, description="Session or trace ID for auditability.")
-
-
-class SearchResponseDocument(BaseModel):
-    content: str
-    metadata: dict
-
-
 class VectorSearchController:
-    """
-    Controller responsible for handling vectorization and search requests.
+    """knowledge_flow_app/features/tabular/__init__.py
+    Controller responsible for document search using vector similarity.
+
+    This controller exposes a REST API endpoint for embedding-based search
+    over previously ingested and vectorized documents. Results are returned
+    as ranked `DocumentSource` objects with associated similarity scores and metadata.
+
+    Exposure:
+    ---------
+    This controller is **also registered as an MCP tool** in `main.py` under the name
+    `"search_documents_using_vectorization"` and can be invoked programmatically by
+    agents such as Dominic. This makes it a central capability in the Knowledge Flow
+    architecture, bridging both REST and agentic workflows.
+
+    Current Usage:
+    --------------
+    - Accessed directly via REST (e.g., for external tools or UIs)
+    - Invoked by agents via MCP workflows (e.g., from LangGraph plans)
+
+    Limitations and Design Considerations:
+    --------------------------------------
+    The implementation performs a simple similarity search over the vector index,
+    without caching, reranking, or context-aware adaptation.
+
+    Future directions include:
+    - Avoiding redundant queries for the same session
+    - Introducing query memory or context for improved relevance
+    - Supporting advanced filtering (e.g., by tags, access rights)
+    - Integrating hybrid keyword + vector search
     """
 
     def __init__(self, router: APIRouter):

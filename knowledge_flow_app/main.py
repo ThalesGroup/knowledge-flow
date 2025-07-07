@@ -35,8 +35,9 @@ from knowledge_flow_app.common.structures import Configuration
 from knowledge_flow_app.common.utils import parse_server_configuration
 from knowledge_flow_app.controllers.content_controller import ContentController
 from knowledge_flow_app.controllers.ingestion_controller import IngestionController
-from knowledge_flow_app.controllers.metadata_controller import MetadataController
-from knowledge_flow_app.controllers.vector_search_controller import VectorSearchController
+from knowledge_flow_app.features.metadata.controller import MetadataController
+from knowledge_flow_app.features.tabular.controller import TabularController
+from knowledge_flow_app.features.vector_search.controller import VectorSearchController
 from knowledge_flow_app.controllers.knowledge_context_controller import KnowledgeContextController
 
 
@@ -89,6 +90,8 @@ def create_app(config_path: str = "./config/configuration.yaml", base_url: str =
     MetadataController(router)
     ContentController(router)
     KnowledgeContextController(router)
+    TabularController(router)
+
 
     logger.info("🧩 All controllers registered.")
     app.include_router(router, prefix=base_url)
@@ -128,7 +131,7 @@ mcp = FastApiMCP(
     app,
     name="Knowledge Flow MCP",
     description="MCP server for Knowledge Flow",
-    include_tags=["Vector Search"],
+    include_tags=["Vector Search", "Tabular"],
     describe_all_responses=True,
     describe_full_response_schema=True,
 )

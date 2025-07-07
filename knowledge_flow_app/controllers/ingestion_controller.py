@@ -69,9 +69,51 @@ class StatusAwareStreamingResponse(StreamingResponse):
 
 class IngestionController:
     """
-    Controller responsible for uploading documents, executing the ingestion pipeline,
-    and if all goes well, storing the documents in the configured backend storage.
-    It also handles the metadata extraction and storage.
+    Controller responsible for handling the initial ingestion pipeline.
+
+    Current Responsibilities:
+    --------------------------
+    This controller manages the **entire ingestion lifecycle** in one endpoint:
+    1. Temporary storage of uploaded files
+    2. Metadata extraction
+    3. Document processing (e.g. chunking)
+    4. Vectorization and post-processing
+    5. Metadata persistence
+    6. Raw content storage
+
+    It emits a streaming NDJSON response (`ProcessingProgress`) for real-time tracking
+    of the ingestion steps.
+
+    Design Note:
+    ------------
+    This controller is deliberately implemented as a **first, monolithic prototype** to
+    validate the ingestion workflow end-to-end. While this design is operational and
+    suitable for low-concurrency environments, it is **not the final architecture**.
+
+    In a future refactoring, this will likely be split into:
+    - `ContentController`: handles file upload, raw content storage, UID assignment
+    - `ProcessingController`: triggers the async processing pipeline (chunking, embedding, etc.)
+
+    This separation will:
+    - Improve modularity and testability
+    - Support ingestion from other sources (e.g., FTP, S3, user portal)
+    - Enable processing reuse for re-indexing, multi-agent ingestion, etc.
+
+    For now, developers **should not worry** about this architectural limitation. The current
+    implementation is reliable and aligned with the rest of the platform.
+
+    Endpoint:
+    ---------
+    - POST `/process-files`: main endpoint to upload and process one or more files
+      - Accepts a `metadata_json` Form field and multiple files
+      - Returns a streaming response of progress events
+
+    Dependencies:
+    -------------
+    - `IngestionService` for file I/O
+    - `InputProcessorService` for metadata & chunking
+    - `OutputProcessorService` for post-processing
+    - `ContentStore` and `MetadataStore` for persistence
     """
 
     def __init__(self, router: APIRouter):
@@ -82,8 +124,6 @@ class IngestionController:
         self.content_store = get_content_store()
         self.input_processor_service = InputProcessorService()
         self.output_processor_service = OutputProcessorService()
-
-        # self.vectorization_pipeline = VectorizationPipeline()
         logger.info("IngestionController initialized.")
 
         @router.post("/process-files", tags=["Ingestion"])

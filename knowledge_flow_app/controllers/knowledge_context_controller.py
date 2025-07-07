@@ -38,6 +38,47 @@ class UpdateKnowledgeContextRequest(BaseModel):
 
 
 class KnowledgeContextController:
+    """
+    Controller responsible for managing 'Knowledge Contexts'—custom document groupings 
+    associated with user interactions, profiles, or projects.
+
+    ⚠️ Transitional Design Notice:
+    ------------------------------
+    This controller represents an **early implementation** of contextual scoping for 
+    document ingestion and retrieval. It was originally introduced to experiment with
+    associating files to chat sessions or user projects in a structured way.
+
+    However, the architecture is **evolving** toward a more robust and uniform system
+    based on **tags**, which will handle:
+      - user access control (RBAC)
+      - project scoping
+      - filtering/grouping of retrievable content
+
+    As such, the current implementation:
+      - persists knowledge contexts in a custom structure
+      - allows uploading, updating, and deleting files tied to a context
+      - supports markdown rendering and raw file access
+
+    This controller should be treated as **temporary** and will likely be deprecated or 
+    significantly refactored in the near future.
+
+    Developers should not invest in extending this controller but focus instead on the 
+    emerging `tag`-based metadata filtering system, which will subsume these use cases.
+
+    Current Endpoints:
+    ------------------
+    - `GET /knowledgeContexts`: List all contexts for a tag
+    - `GET /knowledgeContexts/{id}`: Fetch a context with markdown
+    - `POST /knowledgeContexts`: Create a new context with documents
+    - `PUT /knowledgeContexts/{id}`: Update metadata or attached files
+    - `DELETE /knowledgeContexts/{id}`: Delete entire context
+    - `DELETE /knowledgeContexts/{id}/documents/{doc_id}`: Delete a specific document
+
+    Future Direction:
+    -----------------
+    The `knowledge_context_id` and `tag` mechanisms will be unified, with `tags` becoming 
+    the central abstraction for organizing documents and enforcing visibility.
+    """
     def __init__(self, router: APIRouter):
         self.service = KnowledgeContextService()
         self._register_routes(router)

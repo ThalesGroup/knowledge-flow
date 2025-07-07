@@ -44,7 +44,39 @@ class MarkdownContentResponse(BaseModel):
 
 class ContentController:
     """
-    FastAPI controller for managing document content operations.
+    Controller responsible for serving document content and previews.
+
+    Current Responsibilities:
+    --------------------------
+    This controller exposes read-only endpoints to access document content:
+    - Serve raw binary files uploaded during ingestion
+    - Serve full Markdown previews rendered from extracted/processed content
+
+    It bridges the backend storage layer with frontend-facing APIs that:
+    - Render documents in the UI (markdown preview)
+    - Allow download of original files (raw content)
+
+    Design Note:
+    ------------
+    In the current implementation, this controller operates in a **passive role**:
+    it only retrieves content, with no ingestion or transformation logic.
+
+    In future iterations, the platform may introduce:
+    - A separate **Content Upload API** (to decouple ingestion and upload)
+    - Access control or document-level authorization
+    - Support for streaming large files or paginated markdown rendering
+
+    Developers should treat this controller as **stable**, with low coupling to
+    the processing pipeline. It is safe to extend for new access-related use cases.
+
+    Endpoints:
+    ----------
+    - `GET /markdown/{document_uid}`: returns the full markdown preview of a document
+    - `GET /raw_content/{document_uid}`: streams the original uploaded file for download
+
+    Dependencies:
+    -------------
+    - `ContentService`: abstracts retrieval from storage backend (e.g., filesystem, MinIO)
     """
 
     def __init__(self, router: APIRouter):
