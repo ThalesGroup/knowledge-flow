@@ -17,7 +17,7 @@ from typing import List
 from fastapi import APIRouter
 from langchain.schema.document import Document
 from knowledge_flow_app.features.vector_search.structures import DocumentSource, SearchRequest
-from knowledge_flow_app.services.vector_search_service import VectorSearchService
+from knowledge_flow_app.features.vector_search.service import VectorSearchService
 
 class VectorSearchController:
     """knowledge_flow_app/features/tabular/__init__.py

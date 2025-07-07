@@ -25,8 +25,8 @@ Uses monkeypatching to simulate application context and dependencies.
 
 import pytest
 from langchain.schema.document import Document
-from knowledge_flow_app.services.vector_search_service import VectorSearchService
-from knowledge_flow_app.services import vector_search_service
+from knowledge_flow_app.features.vector_search.service import VectorSearchService
+from knowledge_flow_app.features.vector_search import service
 
 
 class DummyVectorStore:
@@ -63,7 +63,7 @@ def test_similarity_search_success(monkeypatch):
     Test: performs similarity search with a valid question and k=2.
     Asserts returned objects are Document-score tuples.
     """
-    monkeypatch.setattr(vector_search_service.ApplicationContext, "get_instance", DummyContext)
+    monkeypatch.setattr(service.ApplicationContext, "get_instance", DummyContext)
     service = VectorSearchService()
     results = service.similarity_search_with_score("What is AI?", k=2)
     assert isinstance(results, list)
@@ -80,7 +80,7 @@ def test_similarity_search_empty_question(monkeypatch):
     """
     Test: raises ValueError if question is an empty string.
     """
-    monkeypatch.setattr(vector_search_service.ApplicationContext, "get_instance", DummyContext)
+    monkeypatch.setattr(service.ApplicationContext, "get_instance", DummyContext)
     service = VectorSearchService()
     with pytest.raises(ValueError, match="Question must not be empty"):
         service.similarity_search_with_score("", k=3)
@@ -95,7 +95,7 @@ def test_similarity_search_zero_k(monkeypatch):
     """
     Test: returns empty list when k=0, a valid edge case.
     """
-    monkeypatch.setattr(vector_search_service.ApplicationContext, "get_instance", DummyContext)
+    monkeypatch.setattr(service.ApplicationContext, "get_instance", DummyContext)
     service = VectorSearchService()
     results = service.similarity_search_with_score("Explain edge case.", k=0)
     assert isinstance(results, list)

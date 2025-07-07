@@ -13,14 +13,13 @@
 # limitations under the License.
 
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 from fastapi import APIRouter, Body, HTTPException
-from pydantic import BaseModel
 
 from knowledge_flow_app.common.structures import Status
+from knowledge_flow_app.core.stores.content.content_storage_factory import get_content_store
 from knowledge_flow_app.features.metadata.service import InvalidMetadataRequest, MetadataNotFound, MetadataService, MetadataUpdateError
 from knowledge_flow_app.features.metadata.structures import DeleteDocumentMetadataResponse, GetDocumentMetadataResponse, GetDocumentsMetadataResponse, UpdateDocumentMetadataRequest, UpdateDocumentMetadataResponse, UpdateRetrievableRequest
-from knowledge_flow_app.stores.content.content_storage_factory import get_content_store
 from threading import Lock
 
 logger = logging.getLogger(__name__)

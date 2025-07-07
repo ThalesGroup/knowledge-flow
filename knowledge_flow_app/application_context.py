@@ -22,29 +22,26 @@ from knowledge_flow_app.config.embedding_azure_openai_settings import EmbeddingA
 from knowledge_flow_app.config.ollama_settings import OllamaSettings
 from knowledge_flow_app.config.embedding_openai_settings import EmbeddingOpenAISettings
 from knowledge_flow_app.config.opensearch_settings import OpenSearchSettings
-from knowledge_flow_app.output_processors.base_output_processor import BaseOutputProcessor
 from langchain_openai import OpenAIEmbeddings, AzureOpenAIEmbeddings
 from langchain_ollama import OllamaEmbeddings
-from knowledge_flow_app.input_processors.common.base_input_processor import (
-    BaseInputProcessor,
-    BaseMarkdownProcessor,
-    BaseTabularProcessor,
-)
-from knowledge_flow_app.output_processors.vectorization_processor.azure_apim_embedder import AzureApimEmbedder
-from knowledge_flow_app.output_processors.vectorization_processor.embedder import Embedder
-from knowledge_flow_app.output_processors.vectorization_processor.in_memory_langchain_vector_store import InMemoryLangchainVectorStore
-from knowledge_flow_app.output_processors.vectorization_processor.interfaces import BaseDocumentLoader, BaseEmbeddingModel, BaseTextSplitter, BaseVectoreStore
-from knowledge_flow_app.output_processors.vectorization_processor.local_file_loader import LocalFileLoader
-from knowledge_flow_app.output_processors.vectorization_processor.opensearch_vector_store import OpenSearchVectorStoreAdapter
-from knowledge_flow_app.output_processors.vectorization_processor.recursive_splitter import RecursiveSplitter
+
+from knowledge_flow_app.core.processors.input.common.base_input_processor import BaseInputProcessor, BaseMarkdownProcessor, BaseTabularProcessor
+from knowledge_flow_app.core.processors.output.base_output_processor import BaseOutputProcessor
+from knowledge_flow_app.core.processors.output.vectorization_processor.azure_apim_embedder import AzureApimEmbedder
+from knowledge_flow_app.core.processors.output.vectorization_processor.embedder import Embedder
+from knowledge_flow_app.core.processors.output.vectorization_processor.in_memory_langchain_vector_store import InMemoryLangchainVectorStore
+from knowledge_flow_app.core.processors.output.vectorization_processor.interfaces import BaseDocumentLoader, BaseEmbeddingModel, BaseTextSplitter, BaseVectoreStore
+from knowledge_flow_app.core.processors.output.vectorization_processor.local_file_loader import LocalFileLoader
+from knowledge_flow_app.core.processors.output.vectorization_processor.opensearch_vector_store import OpenSearchVectorStoreAdapter
+from knowledge_flow_app.core.processors.output.vectorization_processor.recursive_splitter import RecursiveSplitter
 
 # Union of supported processor base classes
 BaseProcessorType = Union[BaseMarkdownProcessor, BaseTabularProcessor]
 
 # Default mapping for output processors by category
 DEFAULT_OUTPUT_PROCESSORS = {
-    "markdown": "knowledge_flow_app.output_processors.vectorization_processor.vectorization_processor.VectorizationProcessor",
-    "tabular": "knowledge_flow_app.output_processors.tabular_processor.tabular_processor.TabularProcessor",
+    "markdown": "knowledge_flow_app.core.processors.output.vectorization_processor.vectorization_processor.VectorizationProcessor",
+    "tabular": "knowledge_flow_app.core.processors.output.tabular_processor.tabular_processor.TabularProcessor",
 }
 
 # Mapping file extensions to categories

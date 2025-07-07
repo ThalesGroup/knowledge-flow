@@ -1,8 +1,8 @@
 import logging
 
 from knowledge_flow_app.common.structures import Status
+from knowledge_flow_app.core.stores.metadata.metadata_storage_factory import get_metadata_store
 from knowledge_flow_app.features.metadata.structures import GetDocumentMetadataResponse, GetDocumentsMetadataResponse, UpdateDocumentMetadataResponse
-from knowledge_flow_app.stores.metadata.metadata_storage_factory import get_metadata_store
 
 logger = logging.getLogger(__name__)
 

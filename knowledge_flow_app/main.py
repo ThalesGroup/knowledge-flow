@@ -33,12 +33,12 @@ from rich.logging import RichHandler
 from knowledge_flow_app.application_context import ApplicationContext
 from knowledge_flow_app.common.structures import Configuration
 from knowledge_flow_app.common.utils import parse_server_configuration
-from knowledge_flow_app.controllers.content_controller import ContentController
-from knowledge_flow_app.controllers.ingestion_controller import IngestionController
+from knowledge_flow_app.features.content.controller import ContentController
+from knowledge_flow_app.features.wip.ingestion_controller import IngestionController
 from knowledge_flow_app.features.metadata.controller import MetadataController
 from knowledge_flow_app.features.tabular.controller import TabularController
 from knowledge_flow_app.features.vector_search.controller import VectorSearchController
-from knowledge_flow_app.controllers.knowledge_context_controller import KnowledgeContextController
+from knowledge_flow_app.features.wip.knowledge_context_controller import KnowledgeContextController
 
 
 logger = logging.getLogger(__name__)
